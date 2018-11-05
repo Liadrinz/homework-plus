@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import graphene
 
 # arguments of creating a user
@@ -53,7 +54,7 @@ class AssignmentCreationInput(graphene.InputObjectType):
     course_class = graphene.Int(required=True)
     name = graphene.String(required=True)
     description = graphene.String(required=True)
-    type = graphene.String(required=True)
+    assignment_type = graphene.String(required=True)
     deadline = graphene.DateTime(required=True)
     addfile = graphene.List(of_type=graphene.Int, required=True)
 
@@ -63,7 +64,7 @@ class AssignmentEditionInput(graphene.InputObjectType):
     id = graphene.Int(required=True)
     name = graphene.String(required=False)
     description = graphene.String(required=False)
-    type = graphene.String(required=False)
+    assignment_type = graphene.String(required=False)
     deadline = graphene.DateTime(required=False)
     addfile = graphene.List(of_type=graphene.Int, required=False)
 

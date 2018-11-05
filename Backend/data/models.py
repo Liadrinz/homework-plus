@@ -2,7 +2,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-# 为老师助教自动生成buptid
+# 为老师自动生成buptid
 def default_bupt_id():
     count = User.objects.all().count()
     return 'noBuptId'+str(count)
@@ -73,8 +73,8 @@ class HWFAssignment(models.Model):
     course_class = models.ForeignKey(HWFCourseClass, on_delete=models.PROTECT, related_name='course_assignments')
     name = models.TextField()
     description = models.TextField(default='')
-    type = models.CharField(max_length=20, choices=[(item, item) for item in [
-                                'image', 'docs', 'vary']], default='all')
+    assignment_type = models.CharField(max_length=20, choices=[(item, item) for item in [
+                                'image', 'docs', 'vary']], default='vary')
     addfile = models.ManyToManyField(HWFFile, related_name='assignment', blank=True)
     deadline = models.DateTimeField()
 

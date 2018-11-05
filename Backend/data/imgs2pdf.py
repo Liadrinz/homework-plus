@@ -1,6 +1,7 @@
 import os
 
 from PIL import Image
+from PIL import ImageEnhance
 from reportlab.lib.pagesizes import portrait
 from reportlab.pdfgen import canvas
 
@@ -12,8 +13,22 @@ def imgtopdf(input_paths, outputpath):
     c.showPage()
     c.save()
 
+def enhance_img(src_img):
+    enh_sha = ImageEnhance.Sharpness(src_img)
+    sharpness = 2.5
+    sharped_img = enh_sha.enhance(sharpness)
+    enh_bri = ImageEnhance.Brightness(sharped_img)
+    brightness = 3.0
+    brightened_img = enh_bri.enhance(brightness)
+    enh_con = ImageEnhance.Contrast(brightened_img)
+    contrast = 1.3
+    contrasted_img = enh_con.enhance(contrast)
+    enh_col = ImageEnhance.Color(contrasted_img)
+    color = 1.5
+    colored_img = enh_col.enhance(color)
+    return colored_img
 
-def convert(imgPathList, outputPath, outputWidth=1280, outputName="output"):
+def convert(imgPathList, outputPath, outputWidth=1280, outputName="output", enhance=False):
     each_width = outputWidth
     images = []
     total_height = 0
@@ -30,6 +45,8 @@ def convert(imgPathList, outputPath, outputWidth=1280, outputName="output"):
     for i in range(len(images)):
         new_image.paste(images[i]['img'], (0, total_height))
         total_height += images[i]['height']
+    if enhance:
+        new_image = enhance_img(new_image)
     new_image.save('%s/%s.png' % (outputPath, outputName))
     imgtopdf('%s/%s.png' % (outputPath, outputName),
              '%s/%s.pdf' % (outputPath, outputName))

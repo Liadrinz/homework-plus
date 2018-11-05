@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import graphene
 from django import http
 
@@ -7,7 +8,7 @@ from data import encrypt
 from data.graphql_schema.types import CourseType
 from data.graphql_schema.inputs import CourseEditionInput
 
-from data.graphql_schema import except_resp as Exresp
+from data.graphql_schema.resp_msg import public_msg, create_msg
 
 # editing a course
 class EditCourse(graphene.Mutation):
@@ -17,6 +18,7 @@ class EditCourse(graphene.Mutation):
 
     ok = graphene.Boolean()
     course = graphene.Field(CourseType)
+    msg = graphene.String()
 
     def mutate(self, info, course_data):
 
@@ -32,33 +34,59 @@ class EditCourse(graphene.Mutation):
                 editing_course = models.HWFCourseClass.objects.get(pk=course_data['id'])
                 is_from_wechat = True
             except:
-                return Exresp.forbidden_resp
+                return EditCourse(ok=False, msg=public_msg['not_login'])
+        try:
 
-        # start end time validation
-        start_time = editing_course.start_time
-        end_time = editing_course.end_time
-        if start_time >= end_time or end_time.replace(tzinfo=None) <= datetime.now():
-            return Exresp.deadline_expired_resp
+            # start end time validation
+            start_time = editing_course.start_time
+            end_time = editing_course.end_time
+            if start_time >= end_time or end_time.replace(tzinfo=None) <= datetime.now():
+                return EditCourse(ok=False, msg=create_msg(4111, "开始时间%s大于结束时间%s"%(start_time, end_time)))
 
-        # usertype validation
-        if is_from_wechat:
-            if 'students' in course_data:
-                student_id = course_data['students'][0]
-                if student_id == realuser.pk:
-                    editing_course.students.add(models.User.objects.get(pk=student_id))
+            # usertype validation
+            if is_from_wechat:
+                if 'students' in course_data:
+                    student_id = course_data['students'][0]
+                    if student_id == realuser.pk:
+                        editing_course.students.add(models.User.objects.get(pk=student_id))
+                    else:
+                        return EditCourse(ok=False, msg=public_msg['forbidden'])
+
+            elif len(editing_course.teachers.filter(pk=realuser.id)) == 0:
+                if len(editing_course.teaching_assistants.filter(pk=realuser.id)) == 0:
+                    # neither assistant nor teacher
+                    return EditCourse(ok=False, msg=public_msg['forbidden'])
+                # is assistant
                 else:
-                    return Exresp.forbidden_resp
-
-        elif len(editing_course.teachers.filter(pk=realuser.id)) == 0:
-            if len(editing_course.teaching_assistants.filter(pk=realuser.id)) == 0:
-                # neither assistant nor teacher
-                return Exresp.forbidden_resp
-            # is assistant
+                    if 'description' in course_data:
+                        editing_course.description = course_data['description']
+                    if 'marks' in course_data:
+                        editing_course.marks = course_data['marks']
+                    if 'students' in course_data:
+                        for student_id in course_data['students']:
+                            editing_course.students.add(models.User.objects.get(pk=student_id))
+                    if 'school' in course_data:
+                        editing_course.school = course_data['school']
+                    if 'start_time' in course_data:
+                        editing_course.start_time = course_data['start_time']
+                    if 'end_time' in course_data:
+                        editing_course.end_time = course_data['end_time']
+                    editing_course.save()
+                    return EditCourse(ok=True, course=editing_course, msg=public_msg['success'])
+            # is teacher
             else:
+                if 'name' in course_data:
+                    editing_course.name = course_data['name']
                 if 'description' in course_data:
                     editing_course.description = course_data['description']
                 if 'marks' in course_data:
                     editing_course.marks = course_data['marks']
+                if 'teachers' in course_data:
+                    for teacher_id in course_data['teachers']:
+                        editing_course.teachers.add(models.User.objects.get(pk=teacher_id))
+                if 'teaching_assistants' in course_data:
+                    for teaching_assistant_id in course_data['teaching_assistants']:
+                        editing_course.teaching_assistants.add(models.User.objects.get(pk=teaching_assistant_id))
                 if 'students' in course_data:
                     for student_id in course_data['students']:
                         editing_course.students.add(models.User.objects.get(pk=student_id))
@@ -69,29 +97,8 @@ class EditCourse(graphene.Mutation):
                 if 'end_time' in course_data:
                     editing_course.end_time = course_data['end_time']
                 editing_course.save()
-                return EditCourse(ok=True, course=editing_course)
-        # is teacher
-        else:
-            if 'name' in course_data:
-                editing_course.name = course_data['name']
-            if 'description' in course_data:
-                editing_course.description = course_data['description']
-            if 'marks' in course_data:
-                editing_course.marks = course_data['marks']
-            if 'teachers' in course_data:
-                for teacher_id in course_data['teachers']:
-                    editing_course.teachers.add(models.User.objects.get(pk=teacher_id))
-            if 'teaching_assistants' in course_data:
-                for teaching_assistant_id in course_data['teaching_assistants']:
-                    editing_course.teaching_assistants.add(models.User.objects.get(pk=teaching_assistant_id))
-            if 'students' in course_data:
-                for student_id in course_data['students']:
-                    editing_course.students.add(models.User.objects.get(pk=student_id))
-            if 'school' in course_data:
-                editing_course.school = course_data['school']
-            if 'start_time' in course_data:
-                editing_course.start_time = course_data['start_time']
-            if 'end_time' in course_data:
-                editing_course.end_time = course_data['end_time']
-            editing_course.save()
-            return EditCourse(ok=True, course=editing_course)
+                return EditCourse(ok=True, course=editing_course, msg=public_msg['success'])
+        
+        # bad request
+        except:
+            return EditCourse(ok=False, msg=public_msg['badreq'])

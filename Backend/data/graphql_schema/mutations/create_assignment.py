@@ -1,6 +1,8 @@
+# -*- coding: utf-8 -*-
 from datetime import datetime
 
 import graphene
+import json
 from django import http
 
 from data import models, serializers
@@ -9,7 +11,7 @@ from data import encrypt
 from data.graphql_schema.types import AssignmentType
 from data.graphql_schema.inputs import AssignmentCreationInput
 
-from data.graphql_schema import except_resp as Exresp
+from data.graphql_schema.resp_msg import public_msg, create_msg
 
 # creating an assignment
 class CreateAssignment(graphene.Mutation):
@@ -19,6 +21,7 @@ class CreateAssignment(graphene.Mutation):
 
     ok = graphene.Boolean()
     assignment = graphene.Field(AssignmentType)
+    msg = graphene.JSONString()
 
     def mutate(self, info, assignment_data):
         
@@ -30,26 +33,32 @@ class CreateAssignment(graphene.Mutation):
             try:
                 realuser = models.User.objects.get(wechat=encrypt.getHash(info.context.META['HTTP_TOKEN']))
             except:
-                return Exresp.forbidden_resp
+                return CreateAssignment(ok=False, msg=public_msg['not_login'])
         
-        # type validation
-        if assignment_data['type'] not in ('image', 'docs', 'all'):
-            return Exresp.invalid_type_resp
+        try:
 
-        # time validation
-        if assignment_data['deadline'].replace(tzinfo=None) < datetime.now():
-            return Exresp.invalid_type_resp
+            # type validation
+            if assignment_data['assignment_type'] not in ('image', 'docs', 'vary'):
+                return CreateAssignment(ok=False, msg=create_msg(4101, "%s不是合法的作业类型"%assignment_data['assignment_type']))
 
-        editing_course = models.HWFCourseClass.objects.get(pk=assignment_data['course_class'])
+            # time validation
+            if assignment_data['deadline'].replace(tzinfo=None) < datetime.now():
+                return CreateAssignment(ok=False, msg=create_msg(4102, "%s不是合法截止日期"%assignment_data['deadline']))
 
-        if datetime.now() > editing_course.end_time.replace(tzinfo=None):
-            return Exresp.deadline_expired_resp
+            editing_course = models.HWFCourseClass.objects.get(pk=assignment_data['course_class'])
 
-        # isteacher or isassistant validation
-        if len(editing_course.teachers.filter(pk=realuser.id)) == 0 and len(editing_course.teaching_assistants.filter(pk=realuser.id)) == 0:
-            return Exresp.forbidden_resp
-        else:
-            serial = serializers.HWFAssignmentSerializer(data=assignment_data)
-            if serial.is_valid():
-                new_assignment = serial.save()
-            return CreateAssignment(ok=True, assignment=new_assignment)
+            if datetime.now() > editing_course.end_time.replace(tzinfo=None):
+                return CreateAssignment(ok=False, msg=create_msg(4102, "%s不是合法截止日期"%assignment_data['deadline']))
+
+            # isteacher or isassistant validation
+            if len(editing_course.teachers.filter(pk=realuser.id)) == 0 and len(editing_course.teaching_assistants.filter(pk=realuser.id)) == 0:
+                return CreateAssignment(ok=False, msg=public_msg['forbiddren'])
+            else:
+                serial = serializers.HWFAssignmentSerializer(data=assignment_data)
+                if serial.is_valid():
+                    new_assignment = serial.save()
+                return CreateAssignment(ok=True, assignment=new_assignment, msg=public_msg['success'])
+        
+        # bad request
+        except:
+            return CreateAssignment(ok=False, msg=public_msg['badreq'])

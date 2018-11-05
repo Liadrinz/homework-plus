@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import re
 from project.settings import GQL_PAHT_NAME as gqlpn
@@ -110,9 +111,9 @@ if __name__ == '__main__':
         
         class_name = ''
         if mutation in queries:
-            f = open('./data/%s/queries/'%gqlpn + mutation, 'r')
+            f = open('./data/%s/queries/'%gqlpn + mutation, 'r', encoding='utf-8')
         elif mutation in mutations:
-            f = open('./data/%s/mutations/'%gqlpn + mutation, 'r')
+            f = open('./data/%s/mutations/'%gqlpn + mutation, 'r', encoding='utf-8')
         for line in f.readlines():
             for name in re.findall(r'class .*?\s*\(', line):
                 name = name.replace(' ', '')

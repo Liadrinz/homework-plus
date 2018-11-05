@@ -1,10 +1,9 @@
+# -*- coding: utf-8 -*-
 from graphene_django.types import DjangoObjectType
 from data import models
 
 # hidden fields
 _user_exclude_fields = ('password', 'is_staff', 'is_superuser', 'first_name', 'last_name')
-
-# graphql types
 class UserAvatarType(DjangoObjectType):
     class Meta:
         model = models.UserAvatar

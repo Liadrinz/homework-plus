@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # !!!!!!! Don't edit this file unless you're Liadrinz !!!!!!!
 import graphene
 import data.schema
@@ -16,7 +17,6 @@ class Mutations(graphene.ObjectType):
     edit_user = data.schema.EditUser.Field()
     edit_course = data.schema.EditCourse.Field()
     edit_assignment = data.schema.EditAssignment.Field()
-    delete_file = data.schema.DeleteFile.Field()
     delete_assignment = data.schema.DeleteAssignment.Field()
     create_user = data.schema.CreateUser.Field()
     create_submission = data.schema.CreateSubmission.Field()

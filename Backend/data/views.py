@@ -13,6 +13,8 @@ from data.confirm import ShortToken, Token, send
 from data.models import User
 from project.settings import (API_AUTH_KEY, BACKEND_DOMIAN, FRONTEND_DOMAIN, SECRET_KEY)
 
+from data.encrypt import getHash
+
 # 有效期为24小时的tokener
 token = Token(SECRET_KEY.encode())
 # 有效期为1小时的tokener
@@ -47,7 +49,13 @@ def bind_wechat(request):
 def upload_file(request):
     file = request.FILES.get('data', None)
     tk = request.META['HTTP_TOKEN']
-    realuser = token.confirm_validate_token(tk)
+    try:
+        realuser = token.confirm_validate_token(tk)
+    except:
+        try:
+            realuser = models.User.objects.get(wechat=getHash(tk)).pk
+        except:
+            return Response(data={"msg": "forbidden"})
     upload_user_id = realuser
     newfile = models.HWFFile.objects.create(data=file, initial_upload_user_id=upload_user_id)
     return Response(data={"id": newfile.pk})

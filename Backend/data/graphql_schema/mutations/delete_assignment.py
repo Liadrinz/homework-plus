@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from datetime import datetime
 
 import graphene
@@ -9,7 +10,7 @@ from data import encrypt
 from data.graphql_schema.types import AssignmentType
 from data.graphql_schema.inputs import AssignmentDeletionInput
 
-from data.graphql_schema import except_resp as Exresp
+from data.graphql_schema.resp_msg import public_msg, create_msg
 
 # deleting an assignment
 class DeleteAssignment(graphene.Mutation):
@@ -19,9 +20,10 @@ class DeleteAssignment(graphene.Mutation):
     
     ok = graphene.Boolean()
     assignments = graphene.List(of_type=AssignmentType)
+    msg = graphene.String()
 
     def mutate(self, info, assignment_data):
-
+        
         # id validation
         try:
             realuser = token.confirm_validate_token(info.context.META['HTTP_TOKEN'])
@@ -30,21 +32,29 @@ class DeleteAssignment(graphene.Mutation):
             try:
                 realuser = models.User.objects.get(wechat=encrypt.getHash(info.context.META['HTTP_TOKEN']))
             except:
-                return Exresp.forbidden_resp
-
-        ids_to_del = assignment_data['ids']
-        del_list = []
-
-        for id in ids_to_del:
-            to_del = models.HWFAssignment.objects.get(pk=id)
-
-            # deadline validation
-            if datetime.now() > to_del.deadline.replace(tzinfo=None):
-                return Exresp.deadline_expired_resp
-
-            # owner validation
-            if len(to_del.course_class.teachers.filter(pk=realuser.id)):
-                del_list.append(models.HWFAssignment.objects.get(pk=id))
-                models.HWFAssignment.objects.get(pk=id).delete()
+                return DeleteAssignment(ok=False, msg=public_msg['not_login'])
         
-        return DeleteAssignment(ok=True, assignments=del_list)
+        try:
+
+            ids_to_del = assignment_data['ids']
+            del_list = []
+
+            for id in ids_to_del:
+                to_del = models.HWFAssignment.objects.get(pk=id)
+
+                # deadline validation
+                if datetime.now() > to_del.deadline.replace(tzinfo=None):
+                    return DeleteAssignment(ok=False, msg=create_msg(4141, "该作业已超过截止日期，无法删除"))
+
+                # owner validation
+                if len(to_del.course_class.teachers.filter(pk=realuser.id)):
+                    del_list.append(models.HWFAssignment.objects.get(pk=id))
+                    models.HWFAssignment.objects.get(pk=id).delete()
+                else:
+                    return DeleteAssignment(ok=False, msg=public_msg['forbidden'])
+            
+            return DeleteAssignment(ok=True, assignments=del_list, msg=public_msg['success'])
+        
+        # bad request
+        except:
+            return DeleteAssignment(ok=False, msg=public_msg['badreq'])
