@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {Row,Col,Card,Button,Modal,Menu,Select,Table} from'antd'
+import {Row,Col,Card,Button,Modal,Menu,Select,Table,Form,Radio} from'antd'
 import './teacherSpecificClass.css';
 import {_} from 'underscore'
 import axios from 'axios';
@@ -8,7 +8,15 @@ var courseid;//特定课程的id
 var courseStudents;//该课程的所有学生
 var re=/^\/teachercenter\/teacherclass\/(.*)\/$/;
 var toDate=/^(\d{4})\-(\d{2})\-(\d{2})(.*)$/;
+var usernamechildren=[];//手动添加成员里通过搜索用户名的标签
+var namechildren=[];//手动添加成员里通过搜索真实姓名的标签
+var schoolIdchildren=[];//手动添加成员里通过搜索学号的标签
+var lastUpdateUsername=[];//最后更新时用户名列表
+var lastUpdateName=[];//最后更新时真实姓名列表
+var lastUpdateSchoolId=[];//最后更新时学号列表
 const Option = Select.Option;
+const RadioGroup = Radio.Group;
+const FormItem = Form.Item;
 
 class Homework extends React.Component{
     render(){
@@ -18,11 +26,245 @@ class Homework extends React.Component{
     }
 }
 
+class SelectUsername extends React.Component{
+    constructor(props){
+        super(props);
+        this.state={
+          usernames:[],
+        }
+    }
+  
+    componentDidMount(){
+      var getStudentsUsername=axios.create({
+        url:"http://homeworkplus.cn/graphql/",
+        headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
+        method:'post',
+        data:{
+           "query":`query{
+             allUsers
+             {
+               username
+             }
+            }`      
+        },
+        timeout:1000,
+      })
+      getStudentsUsername().then(function(response){
+        if(JSON.stringify(lastUpdateUsername)!==JSON.stringify(response.data.data.allUsers)){
+         lastUpdateUsername=response.data.data.allUsers;
+         for(let i=0;i<response.data.data.allUsers.length;i++){
+          usernamechildren.push(
+          <Option key={response.data.data.allUsers[i].username} value={response.data.data.allUsers[i].username}>
+          {response.data.data.allUsers[i].username}
+          </Option>);
+         }
+        }
+      })
+      .catch(function(error){
+         console.log(error);
+      })
+    }
+  
+    componentWillReceiveProps(nextProps) {
+      if ('value' in nextProps) {
+        const value = nextProps.value;
+        this.setState({usernames:value});
+      }
+    }
+  
+    handleChange=(username)=>{
+       if(!('value' in this.props)){
+        this.setState({usernames:username});
+       }
+       this.triggerChange(username);
+    }
+  
+    triggerChange = (changedValue) => {
+      const onChange = this.props.onChange;
+      if (onChange) {
+        onChange(changedValue);
+      }
+    }
+  
+    render(){
+        return(
+          <Select
+          mode="multiple"
+          style={{ width: '100%' }}
+          placeholder="通过用户名搜索，可以多选"
+          onChange={this.handleChange}
+          value={this.state.usernames}
+        >
+          {usernamechildren}
+          </Select>
+        )
+    }
+  }
+
+class Selectname extends React.Component{
+    constructor(props){
+        super(props);
+        this.state={
+          names:[],
+        }
+    }
+  
+    componentDidMount(){
+      var getStudentsname=axios.create({
+        url:"http://homeworkplus.cn/graphql/",
+        headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
+        method:'post',
+        data:{
+           "query":`query{
+             allUsers
+             {
+               name
+             }
+            }`      
+        },
+        timeout:1000,
+      })
+      getStudentsname().then(function(response){
+        if(JSON.stringify(lastUpdateName)!==JSON.stringify(response.data.data.allUsers)){
+        lastUpdateName=response.data.data.allUsers;
+         for(let i=0;i<response.data.data.allUsers.length;i++){
+          namechildren.push(
+          <Option key={response.data.data.allUsers[i].name} value={response.data.data.allUsers[i].name}>
+          {response.data.data.allUsers[i].name}
+          </Option>);
+         }
+        }
+      })
+      .catch(function(error){
+         console.log(error);
+      })
+    }
+  
+    componentWillReceiveProps(nextProps) {
+      if ('value' in nextProps) {
+        const value = nextProps.value;
+        this.setState({names:value});
+      }
+    }
+  
+    handleChange=(name)=>{
+       if(!('value' in this.props)){
+        this.setState({names:name});
+       }
+       this.triggerChange(name);
+    }
+  
+    triggerChange = (changedValue) => {
+      const onChange = this.props.onChange;
+      if (onChange) {
+        onChange(changedValue);
+      }
+    }
+  
+    render(){
+        return(
+          <Select
+          mode="multiple"
+          style={{ width: '100%' }}
+          placeholder="通过真实姓名搜索，可以多选"
+          onChange={this.handleChange}
+          value={this.state.names}
+        >
+          {namechildren}
+          </Select>
+        )
+    }
+}
+
+class SelectSchoolId extends React.Component{
+    constructor(props){
+        super(props);
+        this.state={
+          schoolIds:[],
+        }
+    }
+  
+    componentDidMount(){
+      var getStudentsSchoolId=axios.create({
+        url:"http://homeworkplus.cn/graphql/",
+        headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
+        method:'post',
+        data:{
+           "query":`query{
+             allUsers
+             {
+                classNumber
+             }
+            }`      
+        },
+        timeout:1000,
+      })
+      getStudentsSchoolId().then(function(response){
+        if(JSON.stringify(lastUpdateSchoolId)!==JSON.stringify(response.data.data.allUsers)){
+         lastUpdateSchoolId=response.data.data.allUsers;
+         for(let i=0;i<response.data.data.allUsers.length;i++){
+          schoolIdchildren.push(
+          <Option key={response.data.data.allUsers[i].classNumber} value={response.data.data.allUsers[i].classNumber}>
+          {response.data.data.allUsers[i].classNumber}
+          </Option>);
+         }
+        }
+      })
+      .catch(function(error){
+         console.log(error);
+      })
+    }
+  
+    componentWillReceiveProps(nextProps) {
+      if ('value' in nextProps) {
+        const value = nextProps.value;
+        this.setState({schoolIds:value});
+      }
+    }
+  
+    handleChange=(schoolId)=>{
+       if(!('value' in this.props)){
+        this.setState({schoolIds:schoolId});
+       }
+       this.triggerChange(schoolId);
+    }
+  
+    triggerChange = (changedValue) => {
+      const onChange = this.props.onChange;
+      if (onChange) {
+        onChange(changedValue);
+      }
+    }
+  
+    render(){
+        return(
+          <Select
+          mode="multiple"
+          style={{ width: '100%' }}
+          placeholder="通过学号搜索，可以多选"
+          onChange={this.handleChange}
+          value={this.state.schoolIds}
+        >
+          {schoolIdchildren}
+          </Select>
+        )
+    }
+}
+
+class SelectStudents extends React.Component{
+    render(){
+        if(this.props.selectvalue===1){return <SelectUsername/>;}
+        else if(this.props.selectvalue===2){return <Selectname/>;}
+        else {return <SelectSchoolId/>;}
+    }    
+}
+
 class Member extends React.Component{
     constructor(props){
         super(props);
         this.state={
-            
+            visible:false,
+            value:1,//手动添加成员中多选框的value
         }
     }
 
@@ -71,7 +313,104 @@ class Member extends React.Component{
         else this.setState({studentsInformation:_.filter(courseStudents,function(student){return student["name"]===value})})
     }
 
+    showModal=()=>{
+        this.setState({visible:true});
+    }
+
+    handleClose=()=>{
+        this.setState({visible:false});
+    }
+
+    onChange=(e)=>{
+        this.setState({value:e.target.value});
+    }
+
+    handleSubmit=(e)=>{
+        e.preventDefault();
+        this.props.form.validateFieldsAndScroll(["学生"],(err,values)=>{
+        console.log(typeof(values.学生))
+        if(!err&&typeof(values.学生)!=="undefined"){
+            console.log(values)
+          var getAllStudentIdByUsername=axios.create({
+            url:"http://homeworkplus.cn/graphql/",
+            headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
+            method:'post',
+            data:{
+                "query":`query{
+                    getUsersByUsernames(usernames:${[values.学生]}){
+                        id
+                    }
+                }`//用反引号      
+            },
+            timeout:1000,
+          })
+          var getAllStudentIdByName=axios.create({
+            url:"http://homeworkplus.cn/graphql/",
+            headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
+            method:'post',
+            data:{
+                "query":`query{
+                    getUsersByNames(names:${[values.学生]}){
+                        id
+                    }
+                }`//用反引号      
+            },
+            timeout:1000,
+          })
+          var getAllStudentIdBySchoolId=axios.create({
+            url:"http://homeworkplus.cn/graphql/",
+            headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
+            method:'post',
+            data:{
+                "query":`query{
+                    getUsersByBuptIds(buptIds:${[values.学生]}){
+                        id
+                    }
+                }`//用反引号      
+            },
+            timeout:1000,
+          })
+          if(this.state.value===1){
+              getAllStudentIdByUsername().then(function(response){
+                  console.log(response);
+              })
+              .catch(function(error){
+                  console.log(error);
+              })
+          }
+          else if(this.state.value===2){
+              getAllStudentIdByName().then(function(response){
+                  console.log(response);
+              })
+              .catch(function(error){
+                  console.log(error);
+              })
+          }
+          else{
+            getAllStudentIdBySchoolId().then(function(response){
+                console.log(response);
+            })
+            .catch(function(error){
+                console.log(error);
+            })              
+          }
+        }           
+        })
+
+    }
+
     render(){
+        const { getFieldDecorator } = this.props.form;
+        const formItemLayout = {
+            labelCol: {
+              xs: { span: 24 },
+              sm: { span: 8 },
+            },
+            wrapperCol: {
+              xs: { span: 24 },
+              sm: { span: 24 },
+            },
+        };
         const column=[{
             title:'姓名',
             dataIndex:'name',
@@ -95,6 +434,11 @@ class Member extends React.Component{
             title:'缺交作业',
             dataIndex:'lostHomework',
         }]
+        const tips=(
+            <div>
+            <p style={{fontSize:"20px"}}>通过单选框的选择来搜索对应的学生并添加</p>
+            </div>
+        )
         const data=this.state.studentsInformation;
         return(
             <div>
@@ -112,8 +456,41 @@ class Member extends React.Component{
             </Select>
             </Col>
             <Col xs={24} sm={8}>
-            <Button type="primary">手动添加学生</Button>
+            <Button type="primary" onClick={this.showModal}>手动添加学生</Button>
             </Col>
+            <Modal
+                title="手动添加学生"
+                visible={this.state.visible}
+                footer={null}
+                onCancel={this.handleClose}
+                destroyOnClose={true}
+            >
+              <RadioGroup onChange={this.onChange} value={this.state.value}>
+                 <Radio value={1}>搜索用户名</Radio>
+                 <Radio value={2}>搜索真实姓名</Radio>
+                 <Radio value={3}>搜索学号</Radio>
+              </RadioGroup>
+              <br/><br/>
+              <Form onSubmit={this.handleSubmit}>
+                 <FormItem 
+                   {...formItemLayout}
+                   label=""
+                 >
+                   {getFieldDecorator('学生')(
+                     <SelectStudents selectvalue={this.state.value}/>//通过单选框的选项不同来对应不同的搜索标签
+                   )} 
+                 </FormItem>
+                 <FormItem
+                   wrapperCol={{
+                     xs: { span: 24, offset: 0 },
+                     sm: { span: 24, offset: 0 },
+                   }}
+                   help={tips}
+                 >
+                  <Button type="primary" htmlType="submit">添加</Button>
+                 </FormItem>
+              </Form>
+            </Modal>
             <br/><br/><br/><br/>
             <Table columns={column} dataSource={data} bordered rowKey={record=>record["id"]} />
             </div>
@@ -121,10 +498,12 @@ class Member extends React.Component{
     }
 }
 
+const WrappedMember=Form.create()(Member);
+
 class HomeworkOrMember extends React.Component{
     render(){
          if(this.props["current"]=="homework")return <Homework/>;
-         else return <Member courseId={this.props.courseId}/>;
+         else return <WrappedMember courseId={this.props.courseId}/>;
     }
 }
 
@@ -182,7 +561,6 @@ class TeacherSpecificclass extends React.Component{
     }
 
     render(){
-        console.log(this.state.specificCourse)
         const gridStyle={
             width:"33.3%",
             textAlign:'center',

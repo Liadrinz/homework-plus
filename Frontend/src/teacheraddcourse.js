@@ -179,7 +179,6 @@ class Addcourse extends React.Component{
     handleSubmit=(e)=>{
         e.preventDefault();
         this.props.form.validateFieldsAndScroll(["课程名称","授课教师","开课学院","助教","开课时间","学分","课程简介"],(err,values)=>{
-          console.log(values)
           if(!err){
             const value={
               ...values,
