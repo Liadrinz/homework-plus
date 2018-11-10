@@ -10,7 +10,7 @@ import WrappedAddcourse from './teacheraddcourse.js'
 import TeacherSpecificClass from './teacherSpecificClass.js';
 import {_} from 'underscore'
 
-//大多数的地方使用graphql技术获取和传送数据
+ //大多数的地方使用graphql技术获取和传送数据
 const { SubMenu } = Menu;
 const { Header, Content, Sider,Footer } = Layout;
 var userinformation={bupt_id:"",class_number:"",email:"",gender:"",id:"",name:"",username:"",usertype:"",phone:"",wechat:""};
