@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {Row,Col,Card,Button,Modal,Menu,Select,Table,Form,Radio} from'antd'
+import {Row,Col,Card,Button,Modal,Menu,Select,Table,Form,Radio,message} from'antd'
 import './teacherSpecificClass.css';
 import {_} from 'underscore'
 import axios from 'axios';
@@ -9,10 +9,8 @@ var courseStudents;//该课程的所有学生
 var re=/^\/teachercenter\/teacherclass\/(.*)\/$/;
 var toDate=/^(\d{4})\-(\d{2})\-(\d{2})(.*)$/;
 var usernamechildren=[];//手动添加成员里通过搜索用户名的标签
-var namechildren=[];//手动添加成员里通过搜索真实姓名的标签
 var schoolIdchildren=[];//手动添加成员里通过搜索学号的标签
 var lastUpdateUsername=[];//最后更新时用户名列表
-var lastUpdateName=[];//最后更新时真实姓名列表
 var lastUpdateSchoolId=[];//最后更新时学号列表
 const Option = Select.Option;
 const RadioGroup = Radio.Group;
@@ -41,7 +39,7 @@ class SelectUsername extends React.Component{
         method:'post',
         data:{
            "query":`query{
-             allUsers
+            getUsersByUsertype(usertype:"student")
              {
                username
              }
@@ -50,12 +48,12 @@ class SelectUsername extends React.Component{
         timeout:1000,
       })
       getStudentsUsername().then(function(response){
-        if(JSON.stringify(lastUpdateUsername)!==JSON.stringify(response.data.data.allUsers)){
-         lastUpdateUsername=response.data.data.allUsers;
-         for(let i=0;i<response.data.data.allUsers.length;i++){
+        if(JSON.stringify(lastUpdateUsername)!==JSON.stringify(response.data.data.getUsersByUsertype)){
+         lastUpdateUsername=response.data.data.getUsersByUsertype;
+         for(let i=0;i<response.data.data.getUsersByUsertype.length;i++){
           usernamechildren.push(
-          <Option key={response.data.data.allUsers[i].username} value={response.data.data.allUsers[i].username}>
-          {response.data.data.allUsers[i].username}
+          <Option key={response.data.data.getUsersByUsertype[i].username} value={response.data.data.getUsersByUsertype[i].username}>
+          {response.data.data.getUsersByUsertype[i].username}
           </Option>);
          }
         }
@@ -76,16 +74,9 @@ class SelectUsername extends React.Component{
        if(!('value' in this.props)){
         this.setState({usernames:username});
        }
-       this.triggerChange(username);
+       this.props.triggerChange(username);
     }
-  
-    triggerChange = (changedValue) => {
-      const onChange = this.props.onChange;
-      if (onChange) {
-        onChange(changedValue);
-      }
-    }
-  
+    
     render(){
         return(
           <Select
@@ -100,81 +91,6 @@ class SelectUsername extends React.Component{
         )
     }
   }
-
-class Selectname extends React.Component{
-    constructor(props){
-        super(props);
-        this.state={
-          names:[],
-        }
-    }
-  
-    componentDidMount(){
-      var getStudentsname=axios.create({
-        url:"http://homeworkplus.cn/graphql/",
-        headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
-        method:'post',
-        data:{
-           "query":`query{
-             allUsers
-             {
-               name
-             }
-            }`      
-        },
-        timeout:1000,
-      })
-      getStudentsname().then(function(response){
-        if(JSON.stringify(lastUpdateName)!==JSON.stringify(response.data.data.allUsers)){
-        lastUpdateName=response.data.data.allUsers;
-         for(let i=0;i<response.data.data.allUsers.length;i++){
-          namechildren.push(
-          <Option key={response.data.data.allUsers[i].name} value={response.data.data.allUsers[i].name}>
-          {response.data.data.allUsers[i].name}
-          </Option>);
-         }
-        }
-      })
-      .catch(function(error){
-         console.log(error);
-      })
-    }
-  
-    componentWillReceiveProps(nextProps) {
-      if ('value' in nextProps) {
-        const value = nextProps.value;
-        this.setState({names:value});
-      }
-    }
-  
-    handleChange=(name)=>{
-       if(!('value' in this.props)){
-        this.setState({names:name});
-       }
-       this.triggerChange(name);
-    }
-  
-    triggerChange = (changedValue) => {
-      const onChange = this.props.onChange;
-      if (onChange) {
-        onChange(changedValue);
-      }
-    }
-  
-    render(){
-        return(
-          <Select
-          mode="multiple"
-          style={{ width: '100%' }}
-          placeholder="通过真实姓名搜索，可以多选"
-          onChange={this.handleChange}
-          value={this.state.names}
-        >
-          {namechildren}
-          </Select>
-        )
-    }
-}
 
 class SelectSchoolId extends React.Component{
     constructor(props){
@@ -191,7 +107,7 @@ class SelectSchoolId extends React.Component{
         method:'post',
         data:{
            "query":`query{
-             allUsers
+            getUsersByUsertype(usertype:"student")
              {
                 classNumber
              }
@@ -200,12 +116,12 @@ class SelectSchoolId extends React.Component{
         timeout:1000,
       })
       getStudentsSchoolId().then(function(response){
-        if(JSON.stringify(lastUpdateSchoolId)!==JSON.stringify(response.data.data.allUsers)){
-         lastUpdateSchoolId=response.data.data.allUsers;
-         for(let i=0;i<response.data.data.allUsers.length;i++){
+        if(JSON.stringify(lastUpdateSchoolId)!==JSON.stringify(response.data.data.getUsersByUsertype)){
+         lastUpdateSchoolId=response.data.data.getUsersByUsertype;
+         for(let i=0;i<response.data.data.getUsersByUsertype.length;i++){
           schoolIdchildren.push(
-          <Option key={response.data.data.allUsers[i].classNumber} value={response.data.data.allUsers[i].classNumber}>
-          {response.data.data.allUsers[i].classNumber}
+          <Option key={response.data.data.getUsersByUsertype[i].classNumber} value={response.data.data.getUsersByUsertype[i].classNumber}>
+          {response.data.data.getUsersByUsertype[i].classNumber}
           </Option>);
          }
         }
@@ -226,14 +142,7 @@ class SelectSchoolId extends React.Component{
        if(!('value' in this.props)){
         this.setState({schoolIds:schoolId});
        }
-       this.triggerChange(schoolId);
-    }
-  
-    triggerChange = (changedValue) => {
-      const onChange = this.props.onChange;
-      if (onChange) {
-        onChange(changedValue);
-      }
+       this.props.triggerChange(schoolId);
     }
   
     render(){
@@ -252,10 +161,15 @@ class SelectSchoolId extends React.Component{
 }
 
 class SelectStudents extends React.Component{
+    triggerChange = (changedValue) => {
+        const onChange = this.props.onChange;
+        if (onChange) {
+          onChange(changedValue);
+        }
+    }
     render(){
-        if(this.props.selectvalue===1){return <SelectUsername/>;}
-        else if(this.props.selectvalue===2){return <Selectname/>;}
-        else {return <SelectSchoolId/>;}
+        if(this.props.selectvalue===1){return <SelectUsername value={this.props.value} triggerChange={this.triggerChange}/>;}
+        else {return <SelectSchoolId value={this.props.value} triggerChange={this.triggerChange}/>;}
     }    
 }
 
@@ -327,30 +241,16 @@ class Member extends React.Component{
 
     handleSubmit=(e)=>{
         e.preventDefault();
+        var that=this;
         this.props.form.validateFieldsAndScroll(["学生"],(err,values)=>{
-        console.log(typeof(values.学生))
         if(!err&&typeof(values.学生)!=="undefined"){
-            console.log(values)
           var getAllStudentIdByUsername=axios.create({
             url:"http://homeworkplus.cn/graphql/",
             headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
             method:'post',
             data:{
                 "query":`query{
-                    getUsersByUsernames(usernames:${[values.学生]}){
-                        id
-                    }
-                }`//用反引号      
-            },
-            timeout:1000,
-          })
-          var getAllStudentIdByName=axios.create({
-            url:"http://homeworkplus.cn/graphql/",
-            headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
-            method:'post',
-            data:{
-                "query":`query{
-                    getUsersByNames(names:${[values.学生]}){
+                    getUsersByUsernames(usernames:${[JSON.stringify(values.学生)]}){
                         id
                     }
                 }`//用反引号      
@@ -363,40 +263,114 @@ class Member extends React.Component{
             method:'post',
             data:{
                 "query":`query{
-                    getUsersByBuptIds(buptIds:${[values.学生]}){
+                    getUsersByBuptIds(buptIds:${JSON.stringify(values.学生)}){
                         id
                     }
                 }`//用反引号      
             },
             timeout:1000,
           })
+          var getStudentsIdInCourse=axios.create({
+            url:"http://homeworkplus.cn/graphql/",
+            headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
+            method:'post',
+            data:{
+                "query":`query{
+                    getCoursesByIds(ids:${[this.props.courseId]}){
+                        students{
+                          id
+                        }
+                    }
+                }`//用反引号      
+            },
+            timeout:1000,
+          })
           if(this.state.value===1){
-              getAllStudentIdByUsername().then(function(response){
-                  console.log(response);
+              getAllStudentIdByUsername().then(function(response1){
+                  getStudentsIdInCourse().then(function(response2){
+                  var addStudents=axios.create({
+                    url:"http://homeworkplus.cn/graphql/",
+                    headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
+                    method:'post',
+                    data:{
+                        "query":`mutation{
+                            editCourse(
+                                courseData:{
+                                    id:${that.props.courseId},
+                                    students:[${_.map(_.union(_.pluck(response1.data.data.getUsersByUsernames,'id'),_.pluck(response2.data.data.getCoursesByIds[0].students,'id')),function(num){return parseInt(num)})}],
+                                }
+                            ){
+                             ok
+                             msg
+                            }
+                        }`//用反引号      
+                    },
+                    timeout:1000,                     
+                  })
+                  addStudents().then(function(response3){
+                      if(response3.data.data.editCourse.ok===true)message.success("添加学生成功!",3);
+                      else message.error("添加学生失败!",3);
+                  })
+                  .catch(function(error3){
+                      console.log(error3);
+                      message.error("添加学生失败!",3);
+                  })
+                  })
+                  .catch(function(error2){
+                      console.log(error2);
+                      message.error("添加学生失败!",3);
+                  })
               })
-              .catch(function(error){
-                  console.log(error);
-              })
-          }
-          else if(this.state.value===2){
-              getAllStudentIdByName().then(function(response){
-                  console.log(response);
-              })
-              .catch(function(error){
-                  console.log(error);
+              .catch(function(error1){
+                  console.log(error1);
+                  message.error("添加学生失败!",3);
               })
           }
           else{
-            getAllStudentIdBySchoolId().then(function(response){
-                console.log(response);
+            getAllStudentIdBySchoolId().then(function(response1){
+                getStudentsIdInCourse().then(function(response2){
+                    var addStudents=axios.create({
+                      url:"http://homeworkplus.cn/graphql/",
+                      headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
+                      method:'post',
+                      data:{
+                          "query":`mutation{
+                              editCourse(
+                                  courseData:{
+                                      id:${that.props.courseId},
+                                      students:[${_.map(_.union(_.pluck(response1.data.data.getAllStudentIdBySchoolId,'id'),_.pluck(response2.data.data.getCoursesByIds[0].students,'id')),function(num){return parseInt(num)})}],
+                                  }
+                              ){
+                               ok
+                               msg
+                              }
+                          }`//用反引号      
+                      },
+                      timeout:1000,                     
+                    })
+                    addStudents().then(function(response3){
+                        console.log(response3);
+                        if(response3.data.data.editCourse.ok===true)message.success("添加学生成功!",3);
+                        else message.error("添加学生失败!",3);
+                    })
+                    .catch(function(error3){
+                        console.log(error3);
+                        message.error("添加学生失败!",3);
+                    })
+                    })
+                    .catch(function(error2){
+                        console.log(error2);
+                        message.error("添加学生失败!",3);
+                    })
             })
-            .catch(function(error){
-                console.log(error);
+            .catch(function(error1){
+                console.log(error1);
+                message.error("添加学生失败!",3);
             })              
           }
+          this.setState({visible:false});
         }           
         })
-
     }
 
     render(){
@@ -467,8 +441,7 @@ class Member extends React.Component{
             >
               <RadioGroup onChange={this.onChange} value={this.state.value}>
                  <Radio value={1}>搜索用户名</Radio>
-                 <Radio value={2}>搜索真实姓名</Radio>
-                 <Radio value={3}>搜索学号</Radio>
+                 <Radio value={2}>搜索学号</Radio>
               </RadioGroup>
               <br/><br/>
               <Form onSubmit={this.handleSubmit}>
@@ -477,7 +450,7 @@ class Member extends React.Component{
                    label=""
                  >
                    {getFieldDecorator('学生')(
-                     <SelectStudents selectvalue={this.state.value}/>//通过单选框的选项不同来对应不同的搜索标签
+                     <SelectStudents selectvalue={this.state.value}/>
                    )} 
                  </FormItem>
                  <FormItem
