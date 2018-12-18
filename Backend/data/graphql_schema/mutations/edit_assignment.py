@@ -57,11 +57,11 @@ class EditAssignment(graphene.Mutation):
                     if assignment_data['assignment_type'] in ('image', 'docs', 'vary'):
                         editing_assignment.type = assignment_data['assignment_type']
                     else:
-                        return EditAssignment(ok=False, msg=create_msg(4101, "%s不是合法的作业类型"%assignment_data['assignment_type']))
+                        return EditAssignment(ok=False, msg=create_msg(4101, "\"%s\" is not a valid assignment type"%assignment_data['assignment_type']))
 
                 if 'addfile' in assignment_data:
                     for file_id in assignment_data['addfile']:
-                        editing_assignment.addfile.add(models.HWFFile.objects.get(pk=file))
+                        editing_assignment.addfile.add(models.HWFFile.objects.get(pk=file_id))
                 if 'deadline' in assignment_data:
                     editing_assignment.deadline = assignment_data['deadline']
 

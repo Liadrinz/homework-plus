@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# 加密
 import hashlib
 import random
 

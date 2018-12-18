@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from datetime import datetime
+
 import graphene
 from django import http
 
@@ -36,12 +38,6 @@ class EditCourse(graphene.Mutation):
             except:
                 return EditCourse(ok=False, msg=public_msg['not_login'])
         try:
-
-            # start end time validation
-            start_time = editing_course.start_time
-            end_time = editing_course.end_time
-            if start_time >= end_time or end_time.replace(tzinfo=None) <= datetime.now():
-                return EditCourse(ok=False, msg=create_msg(4111, "开始时间%s大于结束时间%s"%(start_time, end_time)))
 
             # usertype validation
             if is_from_wechat:

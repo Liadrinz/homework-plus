@@ -39,16 +39,16 @@ class CreateAssignment(graphene.Mutation):
 
             # type validation
             if assignment_data['assignment_type'] not in ('image', 'docs', 'vary'):
-                return CreateAssignment(ok=False, msg=create_msg(4101, "%s不是合法的作业类型"%assignment_data['assignment_type']))
+                return CreateAssignment(ok=False, msg=create_msg(4101, "\"%s\" is not a valid assignment type"%assignment_data['assignment_type']))
 
             # time validation
             if assignment_data['deadline'].replace(tzinfo=None) < datetime.now():
-                return CreateAssignment(ok=False, msg=create_msg(4102, "%s不是合法截止日期"%assignment_data['deadline']))
+                return CreateAssignment(ok=False, msg=create_msg(4102, "\"%s\" is an expired datetime"%assignment_data['deadline']))
 
             editing_course = models.HWFCourseClass.objects.get(pk=assignment_data['course_class'])
 
             if datetime.now() > editing_course.end_time.replace(tzinfo=None):
-                return CreateAssignment(ok=False, msg=create_msg(4102, "%s不是合法截止日期"%assignment_data['deadline']))
+                return CreateAssignment(ok=False, msg=create_msg(4102, "\"%s\" is an expired datetime"%assignment_data['deadline']))
 
             # isteacher or isassistant validation
             if len(editing_course.teachers.filter(pk=realuser.id)) == 0 and len(editing_course.teaching_assistants.filter(pk=realuser.id)) == 0:

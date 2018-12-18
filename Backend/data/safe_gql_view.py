@@ -7,7 +7,7 @@ from data import models
 
 from project import settings
 
-# 使得GraphQL的访问需要验证token
+# 重写GraphQLView
 
 class BetterGraphQLView(GraphQLView):
 

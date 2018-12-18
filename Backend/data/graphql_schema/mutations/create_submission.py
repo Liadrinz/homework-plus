@@ -40,17 +40,17 @@ class CreateSubmission(graphene.Mutation):
             # type validation
             if 'addfile' in submission_data:
                 if models.HWFAssignment.objects.get(pk=submission_data['assignment']).type == 'image':
-                    return CreateSubmission(ok=False, msg=create_img(4121, "image类型作业不允许拥有addfile字段"))
+                    return CreateSubmission(ok=False, msg=create_msg(4121, "submission of image type are not allowed to obtain an \"addfile\" field"))
 
             # time validation
             if datetime.now() > models.HWFAssignment.objects.get(pk=submission_data['assignment']).deadline.replace(tzinfo=None):
-                return CreateSubmission(ok=False, msg=create_img(4122, "该作业已到达截止日期，不允许提交"))
+                return CreateSubmission(ok=False, msg=create_msg(4122, "deadline expired"))
             
             viewing_course = models.HWFAssignment.objects.get(pk=submission_data['assignment']).course_class
 
             # is authentic student
             if len(viewing_course.students.filter(pk=realuser.pk)) == 0:
-                return CreateSubmission(ok=False, msg=create_img(4123, "用户不是该作业所属课程的学生"))
+                return CreateSubmission(ok=False, msg=create_msg(4123, "you are not a student of this course"))
             
             # field supplement
             submission_data['submitter'] = realuser.pk

@@ -51,3 +51,8 @@ class AssignmentType(DjangoObjectType):
 class SubmissionType(DjangoObjectType):
     class Meta:
         model = models.HWFSubmission
+
+
+class MessageType(DjangoObjectType):
+    class Meta:
+        model = models.Message

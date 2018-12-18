@@ -11,5 +11,6 @@ from data.graphql_schema.mutations.create_course import CreateCourse
 from data.graphql_schema.mutations.create_assignment import CreateAssignment
 from data.graphql_schema.queries.query_user import QueryUser
 from data.graphql_schema.queries.query_submission import QuerySubmission
+from data.graphql_schema.queries.query_message import QueryMessage
 from data.graphql_schema.queries.query_course import QueryCourse
 from data.graphql_schema.queries.query_assignment import QueryAssignment

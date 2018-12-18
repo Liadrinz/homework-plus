@@ -9,6 +9,8 @@ class QueryUser(object):
     get_users_by_ids = graphene.List(UserType, ids=graphene.List(of_type=graphene.Int))
     get_users_by_usertype = graphene.List(UserType, usertype=graphene.String())
     get_users_by_usernames = graphene.List(UserType, usernames=graphene.List(of_type=graphene.String))
+    get_users_by_bupt_ids = graphene.List(UserType, bupt_ids=graphene.List(of_type=graphene.String))
+    get_users_by_names = graphene.List(UserType, names=graphene.List(of_type=graphene.String))
     get_users_by_course_id = graphene.List(UserType, course_id=graphene.Int())
 
     # query for users
@@ -28,6 +30,18 @@ class QueryUser(object):
         result = models.models.Q(username=None)
         for item in kwargs['usernames']:
             result = result | models.models.Q(username=item)
+        return models.User.objects.filter(result)
+
+    def resolve_get_users_by_bupt_ids(self, info, **kwargs):
+        result = models.models.Q(bupt_id=None)
+        for item in kwargs['bupt_ids']:
+            result = result | models.models.Q(bupt_id=item)
+        return models.User.objects.filter(result)
+    
+    def resolve_get_users_by_names(self, info, **kwargs):
+        result = models.models.Q(name=None)
+        for item in kwargs['names']:
+            result = result | models.models.Q(name=item)
         return models.User.objects.filter(result)
 
     def resolve_get_users_by_course_id(self, info, **kwargs):

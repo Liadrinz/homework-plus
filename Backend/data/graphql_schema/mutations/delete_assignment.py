@@ -44,7 +44,7 @@ class DeleteAssignment(graphene.Mutation):
 
                 # deadline validation
                 if datetime.now() > to_del.deadline.replace(tzinfo=None):
-                    return DeleteAssignment(ok=False, msg=create_msg(4141, "该作业已超过截止日期，无法删除"))
+                    return DeleteAssignment(ok=False, msg=create_msg(4141, "fail to delete ,deadline expired."))
 
                 # owner validation
                 if len(to_del.course_class.teachers.filter(pk=realuser.id)):

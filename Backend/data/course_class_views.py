@@ -1,4 +1,4 @@
-# Reserve in case
+# 暂时保留
 
 import qrcode
 from rest_framework import filters, generics, viewsets

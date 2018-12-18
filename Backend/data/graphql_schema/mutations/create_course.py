@@ -40,7 +40,7 @@ class CreateCourse(graphene.Mutation):
             start_time = course_data['start_time']
             end_time = course_data['end_time']
             if start_time >= end_time or end_time.replace(tzinfo=None) <= datetime.now():
-                return CreateCourse(ok=False, msg=create_msg(4111, "开始时间%s大于结束时间%s"%(start_time, end_time)))
+                return CreateCourse(ok=False, msg=create_msg(4111, "the start time \"%s\" is later than the end time \"%s\""%(start_time, end_time)))
             
             # isteacher validation
             if realuser.usertype.lower() == 'teacher':

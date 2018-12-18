@@ -83,7 +83,7 @@ class CreateUser(graphene.Mutation):
                 return CreateUser(user=user, ok=ok)
             
             else:
-                return CreateUser(ok=False, msg=create_msg(4131, "%s不是合法的用户类型"%user_data['usertype']))
+                return CreateUser(ok=False, msg=create_msg(4131, "%s is not a valid usertype"%user_data['usertype']))
 
         # bad request
         except:
