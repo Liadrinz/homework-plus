@@ -128,34 +128,14 @@
                         document.getElementById("talking-with").innerHTML = res.data['getUsersByUsernames'][0]['username'];
 
                         // 建立WebSocket连接(url为ws://localhost:8000/ws/message/chat/, 拥有查询参数sender和receiver, sender传token, receiver传id)
+                        if (webSocket) webSocket.close();
                         webSocket = new WebSocket("ws://localhost:8000/ws/message/chat/?sender=" + vtk + "&receiver=" + receiverId);
 
                         // 设置WebSocket的onmessage事件函数
                         // 从后端逻辑来看, 聊天的二人在同一个group中, 其中一人发送消息, 他自己的WebSocket连接以及对方的WebSocket连接都会触发onmessage
                         webSocket.onmessage = function (e) {
                             var data = JSON.parse(e.data);
-                            var gql = `query{
-                                getUsersByIds(ids:[${data['sender']}]) {
-                                     username
-                                }
-                            }`;
-
-                            // 收到的message中只有发送者和接受者的id, 需要根据发送者的id查询其用户名, 以便于显示消息时显示其用户名(之后会改, 改后此请求不必发送, 可以直接从ws包中获取用户名)
-                            $.ajax({
-                                url: 'http://localhost:8000/graphql/',
-                                method: 'post',
-                                headers: {
-                                    "Content-Type": "application/json",
-                                    "Accept": "application/json",
-                                    "token": vtk
-                                },
-                                data: JSON.stringify({
-                                    query: gql
-                                }),
-                                success: function (res, _, header) {
-                                    record.value += res.data['getUsersByIds'][0]['username'] + ': ' + data['message']['text'] + '\n';
-                                }
-                            })
+                            record.value += data['sender']['username'] + ': ' + data['message']['text'] + '\n';
                         }
 
                         // 接入后获取历史消息

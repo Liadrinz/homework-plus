@@ -73,8 +73,14 @@ class ChatConsumer(JsonWebsocketConsumer):
             {
                 'type': 'chat_message',
                 'message': message,
-                'sender': self.sender_id,
-                'receiver': self.receiver_id,
+                'sender': {
+                    'id': self.sender_id,
+                    'username': models.User.objects.get(pk=self.sender_id).username
+                },
+                'receiver': {
+                    'id': self.receiver_id,
+                    'username': models.User.objects.get(pk=self.receiver_id).username
+                },
                 'send_time': str(new_msg_obj.send_time)
             }
         )
