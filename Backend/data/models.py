@@ -12,6 +12,7 @@ def default_phone():
     count = User.objects.all().count()
     return 'noPhone'+str(count)
 
+
 # User Profile
 class User(AbstractUser):
     date_joined = models.DateTimeField(auto_now_add=True, null=True)
@@ -96,13 +97,28 @@ class HWFSubmission(models.Model):
     is_excellent = models.BooleanField(default=False)
 
 
+class MessageFile(models.Model):
+    data = models.FileField(upload_to='chat_file', null=True)
+    initial_upload_time = models.DateTimeField(auto_now_add=True)
+    initial_upload_user = models.ForeignKey(
+        User, on_delete=models.PROTECT)
+    
+
+# 一条消息的组成
+class MessageContent(models.Model):
+    text = models.TextField(max_length=2000)
+    addfile = models.ForeignKey(MessageFile, related_name="file_message_content", on_delete=models.CASCADE, null=True)
+    picture = models.ForeignKey(MessageFile, related_name="pic_message_content", on_delete=models.CASCADE, null=True)
+    audio = models.ForeignKey(MessageFile, related_name="audio_message_content", on_delete=models.CASCADE, null=True)
+
+
 # message
 class Message(models.Model):
     send_time = models.DateTimeField(auto_now_add=True)
     sender = models.ForeignKey(User, on_delete=models.PROTECT, related_name="out_message")
     receiver = models.ForeignKey(User, on_delete=models.PROTECT, related_name="in_message")
     read = models.BooleanField(default=False)
-    content = models.TextField()
+    content = models.ForeignKey(MessageContent, related_name="complete_message", on_delete=models.CASCADE)
 
 # 以下只建了表，暂未实现功能
 

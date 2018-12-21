@@ -18,6 +18,7 @@ def get_query_dict(query_string):
 
 class ChatConsumer(JsonWebsocketConsumer):
 
+
     def connect(self):
         self.group_name = 'default'
         try:
@@ -43,18 +44,30 @@ class ChatConsumer(JsonWebsocketConsumer):
             self.group_name,
             self.channel_name
         )
+        print(self.group_name)
         self.accept()
+
 
     def disconnect(self, code):
         async_to_sync(self.channel_layer.group_discard)(
             self.group_name,
             self.channel_name
         )
+
     
     def receive(self, text_data=None, bytes_data=None):
         text_data_json = json.loads(text_data)
+        """
+        message: {
+            text: String,
+            picture: Int,
+            addfile: Int,
+            audio: Int
+        }
+        """
         message = text_data_json.get('message', '')
-        new_msg_obj = models.Message.objects.create(content=message, sender_id=self.sender_id, receiver_id=self.receiver_id)
+        new_msg_content_obj = models.MessageContent.objects.create(**message)
+        new_msg_obj = models.Message.objects.create(content=new_msg_content_obj, sender_id=self.sender_id, receiver_id=self.receiver_id)
         async_to_sync(self.channel_layer.group_send)(
             self.group_name,
             {
@@ -66,6 +79,7 @@ class ChatConsumer(JsonWebsocketConsumer):
             }
         )
     
+
     def chat_message(self, event):
         message = event['message']
         sender = event['sender']
@@ -78,6 +92,7 @@ class ChatConsumer(JsonWebsocketConsumer):
             'send_time': send_time
         }))
     
+
     def not_login(self, event):
         error = event['error']
         self.send(text_data=json.dumps({

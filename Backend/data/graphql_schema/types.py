@@ -53,6 +53,16 @@ class SubmissionType(DjangoObjectType):
         model = models.HWFSubmission
 
 
+class MessageFileType(DjangoObjectType):
+    class Meta:
+        model = models.MessageFile
+
+
+class MessageContentType(DjangoObjectType):
+    class Meta:
+        model = models.MessageContent
+
+
 class MessageType(DjangoObjectType):
     class Meta:
         model = models.Message
