@@ -3,7 +3,6 @@ import graphene
 from data.graphql_schema.types import MessageType
 from data import models
 from data.user_views import token
-from project.decorators import with_token
 
 Q = models.models.Q
 
