@@ -7,15 +7,10 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from data import encrypt, models, serializers
-from data.confirm import ShortToken, Token, send, send_forget
+from data.safe.confirm import send_confirm, send_forget
 from data.models import User
 from project.settings import API_AUTH_KEY, SECRET_KEY
 
-# 有效期为24小时的tokener
-token = Token(SECRET_KEY.encode())
-
-# 有效期为1小时的tokener
-short_token = ShortToken(SECRET_KEY.encode())
 
 # 登录时返回的状态
 results = {
@@ -190,7 +185,7 @@ def user_list(request):
         if serializer.is_valid():
             serializer.save()
             data['result'] = results['SUCCESS']
-            send(User.objects.get(email=request.data['email']))
+            send_confirm(User.objects.get(email=request.data['email']))
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -304,8 +299,8 @@ def is_repeated(request):
 @api_view(['POST'])
 def activate(request):
     init()
-    global data, headers, short_token
-    userid = short_token.confirm_validate_token(request.META['HTTP_TOKEN'])
+    global data, headers, token
+    userid = token.confirm_validate_token(request.META['HTTP_TOKEN'], expiration=600)
     if userid:
         user_obj = User.objects.get(pk=userid)
         user_obj.is_active = True
@@ -324,7 +319,7 @@ def change_password(request):
     init()
     global data, headers, token
     vtoken = request.META['HTTP_TOKEN']
-    userid = token.confirm_validate_token(vtoken)
+    userid = token.confirm_validate_token(vtoken, expiration=600)
     try:
         realuser = User.objects.get(pk=userid)
     except:
@@ -344,7 +339,7 @@ def change_password(request):
 @api_view(['POST'])
 def forget_password(request):
     init()
-    global data, headers, short_token
+    global data, headers, token
     requser = request.data['username']
     realuser = None
     try:
@@ -362,8 +357,8 @@ def forget_password(request):
 @api_view(['POST'])
 def confirm_forgotten(request):
     init()
-    global data, headers, short_token
-    userid = short_token.confirm_validate_token(request.META['HTTP_TOKEN'])
+    global data, headers, token
+    userid = token.confirm_validate_token(request.META['HTTP_TOKEN'], expiration=600)
     if userid:
         user_obj = User.objects.get(pk=userid)
         user_obj.forgotten = True
@@ -379,8 +374,8 @@ def confirm_forgotten(request):
 @api_view(['POST'])
 def directly_change(request):
     init()
-    global data, headers, short_token
-    userid = short_token.confirm_validate_token(request.META['HTTP_TOKEN'])
+    global data, headers, token
+    userid = token.confirm_validate_token(request.META['HTTP_TOKEN'], expiration=600)
     if userid:
         usrn_obj = User.objects.get(pk=userid)
         if usrn_obj.forgotten:

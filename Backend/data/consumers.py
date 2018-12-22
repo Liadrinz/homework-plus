@@ -5,7 +5,7 @@ from data import models
 from channels.generic.websocket import JsonWebsocketConsumer
 import json
 
-from data.user_views import token
+from data.safe.tokener import tokener as token
 
 
 def get_query_dict(query_string):

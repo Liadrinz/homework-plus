@@ -9,7 +9,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from data.models import User
-from data.user_views import token
+from data.safe.tokener import tokener as token
 
 from data import encrypt
 

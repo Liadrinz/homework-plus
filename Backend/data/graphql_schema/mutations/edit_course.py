@@ -2,10 +2,10 @@
 from datetime import datetime
 
 import graphene
+from data.safe.tokener import tokener as token
 from django import http
 
 from data import models, serializers
-from data.user_views import token
 from data import encrypt
 from data.graphql_schema.types import CourseType
 from data.graphql_schema.inputs import CourseEditionInput

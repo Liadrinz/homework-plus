@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from graphene_django.views import *
 from django.http import HttpResponseForbidden
-from data.user_views import token
+from data.safe.tokener import tokener as token
 from data import encrypt
 from data import models
 

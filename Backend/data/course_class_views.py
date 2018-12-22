@@ -5,8 +5,9 @@ from rest_framework import filters, generics, viewsets
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from data import models, permissions, serializers
-from data.views import short_token, token
+from data import models, serializers
+from data.safe import permissions
+from data.safe.tokener import tokener as token
 from project.settings import BACKEND_DOMIAN, FRONTEND_DOMAIN
 
 # RESTful API for HWFCourseClass
@@ -39,7 +40,7 @@ class HWFCourseClassDetailView(generics.RetrieveUpdateDestroyAPIView):
     def get_object(self):
         token = self.request.GET.get('token', None)
         try:
-            short_token.confirm_validate_token(token)
+            token.confirm_validate_token(token, expiration=600)
             return super().get_object()
         except:
             return
