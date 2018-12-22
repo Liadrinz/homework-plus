@@ -5,7 +5,8 @@ from threading import Thread
 import graphene
 from django import http
 
-from data import autozip, encrypt, imgs2pdf, models, serializers
+from data import encrypt, models, serializers
+from data.proceeding import autozip, imgs2pdf
 from data.graphql_schema.inputs import SubmissionCreationInput
 from data.graphql_schema.types import SubmissionType
 from data.user_views import token
