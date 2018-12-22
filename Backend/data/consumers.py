@@ -16,6 +16,7 @@ def get_query_dict(query_string):
         query_dict[key] = val
     return query_dict
 
+
 class ChatConsumer(JsonWebsocketConsumer):
 
 
@@ -36,6 +37,10 @@ class ChatConsumer(JsonWebsocketConsumer):
             self.close()
             return
         self.receiver_id = query_dict['receiver']
+        if self.sender_id == self.receiver_id:
+            # 不能自己给自己发
+            self.close()
+            return
         self.joined_user = [self.sender_id, self.receiver_id]
         self.joined_user.sort()
         self.group_name = '_'.join(self.joined_user)
