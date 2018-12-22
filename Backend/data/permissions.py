@@ -15,6 +15,7 @@ from data import encrypt
 
 # 对于REST的一些权限控制
 
+
 # basic class
 class SelfEditUserAppendUserRead(permissions.BasePermission):
 

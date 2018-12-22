@@ -9,10 +9,6 @@ from project import settings
 router = DefaultRouter()
 router.register('avatars', user_views.UserAvatarViewset, 'avatar')
 router.register('files', views.HWFFileViewSet, 'file')
-"""TODO: 以下路由待删除"""
-router.register('questions', views.HWFQuestionViewSet, 'question')
-router.register('answers', views.HWFAnswerViewSet, 'answer')
-router.register('reviews', views.HWFReviewViewSet, 'review')
 
 # 常规
 urlpatterns = [

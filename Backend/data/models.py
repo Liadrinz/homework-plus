@@ -2,6 +2,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+
 # 为老师自动生成buptid
 def default_bupt_id():
     count = User.objects.all().count()
@@ -29,6 +30,7 @@ class User(AbstractUser):
     wechat = models.TextField(null=True)
     forgotten = models.BooleanField(default=False)
 
+
 # 头像
 class UserAvatar(models.Model):
     user = models.ManyToManyField(User,related_name='useravatar')
@@ -36,6 +38,7 @@ class UserAvatar(models.Model):
     url_width = models.PositiveIntegerField(default=75)
     useravatar = models.ImageField(
         upload_to="avatars", height_field='url_height', width_field='url_width', null=True)
+
 
 # 课程
 class HWFCourseClass(models.Model):
@@ -120,7 +123,9 @@ class Message(models.Model):
     read = models.BooleanField(default=False)
     content = models.ForeignKey(MessageContent, related_name="complete_message", on_delete=models.CASCADE)
 
-# 以下只建了表，暂未实现功能
+
+# 以下只建了表, 未做后续工作
+
 
 class HWFQuestion(models.Model):
     assignment = models.ForeignKey(HWFAssignment, on_delete=models.PROTECT)
@@ -193,10 +198,3 @@ class HWFReview(models.Model):
     answer = models.ForeignKey(HWFAnswer, on_delete=models.PROTECT)
     is_graph_review = models.BooleanField(default=False)
     graph_value = models.TextField()
-
-
-# class HWFMessage(models.Model):
-#     time = models.DateTimeField()
-#     sender = models.ForeignKey(User, on_delete=models.PROTECT)
-#     text = models.TextField()
-#     viewed = models.BooleanField(default=False)

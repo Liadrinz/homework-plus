@@ -40,6 +40,7 @@ results = {
 data = None
 headers = None
 
+
 # 重置数据
 def init():
     global data, headers
@@ -113,6 +114,7 @@ def login(request):
         return Response(data=data, headers=headers)
 
     return Response(data=data, headers=headers, status=status.HTTP_400_BAD_REQUEST)
+
 
 # TODO: 确认前端未使用后删除
 @api_view(['GET', 'POST'])
@@ -192,6 +194,7 @@ def user_list(request):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 # TODO: 确认前端未使用后删除
 @api_view(['GET', 'PUT'])

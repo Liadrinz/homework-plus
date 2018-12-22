@@ -7,12 +7,14 @@ from data import models
 
 from project import settings
 
-# 重写GraphQLView
 
+# 重写GraphQLView
 class BetterGraphQLView(GraphQLView):
+
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
 
     def dispatch(self, request, *args, **kwargs):
         if settings.DEBUG == True:
