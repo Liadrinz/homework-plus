@@ -14,6 +14,7 @@ def imgtopdf(input_paths, outputpath):
     c.showPage()
     c.save()
 
+
 def enhance_img(src_img):
     enh_sha = ImageEnhance.Sharpness(src_img)
     sharpness = 2.5
@@ -28,6 +29,7 @@ def enhance_img(src_img):
     color = 1.5
     colored_img = enh_col.enhance(color)
     return colored_img
+
 
 def convert(imgPathList, outputPath, outputWidth=1280, outputName="output", enhance=False):
     each_width = outputWidth

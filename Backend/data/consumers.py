@@ -7,6 +7,7 @@ import json
 
 from data.user_views import token
 
+
 def get_query_dict(query_string):
     query_string = query_string.decode('utf-8')
     queries = query_string.split('&')

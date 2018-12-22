@@ -66,20 +66,3 @@ class HWFFileViewSet(viewsets.ModelViewSet):
     
     queryset = models.HWFFile.objects.all()
     serializer_class = serializers.HWFFileSerializer
-    
-
-"""TODO: 以下接口待删除"""
-
-class HWFQuestionViewSet(viewsets.ModelViewSet):
-    queryset = models.HWFQuestion.objects.all()
-    serializer_class = serializers.HWFQuestionSerializer
-
-
-class HWFAnswerViewSet(viewsets.ModelViewSet):
-    queryset = models.HWFAnswer.objects.all()
-    serializer_class = serializers.HWFAnswerSerializer
-
-
-class HWFReviewViewSet(viewsets.ModelViewSet):
-    queryset = models.HWFReview.objects.all()
-    serializer_class = serializers.HWFReviewSerializer

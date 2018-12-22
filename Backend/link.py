@@ -4,14 +4,17 @@ import re
 from project.settings import GQL_PAHT_NAME as gqlpn
 from project.settings import GQL_URL as gqlurl
 
+
 def strip_end(iterable):
     temp = iterable
     while temp[-1].replace(' ', '') == '':
         temp.pop()
     return temp
 
+
 def getlines(filename):
     return ''.join(open(filename, 'r').readlines()).split('\n')
+
 
 def setlines(filename, iterable):
     f = open(filename, 'w')
@@ -19,10 +22,12 @@ def setlines(filename, iterable):
         if '#todel' not in line:
             f.write(line + '\n')
 
+
 def reset_project_pos(iterable):
     for i in range(0, len(iterable)):
         if 'urlpatterns=[' in iterable[i].replace(' ', ''):
             return i
+
 
 def link(filename, keywords, content, offset, emsg):
     lines = getlines(filename)
@@ -48,6 +53,7 @@ def link(filename, keywords, content, offset, emsg):
     lines = strip_end(lines)
     setlines(filename, lines)
 
+
 def flush(filename, start_str, end_str, mutations):
     lines = getlines(filename)
     s = 0
@@ -69,6 +75,7 @@ def flush(filename, start_str, end_str, mutations):
             lines[i] = '    pass\n'
     lines = strip_end(lines)
     setlines(filename, lines)
+
 
 if __name__ == '__main__':
 
