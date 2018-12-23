@@ -5,6 +5,7 @@ from itsdangerous import SignatureExpired
 from rest_framework import status, viewsets
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from data.safe.tokener import tokener as token
 
 from data import encrypt, models, serializers
 from data.safe.confirm import send_confirm, send_forget

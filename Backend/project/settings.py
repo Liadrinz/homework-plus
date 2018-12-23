@@ -23,7 +23,7 @@ SECRET_KEY = 'sf8o#m=vte7bx&ikfjo_f+3ci9a&9u#ja(&+b8h=0w(u^8z==('
 API_AUTH_KEY='3a6114be3672232f10294472783dfd1503c9c960889cde414d2201d3'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [
     '*',
