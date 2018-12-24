@@ -5,10 +5,14 @@ from data import models
 from channels.generic.websocket import JsonWebsocketConsumer
 import json
 
-from project.schema import schema
+from project.schema import Query
+from graphene import Schema
 from data.safe.tokener import tokener as token
 from channels.http import AsgiRequest
 from data.safe_gql_view import BetterGraphQLView
+
+import time
+from threading import Thread
 
 
 def get_query_dict(query_string):
@@ -118,6 +122,9 @@ class LongGraphQLCosumer(JsonWebsocketConsumer):
 
 
     def connect(self):
+        self.run = True
+        self.polling = None
+        self.temp = None
         self.group_name = 'default'
         async_to_sync(self.channel_layer.group_add)(
             self.group_name,
@@ -127,6 +134,8 @@ class LongGraphQLCosumer(JsonWebsocketConsumer):
     
 
     def disconnect(self, code):
+        self.run = False
+        self.polling.join()
         async_to_sync(self.channel_layer.group_discard)(
             self.group_name,
             self.channel_name
@@ -153,16 +162,19 @@ class LongGraphQLCosumer(JsonWebsocketConsumer):
         }
         asgi_body = json.dumps({"query": gql}).encode('utf-8')
         asgi_request = AsgiRequest(asgi_scope, asgi_body)
-        resp = BetterGraphQLView.as_view(schema=schema)(asgi_request)
-        async_to_sync(self.channel_layer.group_send)(
-            self.group_name,
-            {
-                'type': 'query_result',
-                'data': json.loads(resp.content.decode('utf-8'))
-            }
-        )
+        self.polling = Thread(target=self.poll, args=(asgi_body, asgi_request))
+        self.polling.setDaemon(True)
+        self.polling.start()
 
-    
-    def query_result(self, event):
-        self.send(text_data=json.dumps(event['data']))
-        
+
+    def poll(self, asgi_body, asgi_request):
+        while self.run:
+            resp = BetterGraphQLView.as_view(schema=Schema(query=Query))(asgi_request)
+            if self.temp != json.loads(resp.content.decode('utf-8')):
+                self.temp = json.loads(resp.content.decode('utf-8'))
+                if 'errors' in self.temp:
+                    self.run = False
+            else:
+                time.sleep(1)
+                continue
+            self.send(text_data=json.dumps(self.temp))
