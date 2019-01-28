@@ -61,7 +61,6 @@ class HWFCourseClassSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class HWFAssignmentSerializer(serializers.ModelSerializer):
-    addfile_id = serializers.IntegerField(required=False)
     description = serializers.CharField(required=False)
     class Meta:
         model = models.HWFAssignment

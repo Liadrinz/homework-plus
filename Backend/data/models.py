@@ -43,7 +43,7 @@ class UserAvatar(models.Model):
 # 课程
 class HWFCourseClass(models.Model):
     name = models.TextField()
-    description = models.TextField(default='')
+    description = models.TextField(blank=True, null=True)
     marks = models.FloatField(default=0.0)
     teachers = models.ManyToManyField(
         User, related_name='teachers_course', blank=True
@@ -74,13 +74,15 @@ class HWFFile(models.Model):
 
 # 一项作业
 class HWFAssignment(models.Model):
-    course_class = models.ForeignKey(HWFCourseClass, on_delete=models.PROTECT, related_name='course_assignments')
+    course_class = models.ForeignKey(HWFCourseClass, on_delete=models.CASCADE, related_name='course_assignments')
     name = models.TextField()
-    description = models.TextField(default='')
+    description = models.TextField(blank=True, null=True)
     assignment_type = models.CharField(max_length=20, choices=[(item, item) for item in [
                                 'image', 'docs', 'vary']], default='vary')
     addfile = models.ManyToManyField(HWFFile, related_name='assignment', blank=True)
     deadline = models.DateTimeField()
+    # 作业所占权重
+    weight = models.FloatField(default=0.0)
 
     def __str__(self):
         return self.name
@@ -93,9 +95,9 @@ class HWFSubmission(models.Model):
     pdf = models.ForeignKey(HWFFile, on_delete=models.CASCADE, related_name='pdf_submission', null=True)
     addfile = models.ManyToManyField(HWFFile, blank=True, related_name='addfile_submission')
     submit_time = models.DateTimeField(auto_now_add=True)
-    assignment = models.ForeignKey(HWFAssignment, on_delete=models.PROTECT, related_name='assignment_submission')
-    submitter = models.ForeignKey(User, on_delete=models.PROTECT, related_name='my_submission')
-    description = models.TextField(default='')
+    assignment = models.ForeignKey(HWFAssignment, on_delete=models.CASCADE, related_name='assignment_submission')
+    submitter = models.ForeignKey(User, on_delete=models.CASCADE, related_name='my_submission')
+    description = models.TextField(blank=True, null=True)
     score = models.FloatField(default=0.0)
     is_excellent = models.BooleanField(default=False)
 
@@ -118,8 +120,8 @@ class MessageContent(models.Model):
 # message
 class Message(models.Model):
     send_time = models.DateTimeField(auto_now_add=True)
-    sender = models.ForeignKey(User, on_delete=models.PROTECT, related_name="out_message")
-    receiver = models.ForeignKey(User, on_delete=models.PROTECT, related_name="in_message")
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name="out_message")
+    receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name="in_message")
     read = models.BooleanField(default=False)
     content = models.ForeignKey(MessageContent, related_name="complete_message", on_delete=models.CASCADE)
 

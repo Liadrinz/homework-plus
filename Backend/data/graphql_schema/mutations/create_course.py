@@ -44,14 +44,24 @@ class CreateCourse(graphene.Mutation):
             
             # isteacher validation
             if realuser.usertype.lower() == 'teacher':
+                teachers = course_data.pop('teachers', [])
+                assistants = course_data.pop('teaching_assistants', [])
+                students = course_data.pop('students', [])
                 serial = serializers.HWFCourseClassSerializer(data=course_data)
                 if serial.is_valid():
                     new_course = serial.save()
                     new_course.teachers.add(realuser)
-                return CreateCourse(ok=True, course=new_course, msg=public_msg['success'])
+                    for item in teachers:
+                        new_course.teachers.add(models.User.objects.get(pk=item))
+                    for item in students:
+                        new_course.students.add(models.User.objects.get(pk=item))
+                    for item in assistants:
+                        new_course.teaching_assistants.add(models.User.objects.get(pk=item))
+                    return CreateCourse(ok=True, course=new_course, msg=public_msg['success'])
             else:
                 return CreateCourse(ok=False, msg=public_msg['forbidden'])
         
         # bad request
-        except:
+        except Exception as e:
+            print(e)
             return CreateCourse(ok=False, msg=public_msg['badreq'])
