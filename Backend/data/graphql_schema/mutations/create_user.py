@@ -2,6 +2,8 @@
 import graphene
 from django import http
 
+from project.settings import DEBUG
+
 from data import models, serializers
 from data.graphql_schema.types import UserType
 from data.graphql_schema.inputs import UserCreationInput
@@ -9,6 +11,7 @@ from data.graphql_schema.inputs import UserCreationInput
 from data.graphql_schema.resp_msg import public_msg, create_msg
 
 
+# 此接口仅供测试用
 # creating a user
 class CreateUser(graphene.Mutation):
 
@@ -20,6 +23,9 @@ class CreateUser(graphene.Mutation):
     msg = graphene.String()
 
     def mutate(self, info, user_data):
+
+        if not DEBUG:
+            return
 
         try:
 

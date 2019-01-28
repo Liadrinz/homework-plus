@@ -54,11 +54,15 @@ class CreateAssignment(graphene.Mutation):
             if len(editing_course.teachers.filter(pk=realuser.id)) == 0 and len(editing_course.teaching_assistants.filter(pk=realuser.id)) == 0:
                 return CreateAssignment(ok=False, msg=public_msg['forbiddren'])
             else:
+                addfile = assignment_data.pop('addfile', [])
                 serial = serializers.HWFAssignmentSerializer(data=assignment_data)
                 if serial.is_valid():
                     new_assignment = serial.save()
-                return CreateAssignment(ok=True, assignment=new_assignment, msg=public_msg['success'])
+                    for item in addfile:
+                        new_assignment.addfile.add(item)
+                    return CreateAssignment(ok=True, assignment=new_assignment, msg=public_msg['success'])
         
         # bad request
-        except:
+        except Exception as e:
+            print(e)
             return CreateAssignment(ok=False, msg=public_msg['badreq'])
