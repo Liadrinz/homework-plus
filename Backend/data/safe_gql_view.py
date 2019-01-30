@@ -1,18 +1,20 @@
 # -*- coding: utf-8 -*-
 from graphene_django.views import *
 from django.http import HttpResponseForbidden
-from data.user_views import token
+from data.safe.tokener import tokener as token
 from data import encrypt
 from data import models
 
 from project import settings
 
-# 使得GraphQL的访问需要验证token
 
+# 重写GraphQLView
 class BetterGraphQLView(GraphQLView):
+
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
 
     def dispatch(self, request, *args, **kwargs):
         if settings.DEBUG == True:

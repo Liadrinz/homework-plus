@@ -1,15 +1,16 @@
+# -*- coding: utf-8 -*-
 from datetime import datetime
 
 import graphene
+from data.safe.tokener import tokener as token
 from django import http
 
 from data import models, serializers
-from data.user_views import token
 from data import encrypt
 from data.graphql_schema.types import AssignmentType
 from data.graphql_schema.inputs import AssignmentEditionInput
 
-from data.graphql_schema import except_resp as Exresp
+from data.graphql_schema.resp_msg import public_msg, create_msg
 
 
 # editing an assignment
@@ -20,6 +21,7 @@ class EditAssignment(graphene.Mutation):
 
     ok = graphene.Boolean()
     assignment = graphene.Field(AssignmentType)
+    msg = graphene.String()
 
     def mutate(self, info, assignment_data):
 
@@ -33,35 +35,39 @@ class EditAssignment(graphene.Mutation):
                 realuser = models.User.objects.get(wechat=encrypt.getHash(info.context.META['HTTP_TOKEN']))
                 editing_assignment = models.HWFAssignment.objects.get(pk=assignment_data['id'])
             except:
-                return Exresp.forbidden_resp
+                return EditAssignment(ok=False, msg=public_msg['not_login'])
 
-        # time validation
-        if datetime.now() > editing_assignment.deadline.replace(tzinfo=None):
-            return Exresp.deadline_expired_resp
+        try:
 
-        if datetime.now() > editing_assignment.course_class.end_time.replace(tzinfo=None):
-            return Exresp.deadline_expired_resp
+            # time validation
+            if datetime.now() > editing_assignment.deadline.replace(tzinfo=None):
+                return EditAssignment(ok=False, msg=create_msg(4151, "该作业截止日期已过，无法修改"))
 
-        # owner validation
-        if len(editing_assignment.course_class.teachers.filter(pk=realuser.id)) == 0 or len(editing_assignment.course_class.teaching_assistants.filter(pk=realuser.id)) == 0:
-            return Exresp.forbidden_resp
-        else:
-            if 'name' in assignment_data:
-                editing_assignment.name = assignment_data['name']
-            if 'description' in assignment_data:
-                editing_assignment.description = assignment_data['description']
+            # owner validation
+            if len(editing_assignment.course_class.teachers.filter(pk=realuser.id)) == 0 or len(editing_assignment.course_class.teaching_assistants.filter(pk=realuser.id)) == 0:
+                return EditAssignment(ok=False, msg=public_msg['forbidden'])
+            else:
+                if 'name' in assignment_data:
+                    editing_assignment.name = assignment_data['name']
+                if 'description' in assignment_data:
+                    editing_assignment.description = assignment_data['description']
 
-            # type validation
-            if 'type' in assignment_data:
-                if assignment_data['type'] in ('image', 'docs', 'all'):
-                    editing_assignment.type = assignment_data['type']
-                else:
-                    return Exresp.invalid_type_resp
+                # type validation
+                if 'assignment_type' in assignment_data:
+                    if assignment_data['assignment_type'] in ('image', 'docs', 'vary'):
+                        editing_assignment.type = assignment_data['assignment_type']
+                    else:
+                        return EditAssignment(ok=False, msg=create_msg(4101, "\"%s\" is not a valid assignment type"%assignment_data['assignment_type']))
 
-            if 'addfile' in assignment_data:
-                for file_id in assignment_data['addfile']:
-                    editing_assignment.addfile.add(models.HWFFile.objects.get(pk=file))
-            if 'deadline' in assignment_data:
-                editing_assignment.deadline = assignment_data['deadline']
-            editing_assignment.save()
-            return EditAssignment(ok=True, assignment=editing_assignment)
+                if 'addfile' in assignment_data:
+                    for file_id in assignment_data['addfile']:
+                        editing_assignment.addfile.add(models.HWFFile.objects.get(pk=file_id))
+                if 'deadline' in assignment_data:
+                    editing_assignment.deadline = assignment_data['deadline']
+
+                editing_assignment.save()
+                return EditAssignment(ok=True, assignment=editing_assignment, msg=public_msg['success'])
+        
+        # bad request
+        except:
+            return EditAssignment(ok=False, msg=public_msg['badreq'])

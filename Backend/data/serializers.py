@@ -42,7 +42,6 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserSerializerCourse(UserSerializer):
-
     class Meta:
         model = User
         fields = ('id', 'username', 'students_course',
@@ -50,32 +49,7 @@ class UserSerializerCourse(UserSerializer):
         read_only_fields = ('id', 'username')
 
 
-# class UserSerializerCourseForStudent(UserSerializerCourse):
-
-#     class Meta:
-#         model = User
-#         fields = ('id', 'username', 'students_course')
-#         read_only_fields = ('id', 'username')
-
-
-# class UserSerializerCourseForTeacher(UserSerializerCourse):
-
-#     class Meta:
-#         model = User
-#         fields = ('id', 'username', 'teachers_course')
-#         read_only_fields = ('id', 'username')
-
-
-# class UserSerializerCourseForAssistant(UserSerializerCourse):
-
-#     class Meta:
-#         model = User
-#         fields = ('id', 'username', 'teaching_assistants_course')
-#         read_only_fields = ('id', 'username')
-
-
 class UserAvatarSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = models.UserAvatar
         fields = '__all__'
@@ -87,7 +61,6 @@ class HWFCourseClassSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class HWFAssignmentSerializer(serializers.ModelSerializer):
-    addfile_id = serializers.IntegerField(required=False)
     description = serializers.CharField(required=False)
     class Meta:
         model = models.HWFAssignment
@@ -101,7 +74,6 @@ class HWFAssignmentSerializer(serializers.ModelSerializer):
 
 
 class HWFFileSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = models.HWFFile
         fields = '__all__'
@@ -119,79 +91,3 @@ class HWFSubmissionSerializer(serializers.ModelSerializer):
         model = models.HWFSubmission
         fields = '__all__'
         read_only_fields = ('submit_time', )
-
-
-class HWFQuestionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.HWFQuestion
-        fields = '__all__'
-
-
-class HWFAnswerSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.HWFAnswer
-        fields = '__all__'
-
-
-class HWFTextAnswerSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.HWFTextAnswer
-        fields = '__all__'
-
-
-class HWFSelectAnswerValueSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.HWFSelectAnswerValue
-        fields = '__all__'
-
-
-class HWFSelectAnswerSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.HWFSelectAnswer
-        fields = '__all__'
-
-
-class HWFFileAnswerValueSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.HWFFileAnswerValue
-        fields = '__all__'
-
-
-class HWFFileAnswerSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.HWFFileAnswer
-        fields = '__all__'
-
-
-class HWFSelectQuestion(serializers.ModelSerializer):
-    class Meta:
-        model = models.HWFSelectQuestion
-        fields = '__all__'
-
-
-class HWFSelectQuestionChoiceSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.HWFSelectQuestionChoice
-        fields = '__all__'
-
-
-class HWFFileQuestionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.HWFFileQuestion
-        fields = '__all__'
-
-
-class HWFReviewTagSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.HWFReviewTag
-        fields = '__all__'
-
-
-class HWFReviewSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.HWFReview
-        fields = '__all__'
-
-# class HWFMessage(serializers.ModelSerializer):
-#     class Meta:
-#         model=models.HWFMessage

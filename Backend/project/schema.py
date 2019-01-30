@@ -1,8 +1,10 @@
+# -*- coding: utf-8 -*-
 # !!!!!!! Don't edit this file unless you're Liadrinz !!!!!!!
 import graphene
 import data.schema
 
 class Query(
+    data.schema.QueryMessage, 
     data.schema.QueryUser, 
     data.schema.QuerySubmission, 
     data.schema.QueryCourse, 

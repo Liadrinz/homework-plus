@@ -26,7 +26,7 @@ from project import settings
 
 
 urlpatterns = [
+    path('graphql/', GraphQLView.as_view(graphiql=True, schema=schema)),
     url(r'^',include('data.urls')), # restful and plain API
-    path('graphql/', BetterGraphQLView.as_view(graphiql=True, schema=schema)),  # GraphQL API
     url(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}) # File API
 ]

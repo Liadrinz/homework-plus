@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'graphene_django',
     'data',
     'corsheaders',
+    'channels'
 ]
 
 MIDDLEWARE = [
@@ -168,6 +169,7 @@ CORS_ALLOW_METHODS = (
 
 CORS_ALLOW_HEADERS = (
     'XMLHttpRequest',
+    'Access-Control-Allow-Origin',
     'X_FILENAME',
     'accept-encoding',
     'authorization',
@@ -197,3 +199,14 @@ BACKEND_DOMIAN = "homeworkplus.cn"
 # GraphQL config
 GQL_PAHT_NAME = 'graphql_schema'
 GQL_URL = 'graphql/'
+
+# ws
+ASGI_APPLICATION = 'project.routing.application'
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)]
+        }
+    }
+}

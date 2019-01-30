@@ -1,7 +1,9 @@
+# -*- coding: utf-8 -*-
 import os
 import re
 from project.settings import GQL_PAHT_NAME as gqlpn
 from project.settings import GQL_URL as gqlurl
+
 
 def strip_end(iterable):
     temp = iterable
@@ -9,8 +11,10 @@ def strip_end(iterable):
         temp.pop()
     return temp
 
+
 def getlines(filename):
     return ''.join(open(filename, 'r').readlines()).split('\n')
+
 
 def setlines(filename, iterable):
     f = open(filename, 'w')
@@ -18,10 +22,12 @@ def setlines(filename, iterable):
         if '#todel' not in line:
             f.write(line + '\n')
 
+
 def reset_project_pos(iterable):
     for i in range(0, len(iterable)):
         if 'urlpatterns=[' in iterable[i].replace(' ', ''):
             return i
+
 
 def link(filename, keywords, content, offset, emsg):
     lines = getlines(filename)
@@ -47,6 +53,7 @@ def link(filename, keywords, content, offset, emsg):
     lines = strip_end(lines)
     setlines(filename, lines)
 
+
 def flush(filename, start_str, end_str, mutations):
     lines = getlines(filename)
     s = 0
@@ -69,6 +76,7 @@ def flush(filename, start_str, end_str, mutations):
     lines = strip_end(lines)
     setlines(filename, lines)
 
+
 if __name__ == '__main__':
 
     project_url = getlines('./project/urls.py')
@@ -79,8 +87,8 @@ if __name__ == '__main__':
     if 'from project.schema import schema' not in project_url:
         project_url.insert(urlpatternsIndex, 'from project.schema import schema')
     urlpatternsIndex = reset_project_pos(project_url)
-    if """    path('%s', BetterGraphQLView.as_view(graphiql=True, schema=schema)),"""%gqlurl not in project_url:
-        project_url.insert(urlpatternsIndex + 1, """    path('%s', BetterGraphQLView.as_view(graphiql=True, schema=schema)),"""%gqlurl)
+    if """    path('%s', GraphQLView.as_view(graphiql=True, schema=schema)),"""%gqlurl not in project_url:
+        project_url.insert(urlpatternsIndex + 1, """    path('%s', GraphQLView.as_view(graphiql=True, schema=schema)),"""%gqlurl)
     project_url = strip_end(project_url)
     setlines('./project/urls.py', project_url)
 
@@ -110,9 +118,9 @@ if __name__ == '__main__':
         
         class_name = ''
         if mutation in queries:
-            f = open('./data/%s/queries/'%gqlpn + mutation, 'r')
+            f = open('./data/%s/queries/'%gqlpn + mutation, 'r', encoding='utf-8')
         elif mutation in mutations:
-            f = open('./data/%s/mutations/'%gqlpn + mutation, 'r')
+            f = open('./data/%s/mutations/'%gqlpn + mutation, 'r', encoding='utf-8')
         for line in f.readlines():
             for name in re.findall(r'class .*?\s*\(', line):
                 name = name.replace(' ', '')

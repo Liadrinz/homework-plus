@@ -1,15 +1,16 @@
+# -*- coding: utf-8 -*-
 from datetime import datetime
 
 import graphene
+from data.safe.tokener import tokener as token
 from django import http
 
 from data import models, serializers
-from data.user_views import token
 from data import encrypt
 from data.graphql_schema.types import CourseType
 from data.graphql_schema.inputs import CourseCreationInput
 
-from data.graphql_schema import except_resp as Exresp
+from data.graphql_schema.resp_msg import public_msg, create_msg
 
 # creating a course
 class CreateCourse(graphene.Mutation):
@@ -19,6 +20,7 @@ class CreateCourse(graphene.Mutation):
 
     ok = graphene.Boolean()
     course = graphene.Field(CourseType)
+    msg = graphene.JSONString()
 
     def mutate(self, info, course_data):
         
@@ -30,20 +32,36 @@ class CreateCourse(graphene.Mutation):
             try:
                 realuser = models.User.objects.get(wechat=encrypt.getHash(info.context.META['HTTP_TOKEN']))
             except:
-                return Exresp.forbidden_resp
+                return CreateCourse(ok=False, msg=public_msg['not_login'])
 
-        # start end time validation
-        start_time = course_data['start_time']
-        end_time = course_data['end_time']
-        if start_time >= end_time or end_time.replace(tzinfo=None) <= datetime.now():
-            return Exresp.deadline_expired_resp
+        try:
+
+            # start end time validation
+            start_time = course_data['start_time']
+            end_time = course_data['end_time']
+            if start_time >= end_time or end_time.replace(tzinfo=None) <= datetime.now():
+                return CreateCourse(ok=False, msg=create_msg(4111, "the start time \"%s\" is later than the end time \"%s\""%(start_time, end_time)))
+            
+            # isteacher validation
+            if realuser.usertype.lower() == 'teacher':
+                teachers = course_data.pop('teachers', [])
+                assistants = course_data.pop('teaching_assistants', [])
+                students = course_data.pop('students', [])
+                serial = serializers.HWFCourseClassSerializer(data=course_data)
+                if serial.is_valid():
+                    new_course = serial.save()
+                    new_course.teachers.add(realuser)
+                    for item in teachers:
+                        new_course.teachers.add(models.User.objects.get(pk=item))
+                    for item in students:
+                        new_course.students.add(models.User.objects.get(pk=item))
+                    for item in assistants:
+                        new_course.teaching_assistants.add(models.User.objects.get(pk=item))
+                    return CreateCourse(ok=True, course=new_course, msg=public_msg['success'])
+            else:
+                return CreateCourse(ok=False, msg=public_msg['forbidden'])
         
-        # isteacher validation
-        if realuser.usertype.lower() == 'teacher':
-            serial = serializers.HWFCourseClassSerializer(data=course_data)
-            if serial.is_valid():
-                new_course = serial.save()
-                new_course.teachers.add(realuser)
-            return CreateCourse(ok=True, course=new_course)
-        else:
-            return Exresp.not_teacher_resp
+        # bad request
+        except Exception as e:
+            print(e)
+            return CreateCourse(ok=False, msg=public_msg['badreq'])
