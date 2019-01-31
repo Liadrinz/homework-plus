@@ -26,7 +26,7 @@ class SelectTeacher extends React.Component{
 
     componentDidMount(){
       var getTeachersusername=axios.create({
-        url:"http://homeworkplus.cn/graphql/",
+        url:"http://localhost:8000/graphql/",
         headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
         method:'post',
         data:{
@@ -102,7 +102,7 @@ class SelectAssistant extends React.Component{
 
   componentDidMount(){
     var getAssistantsusername=axios.create({
-      url:"http://homeworkplus.cn/graphql/",
+      url:"http://localhost:8000/graphql/",
       headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
       method:'post',
       data:{
@@ -185,7 +185,7 @@ class Addcourse extends React.Component{
               "开课时间":[values.开课时间[0].format('YYYY-MM-DD'), values.开课时间[1].format('YYYY-MM-DD')],
             }
             var getTeachersId=axios.create({
-              url:"http://homeworkplus.cn/graphql/",
+              url:"http://localhost:8000/graphql/",
               headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
               method:'post',
               data:{
@@ -202,7 +202,7 @@ class Addcourse extends React.Component{
               value.助教=[];
             }
             var getAssistantsId=axios.create({
-              url:"http://homeworkplus.cn/graphql/",
+              url:"http://localhost:8000/graphql/",
               headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
               method:'post',
               data:{
@@ -220,7 +220,7 @@ class Addcourse extends React.Component{
               value.授课教师=_.pluck(teacher.data.data.getUsersByUsernames,'id');
               value.助教=_.pluck(assistant.data.data.getUsersByUsernames,'id');
               var createcourse=axios.create({
-                url:"http://homeworkplus.cn/graphql/",
+                url:"http://localhost:8000/graphql/",
                 headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
                 method:'post',
                 data:{

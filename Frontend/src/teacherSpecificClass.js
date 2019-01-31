@@ -17,9 +17,73 @@ const RadioGroup = Radio.Group;
 const FormItem = Form.Item;
 
 class Homework extends React.Component{
+    constructor(props){
+        super(props);
+        this.state={
+            visible1:false,
+        }
+    }
+
+    componentWillMount(){
+        var that=this;
+        var getAllHomework=axios.create({
+            url:"http://localhost:8000/graphql/",
+            headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
+            method:'post',
+            data:{
+               "query":`query{
+                    getAssignmentsByCourses(courses:${[this.props.courseId]}){
+                        id
+                        name
+                        description
+                        deadline
+                    }
+                }`//用反引号      
+            },
+            timeout:1000,
+        })
+        getAllHomework().then(function(response){
+           console.log(response);
+           that.setState({
+               assignmentInfo:response.data.data.getAssignmentsByCourses,
+           })
+        })
+        .catch(function(error){
+            console.log(error);
+        })
+    }
+
+    showModal=()=>{
+        this.setState({visible1:true});
+    }
+
+    handleClose=()=>{
+        this.setState({visible1:false});
+    }
+
     render(){
+        const column=[{
+            title:'作业名',
+            dataIndex:'name',
+        },{
+            title:'结束日期',
+            dataIndex:'deadline',
+        }]
+        const data=this.state.assignmentInfo;
         return(
-            <span>hello world</span>
+            <div>
+            <Button type="primary" onClick={this.showModal}>添加作业</Button>
+            <br/><br/><br/><br/>
+            <Table columns={column} dataSource={data} bordered rowKey={record=>record["id"]} />
+            <Modal
+                title="添加作业任务"
+                visible={this.state.visible1}
+                footer={null}
+                onCancel={this.handleClose}
+            >
+
+            </Modal>
+            </div>
         )
     }
 }
@@ -34,7 +98,7 @@ class SelectUsername extends React.Component{
   
     componentDidMount(){
       var getStudentsUsername=axios.create({
-        url:"http://homeworkplus.cn/graphql/",
+        url:"http://localhost:8000/graphql/",
         headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
         method:'post',
         data:{
@@ -102,14 +166,14 @@ class SelectSchoolId extends React.Component{
   
     componentDidMount(){
       var getStudentsSchoolId=axios.create({
-        url:"http://homeworkplus.cn/graphql/",
+        url:"http://localhost:8000/graphql/",
         headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
         method:'post',
         data:{
            "query":`query{
             getUsersByUsertype(usertype:"student")
              {
-                classNumber
+                buptId
              }
             }`      
         },
@@ -120,8 +184,8 @@ class SelectSchoolId extends React.Component{
          lastUpdateSchoolId=response.data.data.getUsersByUsertype;
          for(let i=0;i<response.data.data.getUsersByUsertype.length;i++){
           schoolIdchildren.push(
-          <Option key={response.data.data.getUsersByUsertype[i].classNumber} value={response.data.data.getUsersByUsertype[i].classNumber}>
-          {response.data.data.getUsersByUsertype[i].classNumber}
+          <Option key={response.data.data.getUsersByUsertype[i].buptId} value={response.data.data.getUsersByUsertype[i].buptId}>
+          {response.data.data.getUsersByUsertype[i].buptId}
           </Option>);
          }
         }
@@ -185,7 +249,7 @@ class Member extends React.Component{
     componentWillMount(){
         var that=this;
         var getAllStudentInformation=axios.create({
-            url:"http://homeworkplus.cn/graphql/",
+            url:"http://localhost:8000/graphql/",
             headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
             method:'post',
             data:{
@@ -245,7 +309,7 @@ class Member extends React.Component{
         this.props.form.validateFieldsAndScroll(["学生"],(err,values)=>{
         if(!err&&typeof(values.学生)!=="undefined"){
           var getAllStudentIdByUsername=axios.create({
-            url:"http://homeworkplus.cn/graphql/",
+            url:"http://localhost:8000/graphql/",
             headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
             method:'post',
             data:{
@@ -258,7 +322,7 @@ class Member extends React.Component{
             timeout:1000,
           })
           var getAllStudentIdBySchoolId=axios.create({
-            url:"http://homeworkplus.cn/graphql/",
+            url:"http://localhost:8000/graphql/",
             headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
             method:'post',
             data:{
@@ -271,7 +335,7 @@ class Member extends React.Component{
             timeout:1000,
           })
           var getStudentsIdInCourse=axios.create({
-            url:"http://homeworkplus.cn/graphql/",
+            url:"http://localhost:8000/graphql/",
             headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
             method:'post',
             data:{
@@ -289,7 +353,7 @@ class Member extends React.Component{
               getAllStudentIdByUsername().then(function(response1){
                   getStudentsIdInCourse().then(function(response2){
                   var addStudents=axios.create({
-                    url:"http://homeworkplus.cn/graphql/",
+                    url:"http://localhost:8000/graphql/",
                     headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
                     method:'post',
                     data:{
@@ -330,7 +394,7 @@ class Member extends React.Component{
             getAllStudentIdBySchoolId().then(function(response1){
                 getStudentsIdInCourse().then(function(response2){
                     var addStudents=axios.create({
-                      url:"http://homeworkplus.cn/graphql/",
+                      url:"http://localhost:8000/graphql/",
                       headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
                       method:'post',
                       data:{
@@ -475,7 +539,7 @@ const WrappedMember=Form.create()(Member);
 
 class HomeworkOrMember extends React.Component{
     render(){
-         if(this.props["current"]=="homework")return <Homework/>;
+         if(this.props["current"]=="homework")return <Homework courseId={this.props.courseId}/>;
          else return <WrappedMember courseId={this.props.courseId}/>;
     }
 }
@@ -510,7 +574,7 @@ class TeacherSpecificclass extends React.Component{
     showQRCode=()=>{
         var that=this;
         var getQRCode=axios.create({
-            url:"http://homeworkplus.cn/data/get_qrcode/",
+            url:"http://localhost:8000/data/get_qrcode/",
             headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
             method:'post',
             data:{course_id:courseid},

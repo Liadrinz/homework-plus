@@ -22,7 +22,7 @@ class ModifyPassword extends React.Component{
         if(gotToken===''){
             gotToken=re.exec(window.location.href)[2];
             var confirm=axios.create({
-             url:"http://homeworkplus.cn/account/confirm_forgotten/",
+             url:"http://localhost:8000/account/confirm_forgotten/",
              headers:{"content-type":"application/json","token":gotToken},
              method:'post',
              timeout:1000,

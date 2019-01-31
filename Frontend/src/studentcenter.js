@@ -17,7 +17,7 @@ var validPassword =/^\w{6,20}$/;
 var validPhone=/^1\d{10}$/;
 var toDate=/^(\d{4})\-(\d{2})\-(\d{2})(.*)$/;
 var loginUser=axios.create({
-  url:"http://homeworkplus.cn/data/is_repeated/",
+  url:"http://localhost:8000/data/is_repeated/",
   headers:{"content-type":"application/json"},
   method:'post',
   data:Userlogin,
@@ -78,7 +78,7 @@ class UploadAvatar extends React.Component {
           listType="picture-card"
           className="avatar-uploader"
           showUploadList={false}
-          action="http://homeworkplus.cn/data/avatars/"
+          action="http://localhost:8000/data/avatars/"
           headers={{"content-type":"application/json","token":localStorage.getItem('token')}}
           beforeUpload={beforeUpload}
           onChange={this.handleChange}
@@ -108,7 +108,7 @@ class Studentcenter extends React.Component{
     
     componentDidMount(){
       var getQRcode=axios.create({
-        url:"http://homeworkplus.cn/data/bind_wechat_qrcode/",
+        url:"http://localhost:8000/data/bind_wechat_qrcode/",
         headers:{"content-type":"application/json","token":localStorage.getItem('token')},
         method:'post',
         data:{
@@ -179,7 +179,7 @@ class Studentcenter extends React.Component{
               pass.old_pass=values.原密码;
               pass.new_pass=values.新的密码;
               var changePass=axios.create({
-                url:"http://homeworkplus.cn/account/change_password/",
+                url:"http://localhost:8000/account/change_password/",
                 headers:{"content-type":"application/json","token":localStorage.getItem('token')},
                 method:'post',
                 data:pass,
@@ -257,7 +257,7 @@ class Studentcenter extends React.Component{
             user.phone=values.手机号;
           }
              var changeuserinformation=axios.create({
-              url:"http://homeworkplus.cn/graphql/",
+              url:"http://localhost:8000/graphql/",
               headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
               method:'post',
               data:{

@@ -55,7 +55,7 @@ class StudentIndex extends React.Component{
       textAlign:'center',
     }
      var getbuptId=axios.create({
-      url:"http://homeworkplus.cn/graphql/",
+      url:"http://localhost:8000/graphql/",
       headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
       method:'post',
       data:{
@@ -102,7 +102,7 @@ class StudentIndex extends React.Component{
       var lastUpdateassistantcourse=[];//学生作为助教参加的课程
       this.getCourse=setInterval(()=>{
       var getUserCourse=axios.create({
-        url:"http://homeworkplus.cn/graphql/",
+        url:"http://localhost:8000/graphql/",
         headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
         method:'post',
         data:{

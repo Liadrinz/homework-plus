@@ -22,7 +22,7 @@ var vaildEmail=/^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z0-9]{2,
 var validPhone=/^1\d{10}$/;
 var validPassword =/^\w{6,20}$/;
 var enrollUser=axios.create({
-  url:"http://homeworkplus.cn/data/users/",
+  url:"http://localhost:8000/data/users/",
   headers:{"content-type":"application/json"},
   method:'post',
   data:User,
@@ -30,7 +30,7 @@ var enrollUser=axios.create({
 });
 
 var loginUser=axios.create({
-  url:"http://homeworkplus.cn/data/is_repeated/",
+  url:"http://localhost:8000/data/is_repeated/",
   headers:{"content-type":"application/json"},
   method:'post',
   data:Userlogin,
@@ -38,7 +38,7 @@ var loginUser=axios.create({
 })
 
 var takeToken=axios.create({
-  url:"http://homeworkplus.cn/login/",
+  url:"http://localhost:8000/login/",
   headers:{"content-type":"application/json"},
   method:'post',
   data:Userlogin2,
@@ -46,7 +46,7 @@ var takeToken=axios.create({
 })
 
 var forgetPassword=axios.create({
-  url:"http://homeworkplus.cn/account/forget_password/",
+  url:"http://localhost:8000/account/forget_password/",
   headers:{"content-type":"application/json"},
   method:'post',
   data:userinformation,
