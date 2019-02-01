@@ -89,7 +89,7 @@ class HWFAssignment(models.Model):
         default='vary')
     addfile = models.ManyToManyField(
         HWFFile, related_name='assignment', blank=True)
-    start_time = models.DateTimeField(default="2019-01-01T00:00:00+00:00")
+    start_time = models.DateTimeField(auto_now_add=True)
     deadline = models.DateTimeField()
     # 作业所占权重
     weight = models.FloatField(default=0.0)
