@@ -51,6 +51,7 @@ query {
     // 需要查询的字段
   }
 }
+```
 
 #### getUsersByUsernames
 ##### 权限
@@ -66,6 +67,7 @@ query {
     // 需要查询的字段
   }
 }
+```
 
 #### getUsersByBuptIds
 ##### 权限
@@ -113,6 +115,7 @@ query {
     // 需要查询的字段
   }
 }
+```
 
 ### 2) mutation
 
