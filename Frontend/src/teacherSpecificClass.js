@@ -1,8 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {Row,Col,Card,Button,Modal,Menu,Select,Table,Form,Radio,message} from'antd'
+import {Row,Col,Card,Button,Modal,Menu,Select,Table,Form,Radio,message,Input,DatePicker} from'antd'
 import './teacherSpecificClass.css';
 import {_} from 'underscore'
+import moment from 'moment';
 import axios from 'axios';
 var courseid;//特定课程的id
 var courseStudents;//该课程的所有学生
@@ -15,6 +16,93 @@ var lastUpdateSchoolId=[];//最后更新时学号列表
 const Option = Select.Option;
 const RadioGroup = Radio.Group;
 const FormItem = Form.Item;
+const { TextArea } = Input;
+function range(start, end) {
+    const result = [];
+    for (let i = start; i < end; i++) {
+      result.push(i);
+    }
+    return result;
+}
+function disabledDateTime() {
+    return {
+      disabledSeconds: () => range(1,60),
+    };
+}
+class AddAssignment extends React.Component{
+
+    handleSubmit=(e)=>{
+        e.preventDefault();
+        this.props.form.validateFieldsAndScroll(["作业名称","作业描述","截止时间"],(err,values)=>{
+            if(!err){
+                
+            }
+        })
+    }
+
+    render(){
+        const { getFieldDecorator } = this.props.form;
+        const formItemLayout = {
+            labelCol: {
+              xs: { span: 24 },
+              sm: { span: 8 },
+            },
+            wrapperCol: {
+              xs: { span: 24 },
+              sm: { span: 16 },
+            },
+        };
+        const config = {
+            rules: [{ type: 'object', required: true, message: '请选择时间' }],
+        };
+        return(
+            <Form onSubmit={this.handleSubmit}>
+                <FormItem 
+                 {...formItemLayout}
+                 label="作业名称"
+                >
+                {getFieldDecorator('作业名称', {
+                rules: [{
+                  required: true, message: '请输入想要创建作业任务的名称!',whitespace:true
+                }],
+                 })(
+                <Input/>
+                )} 
+                </FormItem>  
+                <FormItem 
+                  {...formItemLayout}
+                  label="作业描述"
+                >
+                 {getFieldDecorator('作业描述', {
+                 rules: [{
+                   required: true, message: '作业描述不能为空!'
+                 }],
+                  })(
+                 <TextArea rows={4}/>
+                 )} 
+                </FormItem>    
+                <Form.Item
+                  {...formItemLayout}
+                  label="作业提交截止时间"
+                >
+                 {getFieldDecorator('截止时间', config)(
+                 <DatePicker showTime={{ defaultValue: moment('23:59', 'HH:mm') }} format="YYYY-MM-DD HH:mm" disabledTime={disabledDateTime} />
+                )}
+                </Form.Item>   
+                <FormItem
+                 wrapperCol={{
+                   xs: { span: 24, offset: 0 },
+                   sm: { span: 16, offset: 8 },
+                 }}
+                >
+                <Button type="primary" htmlType="submit">提交</Button>
+                </FormItem>                 
+            </Form>
+        )
+    }
+}
+
+const WrappedAddAssignment=Form.create()(AddAssignment);
 
 class Homework extends React.Component{
     constructor(props){
@@ -80,8 +168,9 @@ class Homework extends React.Component{
                 visible={this.state.visible1}
                 footer={null}
                 onCancel={this.handleClose}
+                destroyOnClose
             >
-
+            <WrappedAddAssignment/>
             </Modal>
             </div>
         )
