@@ -55,7 +55,6 @@ class AssignmentCreationInput(graphene.InputObjectType):
     name = graphene.String(required=True)
     description = graphene.String(required=True)
     assignment_type = graphene.String(required=True)
-    start_time = graphene.DateTime(required=True)
     deadline = graphene.DateTime(required=True)
     addfile = graphene.List(of_type=graphene.Int, required=True)
 
