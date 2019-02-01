@@ -33,9 +33,41 @@ class AddAssignment extends React.Component{
 
     handleSubmit=(e)=>{
         e.preventDefault();
+        var that=this;
         this.props.form.validateFieldsAndScroll(["作业名称","作业描述","截止时间"],(err,values)=>{
             if(!err){
-                
+                var createAssignment=axios.create({
+                    url:"http://localhost:8000/graphql/",
+                    headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
+                    method:'post',
+                    data:{
+                      "query":`mutation{
+                        createAssignment(
+                          assignmentData:{
+                            id:"${that.props.courseId}",
+                            name:${values.作业名称},
+                            description:"${values.作业描述}",
+                            deadline:[${values.截止时间}],
+                            addfile:[],
+                          }
+                        ){
+                           ok
+                        }
+                      }`
+                    },
+                    timeout:1000,
+                  })
+                  createAssignment().then(function(response){
+                    if(response.data.data.createAssignment.ok==true){
+                      message.success('课程创建成功!',3);
+                     }else{
+                      message.error('课程创建失败!',3);
+                     }
+                  })
+                  .catch(function(error){
+                    message.error('课程创建失败!',3);
+                  })
+                  this.props.form.resetFields();
             }
         })
     }
@@ -170,7 +202,7 @@ class Homework extends React.Component{
                 onCancel={this.handleClose}
                 destroyOnClose
             >
-            <WrappedAddAssignment/>
+            <WrappedAddAssignment courseId={this.props.courseId}/>
             </Modal>
             </div>
         )
