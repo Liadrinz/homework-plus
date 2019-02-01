@@ -34,7 +34,7 @@ class AddAssignment extends React.Component{
     handleSubmit=(e)=>{
         e.preventDefault();
         var that=this;
-        this.props.form.validateFieldsAndScroll(["作业名称","作业描述","截止时间"],(err,values)=>{
+        this.props.form.validateFieldsAndScroll(["作业名称","作业描述","截止时间","作业类型"],(err,values)=>{
             if(!err){
                 var createAssignment=axios.create({
                     url:"http://localhost:8000/graphql/",
@@ -44,10 +44,11 @@ class AddAssignment extends React.Component{
                       "query":`mutation{
                         createAssignment(
                           assignmentData:{
-                            id:"${that.props.courseId}",
+                            courseClass:${that.props.courseId},
+                            assignmentType:"${values.作业类型}",
                             name:"${values.作业名称}",
                             description:"${values.作业描述}",
-                            deadline:"${values.截止时间}",
+                            deadline:"${moment(values.截止时间).format()}",
                             addfile:[],
                           }
                         ){
@@ -59,13 +60,14 @@ class AddAssignment extends React.Component{
                   })
                   createAssignment().then(function(response){
                     if(response.data.data.createAssignment.ok==true){
-                      message.success('课程创建成功!',3);
+                      message.success('作业布置成功!',3);
+                      that.props.changeflag();
                      }else{
-                      message.error('课程创建失败!',3);
+                      message.error('作业布置失败!',3);
                      }
                   })
                   .catch(function(error){
-                    message.error('课程创建失败!',3);
+                    message.error('作业布置失败!',3);
                   })
                   this.props.form.resetFields();
             }
@@ -112,7 +114,22 @@ class AddAssignment extends React.Component{
                   })(
                  <TextArea rows={4}/>
                  )} 
-                </FormItem>    
+                </FormItem>   
+                <FormItem
+                  {...formItemLayout}
+                  label="作业类型"
+                >
+                 {getFieldDecorator('作业类型', {
+                  rules: [{
+                    required: true, message: '请选择作业类型!',
+                  }],
+                 })(
+                  <RadioGroup >
+                  <Radio value={"image"}>图片作业</Radio>
+                  <Radio value={"docs"}>文件作业</Radio>
+                  </RadioGroup>
+                )}
+                </FormItem>                
                 <Form.Item
                   {...formItemLayout}
                   label="作业提交截止时间"
@@ -141,6 +158,7 @@ class Homework extends React.Component{
         super(props);
         this.state={
             visible1:false,
+            flag:false,//设置一个标志，当添加作业成功以后，这个标志会发生改变，然后调用componentWillUpdate来重新获取一遍当前作业任务列表
         }
     }
 
@@ -155,6 +173,7 @@ class Homework extends React.Component{
                     getAssignmentsByCourses(courses:${[this.props.courseId]}){
                         id
                         name
+                        assignmentType
                         description
                         deadline
                     }
@@ -163,14 +182,43 @@ class Homework extends React.Component{
             timeout:1000,
         })
         getAllHomework().then(function(response){
-           console.log(response);
+           const assignments=response.data.data.getAssignmentsByCourses;
            that.setState({
-               assignmentInfo:response.data.data.getAssignmentsByCourses,
+               assignmentInfo:assignments,
            })
         })
         .catch(function(error){
             console.log(error);
         })
+    }
+
+    componentWillUpdate(nextProps,nextState){
+        if(nextState.flag!==this.state.flag){
+        var getAllHomework=axios.create({
+            url:"http://localhost:8000/graphql/",
+            headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
+            method:'post',
+            data:{
+               "query":`query{
+                    getAssignmentsByCourses(courses:${[this.props.courseId]}){
+                        id
+                        name
+                        assignmentType
+                        description
+                        deadline
+                    }
+                }`//用反引号      
+            },
+            timeout:1000,
+        })
+        getAllHomework().then(function(response){
+           const assignments=response.data.data.getAssignmentsByCourses;
+           nextState.assignmentInfo=assignments;//“变着法儿的调用setState”
+        })
+        .catch(function(error){
+            console.log(error);
+        })
+        }
     }
 
     showModal=()=>{
@@ -181,14 +229,24 @@ class Homework extends React.Component{
         this.setState({visible1:false});
     }
 
+    changeflag=()=>{
+        const flag=this.state.flag;
+        this.setState({flag:!flag});
+    }
+
     render(){
         const column=[{
             title:'作业名',
             dataIndex:'name',
         },{
+            title:'作业类型',
+            dataIndex:'assignmentType',
+            render:text=>{if(text=="IMAGE"){ return '图片作业'}else if(text=="DOCS"){ return "文件作业"}else{ return "任意"}},
+        },{
             title:'结束日期',
             dataIndex:'deadline',
-        }]
+            render:text=> moment(text).format("YYYY"+"年"+"M"+"月"+"D"+"日"+"HH"+"点"+"mm"+"分"),
+        },]
         const data=this.state.assignmentInfo;
         return(
             <div>
@@ -202,7 +260,7 @@ class Homework extends React.Component{
                 onCancel={this.handleClose}
                 destroyOnClose
             >
-            <WrappedAddAssignment courseId={this.props.courseId}/>
+            <WrappedAddAssignment courseId={this.props.courseId} changeflag={this.changeflag} handleClose={this.handleClose}/>
             </Modal>
             </div>
         )
