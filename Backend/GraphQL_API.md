@@ -17,6 +17,11 @@
   classNumber: String
   wechat: String
   forgotten: Boolean
+  useravatar: FileType
+  teachersCourses: List<CourseType>  // 以该用户作为老师的所有课程
+  teachingAssistantsCourses: List<CourseType>  // 以该用户作为助教的所有课程
+  studentsCourses: List<CourseType>  // 以该用户作为学生的所有课程
+  mySubmissions: List<SubmissionType>  // 该用户提交的作业
 }
 ```
 
@@ -168,6 +173,7 @@ mutation {
   teachers: List<UserType>
   teachingAssistants: List<UserType>
   students: List<UserType>
+  courseAssignments: List<AssignmentType>  // 该课程的作业
 }
 ```
 
@@ -345,6 +351,7 @@ mutation {
   deadline: DateTime
   courseClass: CourseType
   addfile: FileType
+  assignmentSubmissions: List<SubmissionType>  // 该assignment的所有submission
 }
 ```
 
@@ -690,5 +697,22 @@ mutation {
   }) {
     // 返回字段
   }
+}
+```
+
+### 5. FileType (文件) (不能单独操作)
+
+#### 可以展开的字段
+```gql
+{
+  data: String  // 文件的相对url
+  initialUploadUser: UserType  // 上传者
+  initialUploadTime: DateTime  // 上传时间
+  // 以下为冗余字段
+  assignments: List<AssignmentType>  // 以该文件作为附加文件的assignment
+  imageSubmission: List<SubmissionType>  // 以该文件作为图片的submission
+  pdfSubmission: List<SubmissionType>  // 以该文件作为pdf的submission
+  longPicSubmission: List<SubmissionType>  // 以该文件作为长图的submission
+  addfileSubmission: List<SubmissionType>  // 以该文件作为附加文件的submission
 }
 ```
