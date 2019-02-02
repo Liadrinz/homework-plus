@@ -136,7 +136,7 @@ query {
 ```gql
 {
   ok: Boolean
-  msg: String,
+  msg: JSONString,
   user: UserType
 }
 ```
@@ -277,7 +277,7 @@ query {
 ```gql
 {
   ok: Boolean,
-  msg: String,
+  msg: JSONString,
   course: CourseType
 }
 ```
@@ -315,7 +315,7 @@ mutation {
 ```gql
 {
   ok: Boolean,
-  msg: String,
+  msg: JSONString,
   course: CourseType
 }
 ```
@@ -467,7 +467,7 @@ query {
 ```gql
 {
   ok: Boolean
-  msg: String // 提示信息
+  msg: JSONString // 提示信息
   assignment: AssignmentType
 }
 ```
@@ -500,7 +500,7 @@ mutation {
 ```gql
 {
   ok: Boolean
-  msg: String // 提示信息
+  msg: JSONString // 提示信息
   assignment: AssignmentType
 }
 ```
@@ -528,7 +528,7 @@ mutation {
 ```gql
 {
   ok: Boolean
-  msg: String // 提示信息
+  msg: JSONString // 提示信息
   assignments: List<AssignmentType>  // 删掉的assignments
 }
 ```
@@ -624,6 +624,71 @@ query {
 query {
   getSubmissionsByCourses(courses: 指定课程的id列表) {
     // 需要查询的字段
+  }
+}
+```
+
+### 2) mutation
+
+### mutation 的方法
+
+#### createSubmission
+##### 权限
+需要该课的学生
+##### 参数
+```gql
+(submissionData:{
+  assignment: Int!
+  description: String
+  image: List<Int>
+  addfile: List<Int>
+})
+```
+##### 返回字段
+```gql
+{
+  ok: Boolean
+  msg: JSONString
+  submission: SubmissionType
+}
+```
+##### 用法
+```gql
+mutation {
+  createSubmission(submissionData: {
+    // 参数字段
+  }) {
+    // 返回字段
+  }
+}
+```
+
+#### giveScore
+##### 权限
+该课的老师或助教
+##### 参数
+```gql
+(scoreGivingData: {
+  submission: Int!
+  score: Float!
+  isExcellent: Boolean
+})
+```
+##### 返回字段
+```gql
+{
+  ok: Boolean
+  msg: JSONString
+  submission: SubmissionType
+}
+```
+##### 用法
+```gql
+mutation {
+  giveScore(scoreGivingData: {
+    // 参数字段
+  }) {
+    // 返回字段
   }
 }
 ```
