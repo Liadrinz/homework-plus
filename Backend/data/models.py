@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-
+from datetime import datetime
 
 # 为老师自动生成buptid
 def default_bupt_id():
