@@ -5,6 +5,7 @@ import './teacherSpecificClass.css';
 import {_} from 'underscore'
 import moment from 'moment';
 import axios from 'axios';
+import {Link} from 'react-router-dom';
 var courseid;//特定课程的id
 var courseStudents;//该课程的所有学生
 var re=/^\/teachercenter\/teacherclass\/(.*)\/$/;
@@ -246,6 +247,16 @@ class Homework extends React.Component{
             title:'结束日期',
             dataIndex:'deadline',
             render:text=> moment(text).format("YYYY"+"年"+"M"+"月"+"D"+"日"+"HH"+"点"+"mm"+"分"),
+        },{
+            title:'点击进入批改',
+            dataIndex:'id',
+            render:(text)=>(<Link to={'/teachercenter/correctWork/'+text+'/'} 
+                                  style={{color:"blue"}}
+                                  onClick={this.props.redirecttocourse}
+                            >
+                            批改作业
+                            </Link>
+            ),
         },]
         const data=this.state.assignmentInfo;
         return(
@@ -718,7 +729,7 @@ const WrappedMember=Form.create()(Member);
 
 class HomeworkOrMember extends React.Component{
     render(){
-         if(this.props["current"]=="homework")return <Homework courseId={this.props.courseId}/>;
+         if(this.props["current"]=="homework")return <Homework courseId={this.props.courseId} redirecttocourse={this.props.redirecttocourse3}/>;
          else return <WrappedMember courseId={this.props.courseId}/>;
     }
 }
@@ -854,7 +865,7 @@ class TeacherSpecificclass extends React.Component{
                 <span style={{fontSize:"20px"}}>成员列表</span>
               </Menu.Item>
             </Menu>
-            <HomeworkOrMember current={this.state.current} courseId={courseid}/>
+            <HomeworkOrMember current={this.state.current} courseId={courseid} redirecttocourse3={this.props.redirecttocourse3}/>
          </div>
         )
     }

@@ -8,6 +8,8 @@ import WrappedTeachercenter from './teachercenter.js';
 import Teacherclass from './teacherclass.js';
 import WrappedAddcourse from './teacheraddcourse.js'
 import TeacherSpecificClass from './teacherSpecificClass.js';
+import CorrectWork from './correctWork.js';
+import CorrectSpecificWork from './correctSpecificWork.js';
 import {_} from 'underscore'
 
  //大多数的地方使用graphql技术获取和传送数据
@@ -223,6 +225,11 @@ class TeacherIndex extends React.Component{
     this.setState({key:2,clickmenu:false,norepeatkey1:true,norepeatkey2:true,norepeatkey3:true,norepeatkey4:true,norepeatkey5:true,norepeatkey6:true})
    }    
 
+   //对teacherspecificclass里面作业批改的跳转操作进行反应
+   redirecttocourse3=()=>{
+    this.setState({key:3,clickmenu:false,norepeatkey1:true,norepeatkey2:true,norepeatkey3:true,norepeatkey4:true,norepeatkey5:true,norepeatkey6:true})
+   }    
+
     render(){
       userinformation.bupt_id=this.state.bupt_id;
       userinformation.class_number=this.state.class_number;
@@ -239,6 +246,9 @@ class TeacherIndex extends React.Component{
        }
       if(this.state.key==2&&this.state.norepeatkey2&&this.state.clickmenu){
        return (<Redirect exact push to='/teachercenter/teacherclass'/>);
+      }
+      if(this.state.key==3&&this.state.norepeatkey3&&this.state.clickmenu){
+        return (<Redirect exact push to='/teachercenter/correctWork'/>);
       }
       if(this.state.key==4&&this.state.norepeatkey4&&this.state.clickmenu){
         return (<Redirect exact push to='/teachercenter/createclass'/>);
@@ -307,6 +317,7 @@ class TeacherIndex extends React.Component{
                   <TeacherSpecificClass {...props}
                     userinformation={userinformation}
                     courselist={this.state.courselist}
+                    redirecttocourse3={this.redirecttocourse3}
                   /> 
                 )}/>
                 <Route exact path='/teachercenter/createclass' render={(props)=>(
@@ -314,6 +325,17 @@ class TeacherIndex extends React.Component{
                     userinformation={userinformation}
                   /> 
                 )}/>
+                <Route exact path='/teachercenter/correctWork' render={(props)=>(
+                  <CorrectWork {...props}
+                    userinformation={userinformation}
+                    courselist={this.state.courselist}
+                  /> 
+                )}/>    
+                <Route exact path='/teachercenter/correctWork/:assignmentId' render={(props)=>(
+                  <CorrectSpecificWork {...props}
+                    userinformation={userinformation}
+                  /> 
+                )}/>                               
             </Switch>
             </Content>
             <Footer style={{background:'#E6E6E6'}}>Footer</Footer>
