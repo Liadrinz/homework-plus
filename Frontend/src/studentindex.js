@@ -109,7 +109,7 @@ class StudentIndex extends React.Component{
           "query":`query{
             getUsersByIds(ids:${localStorage.getItem('userloginKey')})
             {
-              studentsCourse{
+              studentsCourses{
                 id
                 name
                 description
@@ -130,7 +130,7 @@ class StudentIndex extends React.Component{
                   name
                 }
               }
-              teachingAssistantsCourse{
+              teachingAssistantsCourses{
                 id
                 name
                 description
@@ -158,19 +158,19 @@ class StudentIndex extends React.Component{
       })
       getUserCourse().then(function(response){
         //获得该用户拥有的所有的课程版的ID
-        if(JSON.stringify(lastUpdatestudentcourse)!==JSON.stringify(response.data.data.getUsersByIds[0].studentsCourse)){
-          lastUpdatestudentcourse=response.data.data.getUsersByIds[0].studentsCourse;
+        if(JSON.stringify(lastUpdatestudentcourse)!==JSON.stringify(response.data.data.getUsersByIds[0].studentsCourses)){
+          lastUpdatestudentcourse=response.data.data.getUsersByIds[0].studentsCourses;
           that.setState({courselist:lastUpdatestudentcourse})
         }
-        if(JSON.stringify(lastUpdateassistantcourse)!==JSON.stringify(response.data.data.getUsersByIds[0].teachingAssistantsCourse)){
-          lastUpdateassistantcourse=response.data.data.getUsersByIds[0].teachingAssistantsCourse;
+        if(JSON.stringify(lastUpdateassistantcourse)!==JSON.stringify(response.data.data.getUsersByIds[0].teachingAssistantsCourses)){
+          lastUpdateassistantcourse=response.data.data.getUsersByIds[0].teachingAssistantsCourses;
           that.setState({assistantcourselist:lastUpdateassistantcourse})
         }
       })
       .catch(function(error){
         console.log(error);
       });
-     },1000)
+     },2000)
    }
    
    componentDidUpdate(){

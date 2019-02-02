@@ -1,1 +1,26 @@
 @import '~antd/dist/antd.css';
+
+.scrollprac{
+    width: 100%;
+    height: 200px;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    line-height: 30px;
+    text-align: center;
+}
+
+.scrollprac::-webkit-scrollbar{
+    width: 10px;     
+    height: 1px;
+}
+
+.scrollprac::-webkit-scrollbar-thumb {/*滚动条里面小方块*/
+    border-radius: 10px;
+     -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+    background: #535353;
+}
+.scrollprac::-webkit-scrollbar-track {/*滚动条里面轨道*/
+    -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+    border-radius: 10px;
+    background: #EDEDED;
+}
