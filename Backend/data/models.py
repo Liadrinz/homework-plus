@@ -53,11 +53,11 @@ class HWFCourseClass(models.Model):
     description = models.TextField(blank=True, null=True)
     marks = models.FloatField(default=0.0)
     teachers = models.ManyToManyField(
-        User, related_name='teachers_course', blank=True)
+        User, related_name='teachers_courses', blank=True)
     teaching_assistants = models.ManyToManyField(
-        User, related_name='teaching_assistants_course', blank=True)
+        User, related_name='teaching_assistants_courses', blank=True)
     students = models.ManyToManyField(
-        User, related_name='students_course', blank=True)
+        User, related_name='students_courses', blank=True)
     school = models.TextField(null=True, blank=True)
     start_time = models.DateTimeField(null=True, blank=True)
     end_time = models.DateTimeField(null=True, blank=True)
@@ -88,7 +88,7 @@ class HWFAssignment(models.Model):
         choices=[(item, item) for item in ['image', 'docs', 'vary']],
         default='vary')
     addfile = models.ManyToManyField(
-        HWFFile, related_name='assignment', blank=True)
+        HWFFile, related_name='assignments', blank=True)
     start_time = models.DateTimeField(auto_now_add=True)
     deadline = models.DateTimeField()
     # 作业所占权重
@@ -102,21 +102,26 @@ class HWFAssignment(models.Model):
 class HWFSubmission(models.Model):
     aware = models.BooleanField(default=True)
     image = models.ManyToManyField(
-        HWFFile, blank=True, related_name='image_submission')
+        HWFFile, blank=True, related_name='image_submissions')
     pdf = models.ForeignKey(
         HWFFile,
         on_delete=models.CASCADE,
-        related_name='pdf_submission',
+        related_name='pdf_submissions',
+        null=True)
+    long_picture = models.ForeignKey(
+        HWFFile,
+        on_delete=models.CASCADE,
+        related_name='long_pic_submissions',
         null=True)
     addfile = models.ManyToManyField(
-        HWFFile, blank=True, related_name='addfile_submission')
+        HWFFile, blank=True, related_name='addfile_submissions')
     submit_time = models.DateTimeField(auto_now_add=True)
     assignment = models.ForeignKey(
         HWFAssignment,
         on_delete=models.CASCADE,
-        related_name='assignment_submission')
+        related_name='assignment_submissions')
     submitter = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='my_submission')
+        User, on_delete=models.CASCADE, related_name='my_submissions')
     description = models.TextField(blank=True, null=True)
     score = models.FloatField(default=0.0)
     is_excellent = models.BooleanField(default=False)
