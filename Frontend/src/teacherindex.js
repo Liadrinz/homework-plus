@@ -178,7 +178,7 @@ class TeacherIndex extends React.Component{
      .catch(function(error){
        console.log(error);
      });
-    },2000)
+    },1000)
    }
    
    componentDidUpdate(){
