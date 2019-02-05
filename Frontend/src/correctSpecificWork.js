@@ -1,6 +1,6 @@
 import React from 'react';
 import axios from 'axios';
-import {Row,Col,Card,Layout,Button,Drawer} from 'antd';
+import {Row,Col,Card,Layout,Button,Drawer,Tag} from 'antd';
 import moment from 'moment';
 import "./correctSpecificWork.css";
 
@@ -92,11 +92,11 @@ class CorrectSpecificWork extends React.Component{
     }
 
     render(){
+        const isEnd=moment().isBetween(this.state.assignmentInfo.startTime,this.state.assignmentInfo.deadline,"minute");
         return(
             <div>
             <Layout>
               <Sider theme="light" width="650">
-              <p style={{fontSize:"50px",width:"50px"}}>fsaddsfadf</p>
               <p style={{fontSize:"50px",width:"50px"}}>fsaddsfadf</p>
               <p style={{fontSize:"50px",width:"50px"}}>fsaddsfadf</p>
               <p style={{fontSize:"50px",width:"50px"}}>fsaddsfadf</p>
@@ -116,12 +116,13 @@ class CorrectSpecificWork extends React.Component{
                 <Button type="primary" shape="round" style={{marginLeft:"20px"}} onClick={this.openDrawer}>查看作业描述</Button>        
               </div> 
               <div style={{marginBottom:"10px"}}>
-                <span style={{fontSize:"15px"}}>
+                <span style={{fontSize:"15px",marginRight:"30px"}}>
                 {"开始提交:"+ moment(this.state.assignmentInfo.startTime).format("YY"+"/"+"M"+"/"+"D"+" "+"HH"+":"+"mm")+"  "+
                  "结束提交:"+ moment(this.state.assignmentInfo.deadline).format("YY"+"/"+"M"+"/"+"D"+" "+"HH"+":"+"mm")}   
                 </span>
+                <Tag color={isEnd?"green":"red"}>{isEnd?"进行中":"已结束"}</Tag>
               </div>                                      
-              <Card title="待批改作业" style={{height:"300px",backgroundColor:"#CCFFEB"}}>
+              <Card title="待批改作业" style={{height:"280px",backgroundColor:"#CCFFEB"}}>
                  <div className="scrollprac">
                      <p>some content</p>
                      <p>some content</p>
@@ -133,7 +134,7 @@ class CorrectSpecificWork extends React.Component{
                      <p>some content</p>                     
                  </div>
               </Card>
-              <Card title="已批改作业">
+              <Card title="已批改作业" style={{height:"280px"}}>
                  <div className="scrollprac2">
                      <p>some content</p>
                      <p>some content</p>
@@ -143,6 +144,15 @@ class CorrectSpecificWork extends React.Component{
                      <p>some content</p>   
                      <p>some content</p>   
                      <p>some content</p>                     
+                 </div>
+              </Card>
+              <Card title="未交名单" style={{height:"280px"}}>
+                 <div className="scrollprac3">
+                     <p>some content</p>
+                     <p>some content</p>
+                     <p>some content</p>
+                     <p>some content</p>
+                   
                  </div>
               </Card>
             </Content>

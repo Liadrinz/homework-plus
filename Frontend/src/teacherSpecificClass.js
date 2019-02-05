@@ -261,7 +261,13 @@ class Homework extends React.Component{
         const data=this.state.assignmentInfo;
         return(
             <div>
-            <Button type="primary" onClick={this.showModal}>添加作业</Button>
+            <Button 
+              type="primary" 
+              onClick={this.showModal}
+              disabled={(moment().isBefore(this.props.course[0].startTime,'day')||moment().isAfter(this.props.course[0].endTime,'day'))?true:false}
+            >
+              布置作业
+            </Button>
             <br/><br/><br/><br/>
             <Table columns={column} dataSource={data} bordered rowKey={record=>record["id"]} />
             <Modal
@@ -729,7 +735,7 @@ const WrappedMember=Form.create()(Member);
 
 class HomeworkOrMember extends React.Component{
     render(){
-         if(this.props["current"]=="homework")return <Homework courseId={this.props.courseId} redirecttocourse={this.props.redirecttocourse3}/>;
+         if(this.props["current"]=="homework")return <Homework courseId={this.props.courseId} redirecttocourse={this.props.redirecttocourse3} course={this.props.course}/>;
          else return <WrappedMember courseId={this.props.courseId}/>;
     }
 }
@@ -865,7 +871,11 @@ class TeacherSpecificclass extends React.Component{
                 <span style={{fontSize:"20px"}}>成员列表</span>
               </Menu.Item>
             </Menu>
-            <HomeworkOrMember current={this.state.current} courseId={courseid} redirecttocourse3={this.props.redirecttocourse3}/>
+            <HomeworkOrMember 
+              current={this.state.current} 
+              courseId={courseid} 
+              redirecttocourse3={this.props.redirecttocourse3}
+              course={this.state.specificCourse}/>
          </div>
         )
     }

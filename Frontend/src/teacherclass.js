@@ -5,14 +5,27 @@ import {Row,Col,Button,Card,Select} from'antd'
 import {Link} from 'react-router-dom';
 import axios from 'axios';
 import {_} from 'underscore'
+import moment from 'moment'
 var classRow=[];//课程班显示在网页卡片上的列表
-var courseIDrow=[];//教师的课程列表ID，防止重复
+var closedcourse=0;//已结束或未开始的课程的数量
+var underwaycourse=0;//正在进行中的课程的数量
 const Option=Select.Option;
 var toDate=/^(\d{4})\-(\d{2})\-(\d{2})(.*)$/;
 
 class Teacherclass extends React.Component{
+    constructor(props){
+      super(props);
+      this.state={
+        selectValue:"underway",//课程筛选
+      }
+    }
+
+    changeValue=(value)=>{
+      this.setState({selectValue:value});
+    }
+
     render(){
-      console.log(this.props.courselist)
+      console.log(classRow)
       const gridStyle={
           width:"33.3%",
           textAlign:'center',
@@ -21,13 +34,8 @@ class Teacherclass extends React.Component{
         width:"100%",
         textAlign:'center',
       }
-      if(this.props.courselist.length<courseIDrow.length){
-           courseIDrow=[];
-           classRow=[];
-      }
+      classRow=[];
       for(let i=0;i<this.props.courselist.length;i++){
-        if(_.indexOf(courseIDrow,this.props.courselist[i]["id"])===-1){
-          courseIDrow.push(this.props.courselist[i]["id"]);
           var courseTeacher=[];
           var courseAssistant=[];
           for(let j=0;j<this.props.courselist[i].teachers.length;j++){
@@ -86,7 +94,6 @@ class Teacherclass extends React.Component{
             </Card>
             </Col>             
            )
-        }
       }
         return(
             <div>
@@ -103,7 +110,7 @@ class Teacherclass extends React.Component{
               个
               </Card.Grid>
               <Card.Grid style={gridStyle}>
-              <p style={{fontSize:"20px"}}>已结束的课程班:</p>
+              <p style={{fontSize:"20px"}}>已结束或未开始的课程班:</p>
               <span style={{fontSize:'30px'}}>10  </span>
               个
               </Card.Grid>
@@ -114,9 +121,9 @@ class Teacherclass extends React.Component{
                 <span style={{fontSize:"28px",marginLeft:"20px",marginTop:"20px",marginBottom:"20px"}}>我的课程班</span>
               </Col>
               <Col xs={24} sm={{span:8,offset:8}} style={{left:"10%"}}>
-                <Select defaultValue="underway" style={{ width: 200 }}>
+                <Select defaultValue="underway" style={{ width: 200 }} onChange={this.changeValue}>
                   <Option value="underway">只显示进行中课程</Option>
-                  <Option value="end">只显示已结束课程</Option>
+                  <Option value="end">只显示已结束或未开始课程</Option>
                   <Option value="all">全选</Option>
                 </Select>
               </Col>   
