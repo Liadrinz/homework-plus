@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {Row,Col,Card,Button,Modal,Menu,Select,Table,Form,Radio,message,Input,DatePicker} from'antd'
+import {Row,Col,Card,Button,Modal,Menu,Select,Table,Form,Radio,message,Input,DatePicker,Upload,Icon} from'antd'
 import './teacherSpecificClass.css';
 import {_} from 'underscore'
 import moment from 'moment';
@@ -14,6 +14,7 @@ var usernamechildren=[];//手动添加成员里通过搜索用户名的标签
 var schoolIdchildren=[];//手动添加成员里通过搜索学号的标签
 var lastUpdateUsername=[];//最后更新时用户名列表
 var lastUpdateSchoolId=[];//最后更新时学号列表
+var addfile=[];//上传文件的ID列表(布置作业时)
 const Option = Select.Option;
 const RadioGroup = Radio.Group;
 const FormItem = Form.Item;
@@ -30,7 +31,29 @@ function disabledDateTime() {
       disabledSeconds: () => range(1,60),
     };
 }
+const uploadProps = { //放进Upload组件里的一些属性
+    name: 'data',
+    action: "http://localhost:8000/upload_file/",
+    headers: {
+        token:localStorage.getItem('token'),
+    },
+    onChange(info) {
+      if (info.file.status === 'done') {
+        message.success(`${info.file.name} 作业上传成功!`);
+        addfile.push(info.file.response["id"]);
+      } else if (info.file.status === 'error') {
+        message.error(`${info.file.name} 作业上传失败.`);
+      }
+    },
+    onRemove(file){
+        return false;
+    }
+};
 class AddAssignment extends React.Component{
+
+    componentWillMount(){
+        addfile=[];
+    }
 
     handleSubmit=(e)=>{
         e.preventDefault();
@@ -50,7 +73,7 @@ class AddAssignment extends React.Component{
                             name:"${values.作业名称}",
                             description:"${values.作业描述}",
                             deadline:"${moment(values.截止时间).format()}",
-                            addfile:[],
+                            addfile:[${addfile}],
                           }
                         ){
                            ok
@@ -76,6 +99,7 @@ class AddAssignment extends React.Component{
     }
 
     render(){
+        console.log(addfile)
         const { getFieldDecorator } = this.props.form;
         const formItemLayout = {
             labelCol: {
@@ -130,15 +154,25 @@ class AddAssignment extends React.Component{
                   <Radio value={"docs"}>文件作业</Radio>
                   </RadioGroup>
                 )}
-                </FormItem>                
-                <Form.Item
+                </FormItem> 
+                <FormItem
+                  {...formItemLayout}
+                  label="文件上传"
+                >
+                  <Upload {...uploadProps}>
+                    <Button>
+                    <Icon type="upload" /> 上传想要附在作业要求上的文件
+                    </Button>
+                  </Upload>                 
+                </FormItem>               
+                <FormItem
                   {...formItemLayout}
                   label="作业提交截止时间"
                 >
                  {getFieldDecorator('截止时间', config)(
                  <DatePicker showTime={{ defaultValue: moment('23:59', 'HH:mm') }} format="YYYY-MM-DD HH:mm" disabledTime={disabledDateTime} />
                 )}
-                </Form.Item>   
+                </FormItem>   
                 <FormItem
                  wrapperCol={{
                    xs: { span: 24, offset: 0 },
@@ -275,6 +309,7 @@ class Homework extends React.Component{
                 visible={this.state.visible1}
                 footer={null}
                 onCancel={this.handleClose}
+                style={{top:0}}
                 destroyOnClose
             >
             <WrappedAddAssignment courseId={this.props.courseId} changeflag={this.changeflag} handleClose={this.handleClose}/>
@@ -868,7 +903,7 @@ class TeacherSpecificclass extends React.Component{
                 <span style={{fontSize:"20px"}}>作业任务</span>
               </Menu.Item>
               <Menu.Item key="member">
-                <span style={{fontSize:"20px"}}>成员列表</span>
+                <span style={{fontSize:"20px"}}>学生作业管理</span>
               </Menu.Item>
             </Menu>
             <HomeworkOrMember 

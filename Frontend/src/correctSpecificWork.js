@@ -6,20 +6,34 @@ import "./correctSpecificWork.css";
 
 var assignmentId;//特定作业任务的Id
 var re=/^\/teachercenter\/correctWork\/(.*)\/$/;
+var re2=/^homework_file\/(.*)$/;
+var filelist=[];//作业要求的附件
 const { Header, Footer, Sider, Content,} = Layout;
 
 class UploadAssignmentFile extends React.Component{
+    componentWillMount(){
+        filelist=[];
+    }
     render(){
         if(this.props.addfile.length===0) return(<div/>)
-        else return(            
-            <div>
-            <p>点击下载文件:</p>
-            <a href={"http://localhost:8000/media/"+this.props.addfile[0].data}
-               style={{fontSize:"20px"}}>
-            {this.props["filename"]}
-            </a>
-            </div>
-        )
+        else{ 
+            for(var i=0;i<this.props.addfile.length;i++){
+                filelist.push(
+                    <div>
+                    <a href={"http://localhost:8000/media/"+this.props.addfile[i].data}
+                       style={{fontSize:"20px"}}>
+                    {re2.exec(this.props.addfile[i]["data"])[1]}
+                    </a>
+                    </div>
+                )
+            }
+            return(            
+                <div>
+                <p>点击下载文件:</p>
+                {filelist}
+                </div>
+            )
+        }
     }
 }
   
@@ -92,7 +106,7 @@ class CorrectSpecificWork extends React.Component{
     }
 
     render(){
-        const isEnd=moment().isBetween(this.state.assignmentInfo.startTime,this.state.assignmentInfo.deadline,"minute");
+        const isEnd=moment().isBefore(this.state.assignmentInfo.startTime,"minute")||moment().isAfter(this.state.assignmentInfo.deadline,"minute");
         return(
             <div>
             <Layout>
@@ -120,7 +134,7 @@ class CorrectSpecificWork extends React.Component{
                 {"开始提交:"+ moment(this.state.assignmentInfo.startTime).format("YY"+"/"+"M"+"/"+"D"+" "+"HH"+":"+"mm")+"  "+
                  "结束提交:"+ moment(this.state.assignmentInfo.deadline).format("YY"+"/"+"M"+"/"+"D"+" "+"HH"+":"+"mm")}   
                 </span>
-                <Tag color={isEnd?"green":"red"}>{isEnd?"进行中":"已结束"}</Tag>
+                <Tag color={isEnd?"red":"green"}>{isEnd?"已结束":"进行中"}</Tag>
               </div>                                      
               <Card title="待批改作业" style={{height:"280px",backgroundColor:"#CCFFEB"}}>
                  <div className="scrollprac">
@@ -166,7 +180,7 @@ class CorrectSpecificWork extends React.Component{
             >
             <p>{this.state.assignmentInfo["description"]}</p>
             <br/><br/><br/>
-            <UploadAssignmentFile addfile={this.state.assignmentInfo.addfile} filename={this.state.assignmentInfo["name"]}/>
+            <UploadAssignmentFile addfile={this.state.assignmentInfo.addfile}/>
             </Drawer>
             </div>
         )
