@@ -789,15 +789,15 @@ class TeacherSpecificclass extends React.Component{
     componentWillMount(){
        courseid=re.exec(window.location.pathname)[1];
        this.setState({
-           specificCourse:_.filter(this.props.courselist,(info)=>{return info["id"]==courseid})
+           specificCourse:_.filter(_.union(this.props.courselist,this.props.assistantcourselist),(info)=>{return info["id"]==courseid})
        })
     }
 
     componentWillReceiveProps(nextProps){
-       if(JSON.stringify(_.filter(nextProps.courselist,(info)=>{return info["id"]==courseid}))!==
-          JSON.stringify(_.filter(this.props.courselist,(info)=>{return info["id"]==courseid}))){
+       if(JSON.stringify(_.filter(_.union(nextProps.courselist,nextProps.assistantcourselist),(info)=>{return info["id"]==courseid}))!==
+          JSON.stringify(_.filter(_.union(this.props.courselist,this.props.assistantcourselist),(info)=>{return info["id"]==courseid}))){
          this.setState({
-            specificCourse:_.filter(nextProps.courselist,(info)=>{return info["id"]==courseid})
+            specificCourse:_.filter(_.union(nextProps.courselist,nextProps.assistantcourselist),(info)=>{return info["id"]==courseid})
          })
        }
     }

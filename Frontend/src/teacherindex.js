@@ -308,15 +308,15 @@ class TeacherIndex extends React.Component{
                 <Route exact path='/teachercenter/teacherclass' render={(props)=>(
                   <Teacherclass {...props}
                     userinformation={userinformation}
-                    courselist={this.state.courselist}
-                    assistantcourselist={this.state.assistantcourselist}
+                    courselist={_.union(this.state.courselist,this.state.assistantcourselist)}  //这里的courselist不只有老师的，还有作为助教的；与其他几个组件的courselist不同
                     redirecttocourse2={this.redirecttocourse2}
                   /> 
                 )}/>
                 <Route exact path='/teachercenter/teacherclass/:courseID' render={(props)=>(
                   <TeacherSpecificClass {...props}
                     userinformation={userinformation}
-                    courselist={this.state.courselist}
+                    courselist={this.state.courselist}   
+                    assistantcourselist={this.state.assistantcourselist}
                     redirecttocourse3={this.redirecttocourse3}
                   /> 
                 )}/>
@@ -329,6 +329,7 @@ class TeacherIndex extends React.Component{
                   <CorrectWork {...props}
                     userinformation={userinformation}
                     courselist={this.state.courselist}
+                    assistantcourselist={this.state.assistantcourselist}
                   /> 
                 )}/>    
                 <Route exact path='/teachercenter/correctWork/:assignmentId' render={(props)=>(

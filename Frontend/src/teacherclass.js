@@ -186,7 +186,7 @@ class Teacherclass extends React.Component{
             <div style={{fontSize:"28px",marginLeft:"20px",marginTop:"10px",marginBottom:"5px"}}>概览</div>
             <Card hoverable="true" style={{marginLeft:"20px",marginRight:"20px"}}>
               <Card.Grid style={gridStyle}>
-              <p style={{fontSize:"20px"}}>我拥有的课程班:</p>
+              <p style={{fontSize:"20px"}}>我拥有以及作为助教加入的课程班:</p>
               <span style={{fontSize:'30px'}}>{this.props.courselist.length}  </span>
               个
               </Card.Grid>
