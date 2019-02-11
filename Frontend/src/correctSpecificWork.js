@@ -5,7 +5,6 @@ import moment from 'moment';
 import "./correctSpecificWork.css";
 
 var assignmentId;//特定作业任务的Id
-var re=/^\/teachercenter\/correctWork\/(.*)\/$/;
 var re2=/^homework_file\/(.*)$/;
 var filelist=[];//作业要求的附件
 const { Header, Footer, Sider, Content,} = Layout;
@@ -60,7 +59,7 @@ class CorrectSpecificWork extends React.Component{
     
     componentWillMount(){
         var that=this;
-        assignmentId=re.exec(window.location.pathname)[1];
+        assignmentId=this.props.re.exec(window.location.pathname)[1];
         var getAssignmentInfo=axios.create({
             url:"http://localhost:8000/graphql/",
             headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},

@@ -8,7 +8,7 @@ import axios from 'axios';
 import {Link} from 'react-router-dom';
 var courseid;//特定课程的id
 var courseStudents;//该课程的所有学生
-var re=/^\/teachercenter\/teacherclass\/(.*)\/$/;
+var re=/^\/studentcenter\/assistantclass\/(.*)\/$/;
 var toDate=/^(\d{4})\-(\d{2})\-(\d{2})(.*)$/;
 var usernamechildren=[];//手动添加成员里通过搜索用户名的标签
 var schoolIdchildren=[];//手动添加成员里通过搜索学号的标签
@@ -284,7 +284,7 @@ class Homework extends React.Component{
         },{
             title:'点击进入批改',
             dataIndex:'id',
-            render:(text)=>(<Link to={'/teachercenter/correctWork/'+text+'/'} 
+            render:(text)=>(<Link to={'/studentcenter/correctWork/'+text+'/'} 
                                   style={{color:"blue"}}
                                   onClick={this.props.redirecttocourse}
                             >
@@ -822,7 +822,7 @@ class HomeworkOrMember extends React.Component{
     }
 }
 
-class TeacherSpecificclass extends React.Component{
+class AssistantSpecificclass extends React.Component{
     constructor(props){
         super(props);
         this.state={
@@ -963,4 +963,4 @@ class TeacherSpecificclass extends React.Component{
     }
 }
 
-export default TeacherSpecificclass;
+export default AssistantSpecificclass;

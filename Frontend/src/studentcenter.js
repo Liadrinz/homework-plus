@@ -7,15 +7,20 @@ import axios from 'axios';
 import {_} from 'underscore'
 import {moment} from 'moment'
 var avatarFile;//头像文件
-var courseRow=[];//学生的课程列表
-var allcourseRow=[];//学生所有的课程列表
-var courseIDrow=[];//学生的课程列表ID，防止重复
+var courseRow=[];//作为学生的课程列表
+var allcourseRow=[];//作为学生所有的课程列表
+var courseassistantRow=[];//作为助教加入的课程列表
+var allcourseassistantRow=[];//作为助教加入的所有的课程列表
 var Userlogin={type:'',content:''};
 var pass={old_pass:"",new_pass:""};
 const FormItem = Form.Item;
 var validPassword =/^\w{6,20}$/;
 var validPhone=/^1\d{10}$/;
 var toDate=/^(\d{4})\-(\d{2})\-(\d{2})(.*)$/;
+const gridStyle={
+  width:'100%',
+  textAlign:'center',
+}
 var loginUser=axios.create({
   url:"http://localhost:8000/data/is_repeated/",
   headers:{"content-type":"application/json"},
@@ -97,6 +102,7 @@ class Studentcenter extends React.Component{
         visible1:false,
         visible2:false,
         visible3:false,
+        visible4:false,
         confirmDirty:false,
         userinformation:this.props.userinformation,
         username:this.props.userinformation.username,
@@ -105,7 +111,93 @@ class Studentcenter extends React.Component{
         qrcode:"",//微信二维码所在的url
       }
     }
-    
+
+    componentWillMount(){
+      courseRow=[];
+      allcourseRow=[];
+      courseassistantRow=[];
+      allcourseassistantRow=[];
+       for(let i in this.props.courselist){
+            let courseTeacher=[];
+            for(let j=0;j<this.props.courselist[i].teachers.length;j++){
+              courseTeacher.push(
+                <span key={j} style={{marginLeft:"5px",marginRight:"5px"}}>
+                    {this.props.courselist[i].teachers[j]["name"]}
+                </span>
+              )
+           }
+            if(i<=3){
+            courseRow.push(
+              <Card.Grid key={this.props.courselist[i]["id"]} style={gridStyle}>
+              <Link to={'/studentcenter/class/'+this.props.courselist[i]["id"]+'/'} 
+              style={{color:"black"}}
+              onClick={this.props.redirecttocourse}
+              >   
+              {this.props.courselist[i]["name"]+"    教师:"}
+              {courseTeacher}
+              </Link>
+              </Card.Grid>
+            )
+            }
+            allcourseRow.push(
+              <Card.Grid key={this.props.courselist[i]["id"]} style={gridStyle}>
+              <Link to={'/studentcenter/class/'+this.props.courselist[i]["id"]+'/'} 
+              style={{color:"black"}}
+              onClick={this.props.redirecttocourse}
+              >   
+              {this.props.courselist[i]["name"]+"    教师:"}
+              {courseTeacher}
+              {this.props.courselist[i].marks+"学分 "}
+              {toDate.exec(this.props.courselist[i].startTime)[1]+"."}
+              {toDate.exec(this.props.courselist[i].startTime)[2]+"--"}
+              {toDate.exec(this.props.courselist[i].endTime)[1]+"."}
+              {toDate.exec(this.props.courselist[i].endTime)[2]}
+              </Link>
+              </Card.Grid>
+            )
+       }
+ 
+       for(let i in this.props.assistantcourselist){
+         let courseTeacher2=[];
+         for(let j=0;j<this.props.assistantcourselist[i].teachers.length;j++){
+           courseTeacher2.push(
+             <span key={j} style={{marginLeft:"5px",marginRight:"5px"}}>
+                 {this.props.assistantcourselist[i].teachers[j]["name"]}
+             </span>
+           )
+        }
+         if(i<=3){
+           courseassistantRow.push(
+           <Card.Grid key={this.props.assistantcourselist[i]["id"]} style={gridStyle}>
+           <Link to={'/studentcenter/assistantclass/'+this.props.assistantcourselist[i]["id"]+'/'} 
+           style={{color:"black"}}
+           onClick={this.props.redirecttocourse}
+           >   
+           {this.props.assistantcourselist[i]["name"]+"    教师:"}
+           {courseTeacher2}
+           </Link>
+           </Card.Grid>
+         )
+         }
+           allcourseassistantRow.push(
+           <Card.Grid key={this.props.assistantcourselist[i]["id"]} style={gridStyle}>
+           <Link to={'/studentcenter/assistantclass/'+this.props.assistantcourselist[i]["id"]+'/'} 
+           style={{color:"black"}}
+           onClick={this.props.redirecttocourse}
+           >   
+           {this.props.assistantcourselist[i]["name"]+"    教师:"}
+           {courseTeacher2}
+           {this.props.assistantcourselist[i].marks+"学分 "}
+           {toDate.exec(this.props.assistantcourselist[i].startTime)[1]+"."}
+           {toDate.exec(this.props.assistantcourselist[i].startTime)[2]+"--"}
+           {toDate.exec(this.props.assistantcourselist[i].endTime)[1]+"."}
+           {toDate.exec(this.props.assistantcourselist[i].endTime)[2]}
+           </Link>
+           </Card.Grid>
+         )
+       }
+    }
+
     componentDidMount(){
       var getQRcode=axios.create({
         url:"http://localhost:8000/data/bind_wechat_qrcode/",
@@ -125,6 +217,96 @@ class Studentcenter extends React.Component{
       })
     }
 
+    componentWillReceiveProps(nextProps){
+      if(nextProps.courselist!==this.props.courselist){
+        courseRow=[];
+        allcourseRow=[];
+        for(let i in nextProps.courselist){
+          let courseTeacher=[];
+          for(let j=0;j<nextProps.courselist[i].teachers.length;j++){
+            courseTeacher.push(
+              <span key={j} style={{marginLeft:"5px",marginRight:"5px"}}>
+                  {nextProps.courselist[i].teachers[j]["name"]}
+              </span>
+            )
+         }
+          if(i<=3){
+          courseRow.push(
+            <Card.Grid key={nextProps.courselist[i]["id"]} style={gridStyle}>
+            <Link to={'/studentcenter/class/'+nextProps.courselist[i]["id"]+'/'} 
+            style={{color:"black"}}
+            onClick={nextProps.redirecttocourse}
+            >   
+            {nextProps.courselist[i]["name"]+"    教师:"}
+            {courseTeacher}
+            </Link>
+            </Card.Grid>
+          )
+          }
+          allcourseRow.push(
+            <Card.Grid key={nextProps.courselist[i]["id"]} style={gridStyle}>
+            <Link to={'/studentcenter/class/'+nextProps.courselist[i]["id"]+'/'} 
+            style={{color:"black"}}
+            onClick={nextProps.redirecttocourse}
+            >   
+            {nextProps.courselist[i]["name"]+"    教师:"}
+            {courseTeacher}
+            {nextProps.courselist[i].marks+"学分 "}
+            {toDate.exec(nextProps.courselist[i].startTime)[1]+"."}
+            {toDate.exec(nextProps.courselist[i].startTime)[2]+"--"}
+            {toDate.exec(nextProps.courselist[i].endTime)[1]+"."}
+            {toDate.exec(nextProps.courselist[i].endTime)[2]}
+            </Link>
+            </Card.Grid>
+          )
+        }
+      }
+
+      if(nextProps.assistantcourselist!==this.props.assistantcourselist){
+        courseassistantRow=[];
+        allcourseassistantRow=[];
+        for(let i in nextProps.assistantcourselist){
+          let courseTeacher2=[];
+          for(let j=0;j<nextProps.assistantcourselist[i].teachers.length;j++){
+            courseTeacher2.push(
+              <span key={j} style={{marginLeft:"5px",marginRight:"5px"}}>
+                  {nextProps.assistantcourselist[i].teachers[j]["name"]}
+              </span>
+            )
+         }
+          if(i<=3){
+            courseassistantRow.push(
+            <Card.Grid key={nextProps.assistantcourselist[i]["id"]} style={gridStyle}>
+            <Link to={'/studentcenter/assistantclass/'+nextProps.assistantcourselist[i]["id"]+'/'} 
+            style={{color:"black"}}
+            onClick={nextProps.redirecttocourse}
+            >   
+            {nextProps.assistantcourselist[i]["name"]+"    教师:"}
+            {courseTeacher2}
+            </Link>
+            </Card.Grid>
+          )
+          }
+            allcourseassistantRow.push(
+            <Card.Grid key={nextProps.assistantcourselist[i]["id"]} style={gridStyle}>
+            <Link to={'/studentcenter/assistantclass/'+nextProps.assistantcourselist[i]["id"]+'/'} 
+            style={{color:"black"}}
+            onClick={nextProps.redirecttocourse}
+            >   
+            {nextProps.assistantcourselist[i]["name"]+"    教师:"}
+            {courseTeacher2}
+            {nextProps.assistantcourselist[i].marks+"学分 "}
+            {toDate.exec(nextProps.assistantcourselist[i].startTime)[1]+"."}
+            {toDate.exec(nextProps.assistantcourselist[i].startTime)[2]+"--"}
+            {toDate.exec(nextProps.assistantcourselist[i].endTime)[1]+"."}
+            {toDate.exec(nextProps.assistantcourselist[i].endTime)[2]}
+            </Link>
+            </Card.Grid>
+          )
+        }   
+      }
+    }
+
     showModal1=()=>{
       this.setState({visible1:true});
     }
@@ -137,6 +319,10 @@ class Studentcenter extends React.Component{
       this.setState({visible3:true});
     }
 
+    showModal4=()=>{
+      this.setState({visible4:true});
+    }
+
     handleCancel1=()=>{
       this.setState({visible1:false});
     }
@@ -147,6 +333,10 @@ class Studentcenter extends React.Component{
 
     handleCancel3=()=>{
       this.setState({visible3:false});
+    }
+
+    handleCancel4=()=>{
+      this.setState({visible4:false});
     }
 
     handleConfirmBlur = (e) => {
@@ -328,58 +518,7 @@ class Studentcenter extends React.Component{
           },
         },
       };
-      const tips='您只需填自己想要变更的某个信息，不用把所有信息全填满'
-      const gridStyle={
-        width:'100%',
-        textAlign:'center',
-      }
-      if(this.props.courselist.length<courseIDrow.length){
-           courseIDrow=[];
-           courseRow=[];
-           allcourseRow=[];
-      }
-        for(let i in this.props.courselist){
-              if(_.indexOf(courseIDrow,this.props.courselist[i]["id"])===-1){
-              courseIDrow.push(this.props.courselist[i]["id"]);
-              var courseTeacher=[];
-              for(let j=0;j<this.props.courselist[i].teachers.length;j++){
-                courseTeacher.push(
-                  <span key={j} style={{marginLeft:"5px",marginRight:"5px"}}>
-                      {this.props.courselist[i].teachers[j]["name"]}
-                  </span>
-                )
-             }
-              if(courseIDrow.length<=3){
-              courseRow.push(
-                <Card.Grid key={this.props.courselist[i]["id"]} style={gridStyle}>
-                <Link to={'/studentcenter/class/'+this.props.courselist[i]["id"]+'/'} 
-                style={{color:"black"}}
-                onClick={this.props.redirecttocourse}
-                >   
-                {this.props.courselist[i]["name"]+"    教师:"}
-                {courseTeacher}
-                </Link>
-                </Card.Grid>
-              )
-              }
-              allcourseRow.push(
-                <Card.Grid key={this.props.courselist[i]["id"]} style={gridStyle}>
-                <Link to={'/studentcenter/class/'+this.props.courselist[i]["id"]+'/'} 
-                style={{color:"black"}}
-                onClick={this.props.redirecttocourse}
-                >   
-                {this.props.courselist[i]["name"]+"    教师:"}
-                {courseTeacher}
-                {this.props.courselist[i].marks+"学分 "}
-                {toDate.exec(this.props.courselist[i].startTime)[1]+"."}
-                {toDate.exec(this.props.courselist[i].startTime)[2]+"--"}
-                {toDate.exec(this.props.courselist[i].endTime)[1]+"."}
-                {toDate.exec(this.props.courselist[i].endTime)[2]}
-                </Link>
-                </Card.Grid>
-              )
-          } 
-        }
+      const tips='您只需填自己想要变更的某个信息，不用把所有信息全填满';
         return(
             //背景以后会有专门的壁纸
             <div>
@@ -437,13 +576,24 @@ class Studentcenter extends React.Component{
                 </Col>
               </Row>
               <Row>
-                <Col xs={24} sm={{span:6,offset:6}}>
+              <Col xs={24} sm={{span:6,offset:5}}>
                    <div style={{fontSize:"16px",marginTop:"30px",position:"relative"}}>
-                    已加入课程班
+                    我的课程班
                    </div>
                    <Card style={{width:400}} hoverable="true">
                      {courseRow}
                      <Card.Grid key="-1" style={gridStyle} onClick={this.showModal3}>
+                     <span style={{color:"#2B91D5"}}> 更多课程......</span>
+                     </Card.Grid> 
+                     </Card>
+                </Col>
+                <Col xs={24} sm={{span:6,offset:2}}>
+                   <div style={{fontSize:"16px",marginTop:"30px",position:"relative"}}>
+                    作为助教加入的课程班
+                   </div>
+                   <Card style={{width:400}} hoverable="true">
+                     {courseassistantRow}
+                     <Card.Grid key="-1" style={gridStyle} onClick={this.showModal4}>
                      <span style={{color:"#2B91D5"}}> 更多课程......</span>
                      </Card.Grid> 
                      </Card>

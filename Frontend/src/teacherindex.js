@@ -267,7 +267,7 @@ class TeacherIndex extends React.Component{
                 onClick={this.changehref}
               >
                   <Menu.Item key="1"><span><Icon type="user" />我的</span></Menu.Item>
-                  <Menu.Item key="2"><span><Icon type="usergroup-add" />课程组</span></Menu.Item>
+                  <Menu.Item key="2"><span><Icon type="team" />课程组</span></Menu.Item>
                   <Menu.Item key="3"><span><Icon type="form" />批改作业</span></Menu.Item>
                   <Menu.Item key="4"><span><Icon type="plus-square-o" />创建课程</span></Menu.Item>
                   <Menu.Item key="5"><span><Icon type="info-circle" />消息</span></Menu.Item>
@@ -335,6 +335,7 @@ class TeacherIndex extends React.Component{
                 <Route exact path='/teachercenter/correctWork/:assignmentId' render={(props)=>(
                   <CorrectSpecificWork {...props}
                     userinformation={userinformation}
+                    re={/^\/teachercenter\/correctWork\/(.*)\/$/}
                   /> 
                 )}/>                               
             </Switch>

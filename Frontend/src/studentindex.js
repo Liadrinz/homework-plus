@@ -7,6 +7,9 @@ import {Route,Switch,Redirect} from 'react-router-dom';
 import WrappedStudentcenter from './studentcenter.js'
 import Studentclass from './studentclass.js'
 import Specificclass from './studentspecificclass.js'
+import AssistantSpecificclass from './assistantspecificclass.js'
+import CorrectWork from './correctWork.js';
+import CorrectSpecificWork from './correctSpecificWork.js';
 import {_} from 'underscore'
 
 //大多数的地方使用graphql技术获取和传送数据
@@ -175,20 +178,23 @@ class StudentIndex extends React.Component{
    
    componentDidUpdate(){
     if(this.state.key==1&&this.state.norepeatkey1&&this.state.clickmenu){
-      this.setState({norepeatkey1:false,norepeatkey2:true,norepeatkey3:true,norepeatkey4:true,norepeatkey5:true,});
+      this.setState({norepeatkey1:false,norepeatkey2:true,norepeatkey3:true,norepeatkey4:true,norepeatkey5:true,norepeatkey6:true});
      }
     if(this.state.key==2&&this.state.norepeatkey2&&this.state.clickmenu){
-     this.setState({norepeatkey1:true,norepeatkey2:false,norepeatkey3:true,norepeatkey4:true,norepeatkey5:true,});
+     this.setState({norepeatkey1:true,norepeatkey2:false,norepeatkey3:true,norepeatkey4:true,norepeatkey5:true,norepeatkey6:true});
     }
     if(this.state.key==3&&this.state.norepeatkey3&&this.state.clickmenu){
-      this.setState({norepeatkey1:true,norepeatkey2:true,norepeatkey3:false,norepeatkey4:true,norepeatkey5:true,});
+      this.setState({norepeatkey1:true,norepeatkey2:true,norepeatkey3:false,norepeatkey4:true,norepeatkey5:true,norepeatkey6:true});
      }
     if(this.state.key==4&&this.state.norepeatkey4&&this.state.clickmenu){
-     this.setState({norepeatkey1:true,norepeatkey2:true,norepeatkey3:true,norepeatkey4:false,norepeatkey5:true,});
+     this.setState({norepeatkey1:true,norepeatkey2:true,norepeatkey3:true,norepeatkey4:false,norepeatkey5:true,norepeatkey6:true});
     }
     if(this.state.key==5&&this.state.norepeatkey5&&this.state.clickmenu){
-      this.setState({norepeatkey1:true,norepeatkey2:true,norepeatkey3:true,norepeatkey4:true,norepeatkey5:false,});
-     }
+      this.setState({norepeatkey1:true,norepeatkey2:true,norepeatkey3:true,norepeatkey4:true,norepeatkey5:false,norepeatkey6:true});
+    }
+    if(this.state.key==6&&this.state.norepeatkey6&&this.state.clickmenu){
+      this.setState({norepeatkey1:true,norepeatkey2:true,norepeatkey3:true,norepeatkey4:true,norepeatkey5:true,norepeatkey6:false});
+    }
    }
 
    componentWillUnmount(){
@@ -206,14 +212,21 @@ class StudentIndex extends React.Component{
   
    //对studentcenter里面课程班管理的跳转操作进行反应
    redirecttocourse=()=>{
-     this.setState({key:2,clickmenu:false,norepeatkey1:true,norepeatkey3:true,norepeatkey4:true,norepeatkey5:true})
+     this.setState({key:2,clickmenu:false,norepeatkey1:true,norepeatkey3:true,norepeatkey4:true,norepeatkey5:true,norepeatkey6:true})
    }
 
+
+
    //对studentclass里面课程班管理的跳转操作进行反应
-   redirecttocourse2=()=>{
-    this.setState({key:2,clickmenu:false,norepeatkey1:true,norepeatkey2:true,norepeatkey3:true,norepeatkey4:true,norepeatkey5:true})
+   redirecttocourse3=()=>{
+    this.setState({key:2,clickmenu:false,norepeatkey1:true,norepeatkey2:true,norepeatkey3:true,norepeatkey4:true,norepeatkey5:true,norepeatkey6:true})
    }    
 
+   //对assistantspecificclass里面作业批改的跳转操作进行反应
+   redirecttocourse3=()=>{
+    this.setState({key:4,clickmenu:false,norepeatkey1:true,norepeatkey2:true,norepeatkey3:true,norepeatkey4:true,norepeatkey5:true,norepeatkey6:true})
+   }    
+   
     render(){
       userinformation.bupt_id=this.state.bupt_id;
       userinformation.class_number=this.state.class_number;
@@ -231,6 +244,9 @@ class StudentIndex extends React.Component{
       if(this.state.key==2&&this.state.norepeatkey2&&this.state.clickmenu){
        return (<Redirect exact push to='/studentcenter/class'/>);
       }
+      if(this.state.key==4&&this.state.norepeatkey4&&this.state.clickmenu){
+        return (<Redirect exact push to='/studentcenter/correctWork'/>);
+      }
       //后续随着路径的添加而增加
         return(
           <div>
@@ -245,10 +261,11 @@ class StudentIndex extends React.Component{
                 onClick={this.changehref}
               >
                   <Menu.Item key="1"><span><Icon type="user" />我的</span></Menu.Item>
-                  <Menu.Item key="2"><span><Icon type="usergroup-add" />课程组</span></Menu.Item>
-                  <Menu.Item key="3"><span><Icon type="form" />我的作业</span></Menu.Item>
-                  <Menu.Item key="4"><span><Icon type="info-circle" />消息</span></Menu.Item>
-                  <Menu.Item key="5" className="aboutus"><span className="aboutus2" >关于Homework+</span></Menu.Item>
+                  <Menu.Item key="2"><span><Icon type="team" />课程组</span></Menu.Item>
+                  <Menu.Item key="3"><span><Icon type="edit" />我的作业</span></Menu.Item>
+                  <Menu.Item key="4"><span><Icon type="form" />批改作业</span></Menu.Item>
+                  <Menu.Item key="5"><span><Icon type="info-circle" />消息</span></Menu.Item>
+                  <Menu.Item key="6" className="aboutus"><span className="aboutus2" >关于Homework+</span></Menu.Item>
               </Menu>
             </Sider>
           </Layout>
@@ -287,7 +304,7 @@ class StudentIndex extends React.Component{
                         userinformation={userinformation}
                         courselist={this.state.courselist}
                         assistantcourselist={this.state.assistantcourselist}
-                        redirecttocourse2={this.redirecttocourse2}
+                        redirecttocourse3={this.redirecttocourse3}
                       /> 
                     )}/>
                     <Route path='/studentcenter/class/:courseID' render={(props)=>(
@@ -295,6 +312,27 @@ class StudentIndex extends React.Component{
                       userinformation={userinformation}
                       courselist={this.state.courselist}
                       />
+                    )}/>
+                    <Route path='/studentcenter/assistantclass/:courseID' render={(props)=>(
+                      <AssistantSpecificclass {...props}
+                      userinformation={userinformation}
+                      courselist={this.state.courselist}
+                      assistantcourselist={this.state.assistantcourselist}
+                      redirecttocourse3={this.redirecttocourse3}
+                      />
+                    )}/>                    
+                    <Route exact path='/studentcenter/correctWork' render={(props)=>(
+                      <CorrectWork {...props}
+                      userinformation={userinformation}
+                      courselist={this.state.courselist}
+                      assistantcourselist={this.state.assistantcourselist}
+                      /> 
+                    )}/>    
+                    <Route exact path='/studentcenter/correctWork/:assignmentId' render={(props)=>(
+                      <CorrectSpecificWork {...props}
+                       userinformation={userinformation}
+                       re={/^\/studentcenter\/correctWork\/(.*)\/$/}
+                      /> 
                     )}/>
                 </Switch>
             </Content>
