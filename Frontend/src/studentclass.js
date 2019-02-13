@@ -226,8 +226,8 @@ class Courses extends React.Component{
 
 class StudentOrAssistant extends React.Component{
     render(){
-      if(this.props["current"]==="student")return <Courses courselist={this.props.courselist} redirecttocourse={this.props.redirecttocourse3} url="/studentcenter/class/" current="student"/>
-      else return <Courses courselist={this.props.assistantcourselist} redirecttocourse={this.props.redirecttocourse3} url="/studentcenter/assistantclass/" current="assistant"/>
+      if(this.props["current"]==="student")return <Courses courselist={this.props.courselist} redirecttocourse2={this.props.redirecttocourse2} url="/studentcenter/class/" current="student"/>
+      else return <Courses courselist={this.props.assistantcourselist} redirecttocourse2={this.props.redirecttocourse2} url="/studentcenter/assistantclass/" current="assistant"/>
     }
 }
 
@@ -261,7 +261,7 @@ class Studentclass extends React.Component{
       <StudentOrAssistant
           courselist={this.props.courselist}
           assistantcourselist={this.props.assistantcourselist}
-          redirecttocourse3={this.props.redirecttocourse3}  
+          redirecttocourse2={this.props.redirecttocourse2}  
           current={this.state["current"]}    
       />
       </div>

@@ -209,7 +209,6 @@ class Homework extends React.Component{
                         id
                         name
                         assignmentType
-                        description
                         deadline
                     }
                 }`//用反引号      
@@ -239,7 +238,6 @@ class Homework extends React.Component{
                         id
                         name
                         assignmentType
-                        description
                         deadline
                     }
                 }`//用反引号      

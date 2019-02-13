@@ -214,18 +214,18 @@ class StudentIndex extends React.Component{
    redirecttocourse=()=>{
      this.setState({key:2,clickmenu:false,norepeatkey1:true,norepeatkey3:true,norepeatkey4:true,norepeatkey5:true,norepeatkey6:true})
    }
-
-
-
    //对studentclass里面课程班管理的跳转操作进行反应
-   redirecttocourse3=()=>{
+   redirecttocourse2=()=>{
     this.setState({key:2,clickmenu:false,norepeatkey1:true,norepeatkey2:true,norepeatkey3:true,norepeatkey4:true,norepeatkey5:true,norepeatkey6:true})
    }    
-
    //对assistantspecificclass里面作业批改的跳转操作进行反应
    redirecttocourse3=()=>{
     this.setState({key:4,clickmenu:false,norepeatkey1:true,norepeatkey2:true,norepeatkey3:true,norepeatkey4:true,norepeatkey5:true,norepeatkey6:true})
-   }    
+   } 
+   //对studentspecificclass里面提交作业的跳转操作进行反应
+   redirecttocourse4=()=>{
+    this.setState({key:3,clickmenu:false,norepeatkey1:true,norepeatkey2:true,norepeatkey3:true,norepeatkey4:true,norepeatkey5:true,norepeatkey6:true})
+   }      
    
     render(){
       userinformation.bupt_id=this.state.bupt_id;
@@ -304,13 +304,14 @@ class StudentIndex extends React.Component{
                         userinformation={userinformation}
                         courselist={this.state.courselist}
                         assistantcourselist={this.state.assistantcourselist}
-                        redirecttocourse3={this.redirecttocourse3}
+                        redirecttocourse2={this.redirecttocourse2}
                       /> 
                     )}/>
                     <Route path='/studentcenter/class/:courseID' render={(props)=>(
                       <Specificclass {...props}
                       userinformation={userinformation}
                       courselist={this.state.courselist}
+                      redirecttocourse4={this.redirecttocourse4}
                       />
                     )}/>
                     <Route path='/studentcenter/assistantclass/:courseID' render={(props)=>(
