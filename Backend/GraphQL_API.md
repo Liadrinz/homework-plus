@@ -8,6 +8,7 @@
 ```gql
 {
   dateJoined: DateTime
+  username: String
   buptId: String
   name: String
   email: String
