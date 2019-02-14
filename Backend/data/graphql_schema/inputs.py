@@ -74,11 +74,19 @@ class AssignmentDeletionInput(graphene.InputObjectType):
     ids = graphene.List(of_type=graphene.Int, required=True)
 
 
-# arguments of creating an Submission
+# arguments of creating a Submission
 class SubmissionCreationInput(graphene.InputObjectType):
     image = graphene.List(of_type=graphene.Int, required=False)
     addfile = graphene.List(of_type=graphene.Int, required=False)
     assignment = graphene.Int(required=True)
+    description = graphene.String(required=False)
+
+
+# arguments of editing a Submission
+class SubmissionEditionInput(graphene.InputObjectType):
+    id = graphene.Int(required=True)
+    image = graphene.List(of_type=graphene.Int, required=False)
+    addfile = graphene.List(of_type=graphene.Int, required=False)
     description = graphene.String(required=False)
 
 
@@ -87,4 +95,5 @@ class SubmissionCreationInput(graphene.InputObjectType):
 class ScoreGivingInput(graphene.InputObjectType):
     submission = graphene.Int(required=True)
     score = graphene.Float(required=True)
+    review_comment = graphene.String(required=False)
     is_excellent = graphene.Boolean(required=False)

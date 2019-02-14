@@ -43,9 +43,16 @@ class GiveScore(graphene.Mutation):
             if len(editing_course.teachers.filter(pk=realuser.id)) == 0 and len(editing_course.teaching_assistants.filter(pk=realuser.id)) == 0:
                 return GiveScore(ok=False, msg=public_msg['forbidden'])
             else:
+                # deadline validation 在ddl之前不能批改作业
+                if datetime.now() < editing_submission.deadline.replace(tzinfo=None):
+                    return GiveScore(ok=False, msg=create_msg(4181, '时机未到'))
+
                 editing_submission.score = score_giving_data['score']
                 if 'is_excellent' in score_giving_data:
                     editing_submission.is_excellent = score_giving_data['is_excellent']
+                if 'review_comment' in score_giving_data:
+                    editing_submission.review_comment = score_giving_data['review_comment']
+                editing_submission.is_reviewd = True
                 editing_submission.save()
                 return GiveScore(ok=True, submission=editing_submission, msg=public_msg['success'])
 
