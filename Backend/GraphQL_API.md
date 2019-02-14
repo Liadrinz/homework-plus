@@ -560,6 +560,8 @@ mutation {
 {
   aware: Boolean
   description: String
+  reviewComment: String
+  isReviewed: Boolean
   score: Float
   isExcellent: Boolean
   image: FileType
