@@ -2,6 +2,7 @@
 
 from data.graphql_schema.mutations.give_score import GiveScore
 from data.graphql_schema.mutations.edit_user import EditUser
+from data.graphql_schema.mutations.edit_submission import EditSubmission
 from data.graphql_schema.mutations.edit_course import EditCourse
 from data.graphql_schema.mutations.edit_assignment import EditAssignment
 from data.graphql_schema.mutations.delete_assignment import DeleteAssignment

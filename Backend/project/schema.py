@@ -16,6 +16,7 @@ class Query(
 class Mutations(graphene.ObjectType):
     give_score = data.schema.GiveScore.Field()
     edit_user = data.schema.EditUser.Field()
+    edit_submission = data.schema.EditSubmission.Field()
     edit_course = data.schema.EditCourse.Field()
     edit_assignment = data.schema.EditAssignment.Field()
     delete_assignment = data.schema.DeleteAssignment.Field()
