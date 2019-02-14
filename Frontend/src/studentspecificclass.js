@@ -109,8 +109,6 @@ class SubmitHomework extends React.Component{
     changeValue=()=>{};
 
     render(){
-        console.log(this.state.assignmentInfo)
-        //console.log(re2.exec(this.state.assignmentInfo[0].submitInfoplus))
         const column=[{
             title:'作业名',
             dataIndex:'name',

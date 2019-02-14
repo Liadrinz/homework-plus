@@ -1,0 +1,36 @@
+ moveRight: function(n) {
+            //向右移动
+            var i, j, k, a, b,l;
+            for (j = 0; j < n; j++) {
+                 l=n-1;
+                for (i = 0; i < n; i++) {
+                    if (this.arr[i][j].value == 0) continue;
+                    for (k = i + 1; this.arr[k][j].value == 0; k++) {
+                        if (k == l) {
+                            moveCell(i, j, k, j);
+                            for (a = i - 1, b = i; a == 0; a++, b++) {
+                                moveCell(a, j, b, j);
+                            }
+                            break;
+                        }
+                    }
+                    if (this.arr[k][j].value == this.arr[i][j].value) {
+                        mergeCells(i, j, k, j);
+                        for (a = i - 1, b = i; a == 0; a++, b++) {
+                            moveCell(a, j, b, j);
+                        }
+                    } else if (k > i + 1) {
+                        moveCell(i, j, k - 1, j);
+                        for (a = i - 1, b = i; a == 0; a++, b++) {
+                            moveCell(a, j, b, j);
+                        }
+                    }
+                }
+            }
+            this.newCell(n); //生成一个新格子。后面要对其做判断。
+        },
+
+
+ if (temp == 0) return false;
+                if (this.arr[i + 1][j] != undefined && this.arr[i + 1][j] && (temp == this.arr[i + 1][j].value)) return false;
+                if (this.arr[i][j + 1] != undefined && this.arr[i][j + 1] && (temp == this.arr[i][j + 1].value)) return false;

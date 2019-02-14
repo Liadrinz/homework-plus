@@ -10,6 +10,7 @@ import Specificclass from './studentspecificclass.js'
 import AssistantSpecificclass from './assistantspecificclass.js'
 import CorrectWork from './correctWork.js';
 import CorrectSpecificWork from './correctSpecificWork.js';
+import MyHomework from './myHomework.js'
 import {_} from 'underscore'
 
 //大多数的地方使用graphql技术获取和传送数据
@@ -335,6 +336,11 @@ class StudentIndex extends React.Component{
                        re={/^\/studentcenter\/correctWork\/(.*)\/$/}
                       /> 
                     )}/>
+                    <Route exact path='/studentcenter/myHomework/:assignmentId' render={(props)=>(
+                      <MyHomework {...props}
+                       userinformation={userinformation}
+                      /> 
+                    )}/>                    
                 </Switch>
             </Content>
             <Footer style={{background:'#E6E6E6'}}>Footer</Footer>
