@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
-from threading import Thread
+from threading import Thread, Lock
 
 import graphene
 from data.safe.tokener import tokener as token
@@ -13,6 +13,9 @@ from data.graphql_schema.types import SubmissionType
 
 from data.graphql_schema.resp_msg import public_msg, create_msg
 
+aware_vector = [1, 1]
+aware_vector_lock = Lock()
+
 
 # creating a submission
 class CreateSubmission(graphene.Mutation):
@@ -24,6 +27,7 @@ class CreateSubmission(graphene.Mutation):
     msg = graphene.String()
 
     def mutate(self, info, submission_data):
+        global aware_vector
 
         # id validation
         try:
@@ -71,29 +75,22 @@ class CreateSubmission(graphene.Mutation):
             # field supplement
             submission_data['submitter'] = realuser.pk
 
+            new_submission = models.HWFSubmission.objects.create(
+                description=submission_data['description'],
+                assignment_id=submission_data['assignment'],
+                submitter_id=realuser.pk)
             if 'image' in submission_data:
-                submission_data['aware'] = False
-
-            if 'image' in submission_data:
-                new_submission = models.HWFSubmission.objects.create(
-                    description=submission_data['description'],
-                    assignment_id=submission_data['assignment'],
-                    submitter_id=realuser.pk)
-                new_submission.image.set(submission_data['image'])
-            elif 'addfile' in submission_data:
-                if 'image' in submission_data:
-                    new_submission = models.HWFSubmission.objects.create(
-                        description=submission_data['description'],
-                        assignment_id=submission_data['assignment'],
-                        submitter_id=realuser.pk)
+                if aware_vector_lock.acquire():
+                    aware_vector[0] = 0
+                    new_submission.aware = False
                     new_submission.image.set(submission_data['image'])
+                    aware_vector_lock.release()
+            if 'addfile' in submission_data:
+                if aware_vector_lock.acquire():
+                    aware_vector[1] = 0
+                    new_submission.aware = False
                     new_submission.addfile.set(submission_data['addfile'])
-                else:
-                    new_submission = models.HWFSubmission.objects.create(
-                        description=submission_data['description'],
-                        assignment_id=submission_data['assignment'],
-                        submitter_id=realuser.pk)
-                    new_submission.addfile.set(submission_data['addfile'])
+                    aware_vector_lock.release()
 
             if 'image' in submission_data:
                 convert_thread = Thread(
@@ -123,6 +120,7 @@ def generate_pdf_for_submission(image_id_list,
                                 new_submission_id,
                                 realuser,
                                 enhance=False):
+    global aware_vector, aware_vector_lock
     filter_condition = models.models.Q(pk=None)
     for image_id in image_id_list:
         filter_condition = filter_condition | models.models.Q(pk=image_id)
@@ -143,12 +141,17 @@ def generate_pdf_for_submission(image_id_list,
     target_submission = models.HWFSubmission.objects.get(pk=new_submission_id)
     target_submission.pdf_id = new_pdf.pk
     target_submission.long_picture_id = new_long_pic.pk
-    target_submission.aware = True
     target_submission.save()
+    if aware_vector_lock.acqiure():
+        aware_vector[0] = 1
+        if aware_vector[1] == 1:
+            target_submission.aware = True
+        aware_vector_lock.release()
 
 
 # zip all addfiles as one
 def zip_files_for_submission(addfile_id_list, new_submission_id, realuser):
+    global aware_vector, aware_vector_lock
     filter_condition = models.models.Q(pk=None)
     for addfile_id in addfile_id_list:
         filter_condition = filter_condition | models.models.Q(pk=addfile_id)
@@ -166,3 +169,8 @@ def zip_files_for_submission(addfile_id_list, new_submission_id, realuser):
     target_submission.save()
     for addfile_id in addfile_id_list:
         models.HWFFile.objects.get(pk=addfile_id).delete()
+    if aware_vector_lock.acquire():
+        aware_vector[1] = 1
+        if aware_vector[0] == 1:
+            target_submission.aware = True
+        aware_vector_lock.release()

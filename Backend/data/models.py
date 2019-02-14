@@ -123,7 +123,9 @@ class HWFSubmission(models.Model):
     submitter = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='my_submissions')
     description = models.TextField(blank=True, null=True)
+    is_reviewed = models.BooleanField(default=False)
     score = models.FloatField(default=0.0)
+    review_comment = models.TextField(blank=True, null=True)
     is_excellent = models.BooleanField(default=False)
 
 
