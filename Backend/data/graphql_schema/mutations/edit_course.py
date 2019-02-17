@@ -49,6 +49,13 @@ class EditCourse(graphene.Mutation):
                         return EditCourse(ok=False, msg=public_msg['forbidden'])
 
             elif len(editing_course.teachers.filter(pk=realuser.id)) == 0:
+                # fk validation
+                pk = 0
+                try:
+                    for pk in course_data.get('students', []) + course_data.get('teachers', []) + course_data.get('teaching_assistants', []):
+                        models.User.objects.get(pk=pk)
+                except:
+                    return EditCourse(ok=False, msg=create_msg(4112, "user %d cannot be found" % pk))
                 if len(editing_course.teaching_assistants.filter(pk=realuser.id)) == 0:
                     # neither assistant nor teacher
                     return EditCourse(ok=False, msg=public_msg['forbidden'])

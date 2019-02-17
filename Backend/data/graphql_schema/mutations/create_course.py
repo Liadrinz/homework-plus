@@ -47,6 +47,14 @@ class CreateCourse(graphene.Mutation):
                 teachers = course_data.pop('teachers', [])
                 assistants = course_data.pop('teaching_assistants', [])
                 students = course_data.pop('students', [])
+                # fk validation
+                pk = 0
+                try:
+                    for pk in teachers + assistants + students:
+                        models.User.objects.get(pk=pk)
+                except:
+                    return CreateCourse(ok=False, msg=create_msg(4112, "user %d cannot be found" % pk))
+
                 serial = serializers.HWFCourseClassSerializer(data=course_data)
                 if serial.is_valid():
                     new_course = serial.save()

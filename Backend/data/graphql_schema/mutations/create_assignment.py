@@ -55,6 +55,13 @@ class CreateAssignment(graphene.Mutation):
                 return CreateAssignment(ok=False, msg=public_msg['forbiddren'])
             else:
                 addfile = assignment_data.pop('addfile', [])
+                # file validation
+                fid = 0
+                try:
+                    for fid in addfile:
+                        models.HWFFile.objects.get(fid)
+                except:
+                    return CreateAssignment(ok=False, msg=create_msg(4103, "file %d cannot be found" % fid))
                 serial = serializers.HWFAssignmentSerializer(data=assignment_data)
                 if serial.is_valid():
                     new_assignment = serial.save()

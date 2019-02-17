@@ -12,7 +12,7 @@ from data.graphql_schema.inputs import SubmissionEditionInput
 from data.graphql_schema.types import SubmissionType
 
 from data.graphql_schema.resp_msg import public_msg, create_msg
-from data.graphql_schema.mutations.create_submission import aware_vector, aware_vector_lock, generate_pdf_for_submission, zip_files_for_submission
+from data.graphql_schema.mutations.create_submission import aware_vector, generate_pdf_for_submission, zip_files_for_submission
 
 
 # editing a submission
@@ -47,7 +47,7 @@ class EditSubmission(graphene.Mutation):
 
             # type validation
             if 'addfile' in submission_data:
-                if editing_submission.assignment.type == 'image':
+                if editing_submission.assignment.assignment_type == 'image':
                     return EditSubmission(
                         ok=False,
                         msg=create_msg(
@@ -66,15 +66,26 @@ class EditSubmission(graphene.Mutation):
                 return EditSubmission(ok=False, msg=create_msg(4191, "it's not your homework"))
 
             if 'image' in submission_data:
-                if aware_vector_lock.acquire():
-                    aware_vector[0] = 0
-                    editing_submission.aware = False
-                    aware_vector_lock.release()
+                # file validation
+                fid = 0
+                try:
+                    for fid in submission_data['image']:
+                        models.HWFFile.objects.get(pk=fid)
+                except:
+                    return EditSubmission(ok=False, msg=create_msg(4103, "file %d cannot be found" % fid))
+                aware_vector[0] = 0
+                editing_submission.aware = False
             if 'addfile' in submission_data:
-                if aware_vector_lock.acquire():
-                    aware_vector[1] = 0
-                    editing_submission.aware = False
-                    aware_vector_lock.release()
+                # file validation
+                fid = 0
+                try:
+                    for fid in submission_data['addfile']:
+                        models.HWFFile.objects.get(pk=fid)
+                except:
+                    return EditSubmission(ok=False, msg=create_msg(4103, "file %d cannot be found" % fid))
+                aware_vector[1] = 0
+                editing_submission.aware = False
+            editing_submission.save()
 
             if 'description' in submission_data:
                 editing_submission.description = submission_data['description']
