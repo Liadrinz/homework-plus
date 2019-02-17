@@ -564,9 +564,9 @@ mutation {
   isReviewed: Boolean
   score: Float
   isExcellent: Boolean
-  image: FileType
   pdf: FileType
-  addfile: FileType
+  longPic: FileType  // 长图
+  zippedFile: FileType  // 压缩包
   submitTime: DateTime
   assignment: AssignmentType
   submitter: UserType
