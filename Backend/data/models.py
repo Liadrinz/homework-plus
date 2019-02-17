@@ -101,8 +101,8 @@ class HWFAssignment(models.Model):
 # submission to an assignment
 class HWFSubmission(models.Model):
     aware = models.BooleanField(default=True)
-    image = models.ManyToManyField(
-        HWFFile, blank=True, related_name='image_submissions')
+    # image = models.ManyToManyField(
+    #     HWFFile, blank=True, related_name='image_submissions')
     pdf = models.ForeignKey(
         HWFFile,
         on_delete=models.CASCADE,
@@ -113,8 +113,13 @@ class HWFSubmission(models.Model):
         on_delete=models.CASCADE,
         related_name='long_pic_submissions',
         null=True)
-    addfile = models.ManyToManyField(
-        HWFFile, blank=True, related_name='addfile_submissions')
+    zipped_file = models.ForeignKey(
+        HWFFile,
+        on_delete=models.CASCADE,
+        related_name='zippped_file_submission',
+        null=True)
+    # addfile = models.ManyToManyField(
+    #     HWFFile, blank=True, related_name='addfile_submissions')
     submit_time = models.DateTimeField(auto_now_add=True)
     assignment = models.ForeignKey(
         HWFAssignment,
