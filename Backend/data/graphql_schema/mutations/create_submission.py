@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
-from threading import Thread, Lock
+from threading import Thread
 
 import graphene
 from data.safe.tokener import tokener as token
@@ -14,7 +14,6 @@ from data.graphql_schema.types import SubmissionType
 from data.graphql_schema.resp_msg import public_msg, create_msg
 
 aware_vector = [1, 1]
-aware_vector_lock = Lock()
 
 
 # creating a submission
@@ -47,7 +46,7 @@ class CreateSubmission(graphene.Mutation):
             # type validation
             if 'addfile' in submission_data:
                 if models.HWFAssignment.objects.get(
-                        pk=submission_data['assignment']).type == 'image':
+                        pk=submission_data['assignment']).assignment_type == 'image':
                     return CreateSubmission(
                         ok=False,
                         msg=create_msg(
@@ -72,26 +71,35 @@ class CreateSubmission(graphene.Mutation):
                     msg=create_msg(4123,
                                    "you are not a student of this course"))
 
-            # field supplement
-            submission_data['submitter'] = realuser.pk
+            if 'image' in submission_data:
+                # file validation
+                fid = 0
+                try:
+                    for fid in submission_data['image']:
+                        models.HWFFile.objects.get(pk=fid)
+                except:
+                    return CreateSubmission(ok=False, msg=create_msg(4103, "file %d cannot be found" % fid))
+                aware_vector[0] = 0
+                new_submission.aware = False
+                new_submission.image.set(submission_data['image'])
+            if 'addfile' in submission_data:
+                # file validation
+                fid = 0
+                try:
+                    for fid in submission_data['addfile']:
+                        models.HWFFile.objects.get(pk=fid)
+                except:
+                    return CreateSubmission(ok=False, msg=create_msg(4103, "file %d cannot be found" % fid))
+                aware_vector[1] = 0
+                new_submission.aware = False
+                new_submission.addfile.set(submission_data['addfile'])
+            new_submission.save()
 
             new_submission = models.HWFSubmission.objects.create(
                 description=submission_data['description'],
                 assignment_id=submission_data['assignment'],
                 submitter_id=realuser.pk)
-            if 'image' in submission_data:
-                if aware_vector_lock.acquire():
-                    aware_vector[0] = 0
-                    new_submission.aware = False
-                    new_submission.image.set(submission_data['image'])
-                    aware_vector_lock.release()
-            if 'addfile' in submission_data:
-                if aware_vector_lock.acquire():
-                    aware_vector[1] = 0
-                    new_submission.aware = False
-                    new_submission.addfile.set(submission_data['addfile'])
-                    aware_vector_lock.release()
-
+                
             if 'image' in submission_data:
                 convert_thread = Thread(
                     target=generate_pdf_for_submission,
@@ -111,7 +119,8 @@ class CreateSubmission(graphene.Mutation):
                 ok=True, submission=new_submission, msg=public_msg['success'])
 
         # bad request
-        except:
+        except Exception as e:
+            print(e)
             return CreateSubmission(ok=False, msg=public_msg['badreq'])
 
 
@@ -120,7 +129,7 @@ def generate_pdf_for_submission(image_id_list,
                                 new_submission_id,
                                 realuser,
                                 enhance=False):
-    global aware_vector, aware_vector_lock
+    global aware_vector
     filter_condition = models.models.Q(pk=None)
     for image_id in image_id_list:
         filter_condition = filter_condition | models.models.Q(pk=image_id)
@@ -141,17 +150,15 @@ def generate_pdf_for_submission(image_id_list,
     target_submission = models.HWFSubmission.objects.get(pk=new_submission_id)
     target_submission.pdf_id = new_pdf.pk
     target_submission.long_picture_id = new_long_pic.pk
+    aware_vector[0] = 1
+    if aware_vector[1] == 1:
+        target_submission.aware = True
     target_submission.save()
-    if aware_vector_lock.acqiure():
-        aware_vector[0] = 1
-        if aware_vector[1] == 1:
-            target_submission.aware = True
-        aware_vector_lock.release()
 
 
 # zip all addfiles as one
 def zip_files_for_submission(addfile_id_list, new_submission_id, realuser):
-    global aware_vector, aware_vector_lock
+    global aware_vector
     filter_condition = models.models.Q(pk=None)
     for addfile_id in addfile_id_list:
         filter_condition = filter_condition | models.models.Q(pk=addfile_id)
@@ -166,11 +173,9 @@ def zip_files_for_submission(addfile_id_list, new_submission_id, realuser):
         initial_upload_user_id=realuser.pk)
     target_submission = models.HWFSubmission.objects.get(pk=new_submission_id)
     target_submission.addfile.set([new_zip.pk])
-    target_submission.save()
     for addfile_id in addfile_id_list:
         models.HWFFile.objects.get(pk=addfile_id).delete()
-    if aware_vector_lock.acquire():
-        aware_vector[1] = 1
-        if aware_vector[0] == 1:
-            target_submission.aware = True
-        aware_vector_lock.release()
+    aware_vector[1] = 1
+    if aware_vector[0] == 1:
+        target_submission.aware = True
+    target_submission.save()

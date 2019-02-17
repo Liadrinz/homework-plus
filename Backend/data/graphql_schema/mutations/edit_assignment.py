@@ -47,6 +47,13 @@ class EditAssignment(graphene.Mutation):
             if len(editing_assignment.course_class.teachers.filter(pk=realuser.id)) == 0 or len(editing_assignment.course_class.teaching_assistants.filter(pk=realuser.id)) == 0:
                 return EditAssignment(ok=False, msg=public_msg['forbidden'])
             else:
+                # file validation
+                fid = 0
+                try:
+                    for fid in addfile:
+                        models.HWFFile.objects.get(fid)
+                except:
+                    return EditAssignment(ok=False, msg=create_msg(4103, "file %d cannot be found" % fid))
                 if 'name' in assignment_data:
                     editing_assignment.name = assignment_data['name']
                 if 'description' in assignment_data:
