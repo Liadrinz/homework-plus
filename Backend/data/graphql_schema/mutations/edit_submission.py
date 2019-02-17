@@ -61,14 +61,9 @@ class EditSubmission(graphene.Mutation):
                 return EditSubmission(
                     ok=False, msg=create_msg(4122, "deadline expired"))
 
-            viewing_course = editing_submission.assignment.course_class
-
-            # is authentic student
-            if len(viewing_course.students.filter(pk=realuser.pk)) == 0:
-                return EditSubmission(
-                    ok=False,
-                    msg=create_msg(4123,
-                                   "you are not a student of this course"))
+            # owner validation
+            if editing_submission.submitter.pk != realuser.pk:
+                return EditSubmission(ok=False, msg=create_msg(4191, "it's not your homework"))
 
             if 'image' in submission_data:
                 if aware_vector_lock.acquire():

@@ -560,6 +560,8 @@ mutation {
 {
   aware: Boolean
   description: String
+  reviewComment: String
+  isReviewed: Boolean
   score: Float
   isExcellent: Boolean
   image: FileType
@@ -645,7 +647,7 @@ query {
 需要该课的学生
 ##### 参数
 ```gql
-(submissionData:{
+(submissionData: {
   assignment: Int!
   description: String
   image: List<Int>
@@ -664,6 +666,37 @@ query {
 ```gql
 mutation {
   createSubmission(submissionData: {
+    // 参数字段
+  }) {
+    // 返回字段
+  }
+}
+```
+
+#### editSubmission
+##### 权限
+需要该作业的提交者
+##### 参数
+```gql
+(submissionData: {
+  id: Int!
+  description: String
+  image: List<Int>
+  addfile: List<Int>
+})
+```
+##### 返回字段
+```gql
+{
+  ok: Boolean
+  msg: JSONString
+  submission: SubmissionType
+}
+```
+##### 用法
+```gql
+mutation {
+  editSubmission(submissionData: {
     // 参数字段
   }) {
     // 返回字段
