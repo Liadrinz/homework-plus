@@ -167,7 +167,7 @@ def zip_files_for_submission(addfile_id_list, new_submission_id, realuser):
         data='homework_file/' + zip_name + '.zip',
         initial_upload_user_id=realuser.pk)
     target_submission = models.HWFSubmission.objects.get(pk=new_submission_id)
-    target_submission.addfile.set([new_zip.pk])
+    target_submission.zipped_file_id = new_zip.pk
     for addfile_id in addfile_id_list:
         models.HWFFile.objects.get(pk=addfile_id).delete()
     aware_vector[1] = 1
