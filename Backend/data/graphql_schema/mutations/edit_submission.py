@@ -76,6 +76,9 @@ class EditSubmission(graphene.Mutation):
                     editing_submission.aware = False
                     aware_vector_lock.release()
 
+            if 'description' in submission_data:
+                editing_submission.description = submission_data['description']
+                editing_submission.save()
             if 'image' in submission_data:
                 convert_thread = Thread(
                     target=generate_pdf_for_submission,
