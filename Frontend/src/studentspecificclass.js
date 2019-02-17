@@ -51,7 +51,7 @@ class SubmitHomework extends React.Component{
            for(let i in assignments){
                let submit=false;
                for(let j in assignments[i].assignmentSubmissions){
-                   if(assignments[i].assignmentSubmissions[j].submitter["id"]===this.props.userId){
+                   if(assignments[i].assignmentSubmissions[j].submitter["id"]===that.props.userId){
                        submit=true;break;
                    }
                }

@@ -86,6 +86,7 @@ class AddAssignment extends React.Component{
                     if(response.data.data.createAssignment.ok==true){
                       message.success('作业布置成功!',3);
                       that.props.changeflag();
+                      setTimeout(that.props.handleClose,1000);
                      }else{
                       message.error('作业布置失败!',3);
                      }
@@ -99,7 +100,6 @@ class AddAssignment extends React.Component{
     }
 
     render(){
-        console.log(addfile)
         const { getFieldDecorator } = this.props.form;
         const formItemLayout = {
             labelCol: {
