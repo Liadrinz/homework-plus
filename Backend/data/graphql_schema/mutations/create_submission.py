@@ -80,8 +80,6 @@ class CreateSubmission(graphene.Mutation):
                 except:
                     return CreateSubmission(ok=False, msg=create_msg(4103, "file %d cannot be found" % fid))
                 aware_vector[0] = 0
-                new_submission.aware = False
-                new_submission.image.set(submission_data['image'])
             if 'addfile' in submission_data:
                 # file validation
                 fid = 0
@@ -91,9 +89,6 @@ class CreateSubmission(graphene.Mutation):
                 except:
                     return CreateSubmission(ok=False, msg=create_msg(4103, "file %d cannot be found" % fid))
                 aware_vector[1] = 0
-                new_submission.aware = False
-                new_submission.addfile.set(submission_data['addfile'])
-            new_submission.save()
 
             new_submission = models.HWFSubmission.objects.create(
                 description=submission_data['description'],
