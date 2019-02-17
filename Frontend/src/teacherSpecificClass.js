@@ -45,9 +45,9 @@ class AddAssignment extends React.Component{
                         createAssignment(
                           assignmentData:{
                             id:"${that.props.courseId}",
-                            name:${values.作业名称},
+                            name:"${values.作业名称}",
                             description:"${values.作业描述}",
-                            deadline:[${values.截止时间}],
+                            deadline:"${values.截止时间}",
                             addfile:[],
                           }
                         ){
