@@ -1,6 +1,6 @@
 import React from 'react';
 import axios from 'axios';
-import {Row,Col,Card,Layout,Button,Drawer,Tag} from 'antd';
+import {Row,Col,Card,Layout,Button,Drawer,Tag,Table,Menu, Radio} from 'antd';
 import moment from 'moment';
 import "./correctSpecificWork.css";
 
@@ -54,6 +54,7 @@ class CorrectSpecificWork extends React.Component{
                 }]
             },
             visible1:false,
+            current:"notcorrected",
         }
     }
     
@@ -78,6 +79,26 @@ class CorrectSpecificWork extends React.Component{
                     }
                     addfile{
                         data
+                    }
+                    assignmentSubmissions{
+                        aware
+                        isReviewed
+                        isExcellent
+                        id
+                        description
+                        score
+                        longPicture{
+                            data
+                        }
+                        zippedFile{
+                            data
+                        }
+                        submitter{
+                            name
+                            buptId
+                            classNumber
+                            gender
+                        }
                     }
                  }
                 }`//用反引号      
@@ -104,8 +125,44 @@ class CorrectSpecificWork extends React.Component{
         this.setState({visible1:false});
     }
 
+    handleClick=(e)=>{
+        this.setState({current:e.key});
+    }
+
+    handleChange=(selectedRowKeys,selectedRows)=>{
+        console.log(selectedRowKeys);//这个key即为submission的ID
+    }
+
     render(){
         const isEnd=moment().isBefore(this.state.assignmentInfo.startTime,"minute")||moment().isAfter(this.state.assignmentInfo.deadline,"minute");
+        const column=[{
+            title:'姓名',
+            dataIndex:'submitter.name',
+            width: 100,
+        },{
+            title:'性别',
+            dataIndex:'submitter.gender',
+            render:text=>text=="MALE"?'男':'女',
+            width: 100,
+        },{
+            title:'班级',
+            dataIndex:'submitter.classNumber',
+            width: 100,
+        },{
+            title:'学号',
+            dataIndex:'submitter.buptId',
+            width: 100,
+        },{
+            title:'作业分数',
+            dataIndex:'score',
+            width: 100,
+        }]
+        const data=this.state.assignmentInfo.assignmentSubmissions;
+        const rowSelection={
+            hideDefaultSelections:true,
+            type:"radio",
+            onChange:this.handleChange,
+        }
         return(
             <div>
             <Layout>
@@ -133,42 +190,33 @@ class CorrectSpecificWork extends React.Component{
                 {"开始提交:"+ moment(this.state.assignmentInfo.startTime).format("YY"+"/"+"M"+"/"+"D"+" "+"HH"+":"+"mm")+"  "+
                  "结束提交:"+ moment(this.state.assignmentInfo.deadline).format("YY"+"/"+"M"+"/"+"D"+" "+"HH"+":"+"mm")}   
                 </span>
-                <Tag color={isEnd?"red":"green"}>{isEnd?"已结束":"进行中"}</Tag>
+                <Tag color={isEnd?"red":"green"}>{isEnd?"提交已结束":"提交进行中"}</Tag>
               </div>                                      
-              <Card title="待批改作业" style={{height:"280px",backgroundColor:"#CCFFEB"}}>
-                 <div className="scrollprac">
-                     <p>some content</p>
-                     <p>some content</p>
-                     <p>some content</p>
-                     <p>some content</p>
-                     <p>some content</p>  
-                     <p>some content</p>   
-                     <p>some content</p>   
-                     <p>some content</p>                     
-                 </div>
-              </Card>
-              <Card title="已批改作业" style={{height:"280px"}}>
-                 <div className="scrollprac2">
-                     <p>some content</p>
-                     <p>some content</p>
-                     <p>some content</p>
-                     <p>some content</p>
-                     <p>some content</p>  
-                     <p>some content</p>   
-                     <p>some content</p>   
-                     <p>some content</p>                     
-                 </div>
-              </Card>
-              <Card title="未交名单" style={{height:"280px"}}>
-                 <div className="scrollprac3">
-                     <p>some content</p>
-                     <p>some content</p>
-                     <p>some content</p>
-                     <p>some content</p>
-                   
-                 </div>
-              </Card>
-            </Content>
+              <Menu
+                onClick={this.handleClick}
+                selectedKeys={[this.state.current]}
+                mode="horizontal"
+              >
+                 <Menu.Item key="notcorrected">
+                   <span style={{fontSize:"20px"}}>待批改作业</span>
+                 </Menu.Item>
+                 <Menu.Item key="corrected">
+                   <span style={{fontSize:"20px"}}>已批改作业</span>
+                 </Menu.Item>
+                 <Menu.Item key="unpaid">
+                   <span style={{fontSize:"20px"}}>未交名单</span>
+                 </Menu.Item>
+              </Menu>
+               <Table 
+                  style={{marginLeft:"20px",marginRight:"20px",marginTop:"10px"}}
+                  columns={column} 
+                  dataSource={data} 
+                  bordered 
+                  rowKey={record=>record["id"]}
+                  pagination={{pageSize:50}}
+                  scroll={{y:500}}
+                  rowSelection={rowSelection}/>   
+             </Content>
             </Layout>
             <Drawer
                title="作业要求描述"

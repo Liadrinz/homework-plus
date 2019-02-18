@@ -1,6 +1,7 @@
 import React from 'react';
 import {Button,Col,Row,Modal,Tag,Form,message,Input,Icon,Upload} from 'antd';
 import axios from 'axios';
+import {_} from 'underscore';
 import moment from 'moment';
 import './myHomework.css';
 
@@ -42,6 +43,112 @@ class Review extends React.Component{
     render(){
         return(
             <div>fuck world</div>
+        )
+    }
+}
+
+class CheckHomework extends React.Component{
+    constructor(props){
+        super(props);
+        this.state={
+            description:"xxx",
+            url:"xxx",
+        }
+    }
+    componentWillMount(){
+        var that=this;
+        var getHomework=axios.create({
+            url:"http://localhost:8000/graphql/",
+            headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
+            method:'post',
+            data:{
+              "query":`query{
+                getSubmissionsByIds(ids:[${that.props.submittedID}]){
+                    aware
+                    description
+                    longPicture{
+                       data
+                    }
+                    zippedFile{
+                       data
+                    } 
+                }
+              }`
+            },
+            timeout:1000,
+        })
+        getHomework().then(function(response){
+            let url="xxx";
+            if(response.data.data.getSubmissionsByIds[0].aware===true){
+            if(that.props.type==="图片作业") url=response.data.data.getSubmissionsByIds[0].longPicture.data;
+            else if(that.props.type==="文件作业") url=response.data.data.getSubmissionsByIds[0].zippedFile.data;
+            }
+            that.setState({description:response.data.data.getSubmissionsByIds[0].description,url:url});
+        })
+        .catch(function(error){
+            console.log(error);
+        })
+    }
+    
+    componentWillReceiveProps(nextProps){
+        var that=this;
+        if(nextProps.changeflag!==this.props.changeflag||(nextProps.isSubmitted===true&&this.props.isSubmitted===false)){
+            var getHomework=axios.create({
+                url:"http://localhost:8000/graphql/",
+                headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
+                method:'post',
+                data:{
+                  "query":`query{
+                    getSubmissionsByIds(ids:[${that.props.submittedID}]){
+                        aware
+                        description
+                        longPicture{
+                           data
+                        }
+                        zippedFile{
+                           data
+                        } 
+                    }
+                  }`
+                },
+                timeout:1000,
+            })
+            getHomework().then(function(response){
+                let url="xxx";
+                if(response.data.data.getSubmissionsByIds[0].aware===true){
+                if(that.props.type==="图片作业") url=response.data.data.getSubmissionsByIds[0].longPicture.data;
+                else if(that.props.type==="文件作业") url=response.data.data.getSubmissionsByIds[0].zippedFile.data;
+                }
+                that.setState({description:response.data.data.getSubmissionsByIds[0].description,url:url});
+            })
+            .catch(function(error){
+                console.log(error);
+            })
+        }
+    }
+
+    render(){
+        if(this.props.type==="图片作业"){ return(
+            <div>
+               <span style={{fontSize:"20px"}}>作业备注：</span>
+               <TextArea value={this.state.description} rows={4}/>
+               <br/><br/>
+               <span style={{fontSize:"20px"}}>已提交的作业：</span>
+               <br/><br/>
+               <img src={"http://localhost:8000/media/"+this.state.url} alt="图片作业" width="750px"/>
+            </div>
+        )}else if(this.props.type==="文件作业") return(
+            <div>
+               <span style={{fontSize:"20px"}}>作业备注：</span>
+               <TextArea value={this.state.description} rows={4}/>
+               <br/><br/>
+               <span style={{fontSize:"20px"}}>已提交的作业：</span>
+               <br/><br/>
+               <a href={"http://localhost:8000/media/"+this.state.url}
+                  style={{fontSize:"20px"}}>
+                {this.state.url==="xxx"?"xxx":re2.exec(this.state.url)[1]}
+               </a>
+            </div>           
         )
     }
 }
@@ -150,7 +257,7 @@ class Handin extends React.Component{
                     handinHomework1().then(function(response){
                         if(response.data.data.createSubmission.ok==true){
                             message.success('作业上传成功!',3);
-                            that.props.changeSubmitted();
+                            that.props.changeSubmitted(response.data.data.createSubmission.submission["id"]);
                             setTimeout(that.props.onClose,1000);
                         }else{
                             message.error('作业上传失败!',3);
@@ -163,7 +270,7 @@ class Handin extends React.Component{
                     handinHomework2().then(function(response){
                         if(response.data.data.createSubmission.ok==true){
                             message.success('作业上传成功!',3);
-                            that.props.changeSubmitted();
+                            that.props.changeSubmitted(response.data.data.createSubmission.submission["id"]);
                             setTimeout(that.props.onClose,1000);
                         }else{
                             message.error('作业上传失败!',3);
@@ -178,6 +285,7 @@ class Handin extends React.Component{
                     updateHomework1().then(function(response){
                         if(response.data.data.editSubmission.ok==true){
                             message.success('作业更新成功!',3);
+                            that.props.changeFlag();
                             setTimeout(that.props.onClose,1000);
                         }else{
                             message.error('作业更新失败!',3);
@@ -190,6 +298,7 @@ class Handin extends React.Component{
                     updateHomework2().then(function(response){
                         if(response.data.data.editSubmission.ok==true){
                             message.success('作业更新成功!',3);
+                            that.props.changeFlag();
                             setTimeout(that.props.onClose,1000);
                         }else{
                             message.error('作业更新失败!',3);
@@ -228,7 +337,6 @@ class Handin extends React.Component{
         const uploadProps = { //放进Upload组件里的一些属性
             name: 'data',
             action: "http://localhost:8000/upload_file/",
-            accept:".jpg,.png",
             headers: {
                 token:localStorage.getItem('token'),
             },
@@ -236,6 +344,7 @@ class Handin extends React.Component{
                 return false;
             }
         };
+        if(this.props.type==="图片作业") _.extend(uploadProps,{accept:".jpg,.png"});
         return(
             <Form onSubmit={this.handleSubmit}>
                 <FormItem 
@@ -255,7 +364,7 @@ class Handin extends React.Component{
                     <Icon type="upload" /> {this.props.type==="图片作业"?"上传作业图片":"上传作业文件"}
                     </Button>
                   </Upload>                 
-                </FormItem>   
+                </FormItem> 
                 <Button type="primary" htmlType="submit" disabled={this.state.addfile.length==0?true:false}>提交</Button>
             </Form>
         )
@@ -284,6 +393,8 @@ class SubmitHomework extends React.Component{
             },
             visible1:false,
             visible2:false,
+            visible3:false,
+            changeflag:false,//判断是否更新了提交
             isSubmitted:false,//判断是否已经提交过了作业
             submittedID:-1,//提交作业的submission的ID
         }
@@ -390,6 +501,10 @@ class SubmitHomework extends React.Component{
         this.setState({visible2:true})
     }
 
+    showModal3=()=>{
+        this.setState({visible3:true})
+    }
+
     onClose=()=>{
         this.setState({visible1:false})
     };
@@ -398,8 +513,17 @@ class SubmitHomework extends React.Component{
         this.setState({visible2:false})
     };
 
-    changeSubmitted=()=>{
-        this.setState({isSubmitted:true})
+    onClose3=()=>{
+        this.setState({visible3:false})
+    };
+
+    changeSubmitted=(info)=>{
+        this.setState({isSubmitted:true,submittedID:info});
+    }
+
+    changeFlag=()=>{
+        let changeflag=this.state.changeflag;
+        this.setState({changeflag:!changeflag});
     }
 
     render(){
@@ -421,10 +545,25 @@ class SubmitHomework extends React.Component{
                 {"开始提交:"+ moment(this.state.assignmentInfo.startTime).format("YY"+"/"+"M"+"/"+"D"+" "+"HH"+":"+"mm")+"   "+
                  "结束提交:"+ moment(this.state.assignmentInfo.deadline).format("YY"+"/"+"M"+"/"+"D"+" "+"HH"+":"+"mm")}   
                 </span>
-              </div>   
+              </div> 
+              <span>  
               <Button type="primary" size="large" style={{marginLeft:"20px"}} onClick={this.showModal2}>
               {this.state.isSubmitted?"更新提交":"提交作业"}
               </Button>
+              <Button size="large" style={{marginLeft:"30px"}} disabled={this.state.submittedID===-1?true:false} onClick={this.showModal3}>
+              查看已提交的作业
+              </Button>
+              </span>
+              <Modal
+                title="查看已经提交的作业"
+                footer={<Button onClick={this.onClose3} type="primary">关闭</Button>}
+                onCancel={this.onClose3}
+                visible={this.state.visible3}
+                maskClosable={false}
+                width={800}
+               >
+                 <CheckHomework submittedID={this.state.submittedID} type={this.state.assignmentInfo.assignmentType} changeflag={this.state.changeflag} isSubmitted={this.state.isSubmitted}/>
+              </Modal>
               <Modal
                 title={this.state.isSubmitted?"更新提交":"提交作业"}
                 footer={null}
@@ -435,6 +574,7 @@ class SubmitHomework extends React.Component{
               <WrappedHandin 
                 isSubmitted={this.state.isSubmitted} 
                 changeSubmitted={this.changeSubmitted}
+                changeFlag={this.changeFlag}
                 type={this.state.assignmentInfo.assignmentType}
                 assignmentId={this.state.assignmentInfo["id"]}
                 submittedID={this.state.submittedID}
