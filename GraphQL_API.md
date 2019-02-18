@@ -565,7 +565,7 @@ mutation {
   score: Float
   isExcellent: Boolean
   pdf: FileType
-  longPic: FileType  // 长图
+  longPicture: FileType  // 长图
   zippedFile: FileType  // 压缩包
   submitTime: DateTime
   assignment: AssignmentType
@@ -585,6 +585,22 @@ mutation {
 ```gql
 query {
   allSubmissions {
+    // 需要查询的字段
+  }
+}
+```
+
+#### getSubmissionsByIds
+##### 权限
+需要登录
+##### 参数
+```gql
+(ids: List<Int>)
+```
+##### 用法
+```gql
+query {
+  getSubmissionsByIds(ids: 指定submission的id列表) {
     // 需要查询的字段
   }
 }
