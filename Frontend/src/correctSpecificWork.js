@@ -1,7 +1,8 @@
 import React from 'react';
 import axios from 'axios';
-import {Row,Col,Card,Layout,Button,Drawer,Tag,Table,Menu, Radio} from 'antd';
+import {Row,Col,Card,Layout,Button,Drawer,Tag,Table,Menu,Radio,message} from 'antd';
 import moment from 'moment';
+import {_} from 'underscore'
 import "./correctSpecificWork.css";
 
 var assignmentId;//特定作业任务的Id
@@ -35,6 +36,169 @@ class UploadAssignmentFile extends React.Component{
         }
     }
 }
+
+class NotcorrectedTable extends React.Component{
+    constructor(props){
+        super(props);
+        this.state={data:[]};
+    }
+
+    componentWillMount(){
+        if(typeof(this.props.submission)!=="undefined"){
+             let data=_.filter(this.props.submission,(info)=>{return info.isReviewed===false});
+             this.setState({data:data});
+             this.props.changeCorrectId(data[0]["id"]);
+        }
+    }
+
+    componentWillReceiveProps(nextProps){
+        if(typeof(nextProps.submission)!=="undefined"&&typeof(this.props.submission)==="undefined"){
+             let data=_.filter(nextProps.submission,(info)=>{return info.isReviewed===false});
+             this.setState({data:data});
+             this.props.changeCorrectId(data[0]["id"]);
+        }
+    }
+
+    handleChange=(selectedRowKeys,selectedRows)=>{
+        this.props.changeCorrectId(selectedRowKeys[0]);//这个key即为submission的ID
+    }
+
+    render(){
+        const column=[{
+            title:'姓名',
+            dataIndex:'submitter.name',
+            width: 80,
+        },{
+            title:'性别',
+            dataIndex:'submitter.gender',
+            render:text=>text=="MALE"?'男':'女',
+            width: 60,
+        },{
+            title:'班级',
+            dataIndex:'submitter.classNumber',
+            width: 100,
+        },{
+            title:'学号',
+            dataIndex:'submitter.buptId',
+            width: 100,
+        }]
+        const rowSelection={
+            hideDefaultSelections:true,
+            type:"radio",
+            onChange:this.handleChange,
+            columnTitle:"批改作业",
+        }
+        return(
+            <Table 
+            style={{marginLeft:"20px",marginRight:"20px",marginTop:"10px"}}
+            columns={column} 
+            dataSource={this.state.data} 
+            bordered 
+            rowKey={record=>record["id"]}
+            pagination={{pageSize:50}}
+            scroll={{y:500}}
+            rowSelection={rowSelection}/>   
+        )
+    }
+}
+
+class CorrectedTable extends React.Component{
+    handleChange=(selectedRowKeys,selectedRows)=>{
+        this.props.changeCorrectId(selectedRowKeys[0]);//这个key即为submission的ID
+    }
+
+    render(){
+        const column=[{
+            title:'姓名',
+            dataIndex:'submitter.name',
+            width: 80,
+        },{
+            title:'性别',
+            dataIndex:'submitter.gender',
+            render:text=>text=="MALE"?'男':'女',
+            width: 80,
+        },{
+            title:'班级',
+            dataIndex:'submitter.classNumber',
+            width: 100,
+        },{
+            title:'学号',
+            dataIndex:'submitter.buptId',
+            width: 100,
+        },{
+            title:'作业分数',
+            dataIndex:'score',
+            width: 100,
+        },{
+            title:'优秀作业',
+            dataIndex:'isExcellent',
+            render:text=>{
+                if(text===true) return <Tag color="gold">优秀作业</Tag>
+            },
+            width: 100,
+        }]
+        const data=_.filter(this.props.submission,(info)=>{return info.isReviewed===true});
+        const rowSelection={
+            hideDefaultSelections:true,
+            type:"radio",
+            onChange:this.handleChange,
+            columnTitle:"更新批改",
+        }
+        return(
+            <Table 
+            style={{marginLeft:"20px",marginRight:"20px",marginTop:"10px"}}
+            columns={column} 
+            dataSource={data} 
+            bordered 
+            rowKey={record=>record["id"]}
+            pagination={{pageSize:50}}
+            scroll={{y:500}}
+            rowSelection={rowSelection}/>   
+        )
+    } 
+}
+
+class UnpaidTable extends React.Component{
+    render(){
+        const column=[{
+            title:'姓名',
+            dataIndex:'name',
+            width: 100,
+        },{
+            title:'性别',
+            dataIndex:'gender',
+            render:text=>text=="MALE"?'男':'女',
+            width: 100,
+        },{
+            title:'班级',
+            dataIndex:'classNumber',
+            width: 100,
+        },{
+            title:'学号',
+            dataIndex:'buptId',
+            width: 100,
+        }]
+        const data=_.filter(this.props.students,(info)=>{return !_.contains(_.pluck(_.pluck(this.props.submission,"submitter"),"buptId"),info.buptId);})
+        return(
+            <Table 
+            style={{marginLeft:"20px",marginRight:"20px",marginTop:"10px"}}
+            columns={column} 
+            dataSource={data} 
+            bordered 
+            rowKey={record=>record.buptId}
+            pagination={{pageSize:50}}
+            scroll={{y:500}}/>   
+        )
+    }     
+}
+
+class ThreeTable extends React.Component{
+    render(){
+        if(this.props.current==="notcorrected") return <NotcorrectedTable submission={this.props.submission} changeCorrectId={this.props.changeCorrectId}/>
+        else if(this.props.current==="corrected") return <CorrectedTable submission={this.props.submission} changeCorrectId={this.props.changeCorrectId}/>
+        else return <UnpaidTable submission={this.props.submission} students={this.props.students}/>
+    }
+}
   
 class CorrectSpecificWork extends React.Component{
     constructor(props){
@@ -53,8 +217,29 @@ class CorrectSpecificWork extends React.Component{
                     data:"xxx",
                 }]
             },
+            submissionData:{
+                aware:false,
+                isReviewed:false,
+                isExcellent:false,
+                id:-1,
+                description:"xxx",
+                score:0,
+                longPicture:{
+                    data:"xxx",
+                },
+                zippedFile:{
+                    data:"xxx",
+                },
+                submitter:{
+                    name:"xxx",
+                    buptId:"xxx",
+                    classNumber:"xxx",
+                    gender:"xxx",
+                }
+            },//当前批改作业的数据
             visible1:false,
             current:"notcorrected",
+            correctId:-1,//当前批改的submission的ID,默认为待批改作业列表中的第一个
         }
     }
     
@@ -76,6 +261,12 @@ class CorrectSpecificWork extends React.Component{
                     deadline
                     courseClass{
                         name
+                        students{
+                            name
+                            buptId
+                            classNumber
+                            gender                            
+                        }
                     }
                     addfile{
                         data
@@ -117,6 +308,12 @@ class CorrectSpecificWork extends React.Component{
         })
     }
 
+    componentWillUpdate(nextProps,nextState){
+        if(nextState.correctId!==-1){
+            nextState.submissionData=_.filter(nextState.assignmentInfo.assignmentSubmissions,(info)=>{return info["id"]===nextState.correctId})[0];
+        }
+    }
+
     openDrawer=()=>{
         this.setState({visible1:true});
     }
@@ -129,49 +326,20 @@ class CorrectSpecificWork extends React.Component{
         this.setState({current:e.key});
     }
 
-    handleChange=(selectedRowKeys,selectedRows)=>{
-        console.log(selectedRowKeys);//这个key即为submission的ID
+    changeCorrectId=(info)=>{
+        this.setState({correctId:info});
     }
 
     render(){
         const isEnd=moment().isBefore(this.state.assignmentInfo.startTime,"minute")||moment().isAfter(this.state.assignmentInfo.deadline,"minute");
-        const column=[{
-            title:'姓名',
-            dataIndex:'submitter.name',
-            width: 100,
-        },{
-            title:'性别',
-            dataIndex:'submitter.gender',
-            render:text=>text=="MALE"?'男':'女',
-            width: 100,
-        },{
-            title:'班级',
-            dataIndex:'submitter.classNumber',
-            width: 100,
-        },{
-            title:'学号',
-            dataIndex:'submitter.buptId',
-            width: 100,
-        },{
-            title:'作业分数',
-            dataIndex:'score',
-            width: 100,
-        }]
-        const data=this.state.assignmentInfo.assignmentSubmissions;
-        const rowSelection={
-            hideDefaultSelections:true,
-            type:"radio",
-            onChange:this.handleChange,
-        }
         return(
             <div>
             <Layout>
-              <Sider theme="light" width="650">
-              <p style={{fontSize:"50px",width:"50px"}}>fsaddsfadf</p>
-              <p style={{fontSize:"50px",width:"50px"}}>fsaddsfadf</p>
-              <p style={{fontSize:"50px",width:"50px"}}>fsaddsfadf</p>
-              <p style={{fontSize:"50px",width:"50px"}}>fsaddsfadf</p>
-              <p style={{fontSize:"50px",width:"50px"}}>fsaddsfadf</p>
+              <Sider theme="light" width="650" style={{height:"90vh"}}>
+              <div className="scrollprac">
+              <br/>
+              <span style={{fontSize:"30px"}}>{this.state.submissionData.submitter["name"]+" 的作业"}</span>
+              </div>
               </Sider>
               <Content>
               <div style={{marginBottom:"10px",marginTop:"10px"}}>
@@ -207,15 +375,10 @@ class CorrectSpecificWork extends React.Component{
                    <span style={{fontSize:"20px"}}>未交名单</span>
                  </Menu.Item>
               </Menu>
-               <Table 
-                  style={{marginLeft:"20px",marginRight:"20px",marginTop:"10px"}}
-                  columns={column} 
-                  dataSource={data} 
-                  bordered 
-                  rowKey={record=>record["id"]}
-                  pagination={{pageSize:50}}
-                  scroll={{y:500}}
-                  rowSelection={rowSelection}/>   
+              <ThreeTable current={this.state.current}
+                          submission={this.state.assignmentInfo.assignmentSubmissions}
+                          students={this.state.assignmentInfo.courseClass.students}
+                          changeCorrectId={this.changeCorrectId}/>
              </Content>
             </Layout>
             <Drawer
