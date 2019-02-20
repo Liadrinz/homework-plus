@@ -1,6 +1,6 @@
 import React from 'react';
 import axios from 'axios';
-import {Row,Col,Card,Layout,Button,Drawer,Tag,Table,Menu,Radio,message} from 'antd';
+import {Row,Col,Card,Layout,Button,Drawer,Tag,Table,Menu,Radio,message,Input,Form,Modal,InputNumber} from 'antd';
 import moment from 'moment';
 import {_} from 'underscore'
 import "./correctSpecificWork.css";
@@ -8,6 +8,9 @@ import "./correctSpecificWork.css";
 var assignmentId;//特定作业任务的Id
 var re2=/^homework_file\/(.*)$/;
 var filelist=[];//作业要求的附件
+const RadioGroup = Radio.Group;
+const FormItem = Form.Item;
+const { TextArea } = Input;
 const { Header, Footer, Sider, Content,} = Layout;
 
 class UploadAssignmentFile extends React.Component{
@@ -47,15 +50,15 @@ class NotcorrectedTable extends React.Component{
         if(typeof(this.props.submission)!=="undefined"){
              let data=_.filter(this.props.submission,(info)=>{return info.isReviewed===false});
              this.setState({data:data});
-             this.props.changeCorrectId(data[0]["id"]);
+             if(data.length!==0)this.props.changeCorrectId(data[0]["id"]);
         }
     }
 
     componentWillReceiveProps(nextProps){
-        if(typeof(nextProps.submission)!=="undefined"&&typeof(this.props.submission)==="undefined"){
+        if(typeof(nextProps.submission)!=="undefined"&&typeof(this.props.submission)==="undefined"||nextProps.submission!==this.props.submission){
              let data=_.filter(nextProps.submission,(info)=>{return info.isReviewed===false});
              this.setState({data:data});
-             this.props.changeCorrectId(data[0]["id"]);
+             if(data.length!==0)this.props.changeCorrectId(data[0]["id"]);
         }
     }
 
@@ -199,6 +202,262 @@ class ThreeTable extends React.Component{
         else return <UnpaidTable submission={this.props.submission} students={this.props.students}/>
     }
 }
+
+class Givescore extends React.Component{
+    handleSubmit=(e)=>{
+        e.preventDefault();
+        var that=this;
+        this.props.form.validateFieldsAndScroll(["作业反馈","作业分数","优秀作业"],(err,values)=>{
+            if(!err){
+                if(values.作业反馈===undefined)values.作业反馈="";
+                var givescore=axios.create({
+                    url:"http://localhost:8000/graphql/",
+                    headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
+                    method:'post',
+                    data:{
+                      "query":`mutation{
+                        giveScore(
+                          scoreGivingData:{
+                            submission:${that.props["id"]},
+                            reviewComment:"${values.作业反馈}",
+                            score:${values.作业分数},
+                            isExcellent:${values.优秀作业},
+                          }
+                        ){
+                           ok
+                           msg
+                        }
+                      }`
+                    },
+                    timeout:1000,
+                })
+                givescore().then(function(response){
+                    console.log(response.data.data.giveScore.msg)
+                    if(response.data.data.giveScore.ok==true){
+                        message.success('作业批改成功!',3);
+                        that.props.changeFlag();
+                        that.props.onClose();
+                    }else{
+                        message.error('作业批改失败!',3);
+                    }
+                })
+                .catch(function(error){
+                    message.error('作业批改失败!',3);
+                })
+            }
+        })
+    }
+
+    render(){
+        const { getFieldDecorator } = this.props.form;
+        const formItemLayout = {
+            labelCol: {
+              xs: { span: 24 },
+              sm: { span: 8 },
+            },
+            wrapperCol: {
+              xs: { span: 24 },
+              sm: { span: 16 },
+            },
+        };
+        return(
+            <Form onSubmit={this.handleSubmit}>
+                <FormItem 
+                 {...formItemLayout}
+                 label="添加作业反馈(可选)"
+                >
+                {getFieldDecorator('作业反馈')(
+                    <TextArea rows={4}/>
+                )} 
+                </FormItem>
+                <FormItem 
+                  {...formItemLayout}
+                  label="作业分数"
+                  help="作业分数上限为100分"
+                >
+                 {getFieldDecorator('作业分数', {
+                 rules: [{
+                   required: true, message: '请给作业打分!',type:"number"
+                 }],
+                  })(
+                 <InputNumber min={0} max={100} step={0.1}/>
+                 )} 
+                </FormItem>
+                <FormItem
+                  {...formItemLayout}
+                  label="是否评为优秀作业"
+                >
+                 {getFieldDecorator('优秀作业', {
+                  rules: [{
+                    required: true, message: '请选择!',
+                  }],
+                 })(
+                  <RadioGroup >
+                  <Radio value={true}>是</Radio>
+                  <Radio value={false}>否</Radio>
+                  </RadioGroup>
+                )}
+                </FormItem> 
+                <Button type="primary" htmlType="submit">提交</Button>
+            </Form>
+        )
+    }
+}
+
+const WrappedGivescore=Form.create()(Givescore);
+
+class Studenthomework extends React.Component{
+    constructor(props){
+        super(props);
+        this.state={ visible:false,}
+    }
+
+    showModal=()=>{
+        this.setState({visible:true});
+    }
+
+    onClose=()=>{
+        this.setState({visible:false});
+    }
+
+    render(){
+        if(this.props.data.isReviewed===false){
+            if(this.props.data.zippedFile.data==="xxx"){
+              return(
+                <div>
+                    <div>
+                      <span style={{fontSize:"30px"}}>{this.props.data.submitter["name"]+" 的作业"}</span>
+                      <Button style={{marginLeft:"20%"}} size="large" type="primary" 
+                              onClick={this.showModal} disabled={(this.props.data["id"]===-1||moment().isBefore(this.props.deadline))?true:false}>批改作业</Button>
+                    </div>
+                    <br/>
+                    <div style={{fontSize:"18px",marginLeft:"-80%"}}>作业备注:</div>
+                    <TextArea value={this.props.data.description} style={{width:"95%"}} rows={4}/>
+                    <br/><br/><br/>
+                    <div style={{fontSize:"18px",marginLeft:"-75%"}}>学生提交的作业:</div>
+                    <img src={"http://localhost:8000/media/"+this.props.data.longPicture.data} alt="图片作业" width="95%"/>
+                    <Modal
+                       title="批改作业"
+                       footer={null}
+                       onCancel={this.onClose}
+                       visible={this.state.visible}
+                       destroyOnClose
+                    >   
+                    <WrappedGivescore id={this.props.data["id"]} changeFlag={this.props.changeFlag} onClose={this.onClose}/> 
+                    </Modal> 
+                </div>
+              )
+            }
+            if(this.props.data.longPicture.data==="xxx"){
+                return(
+                  <div>
+                      <div>
+                        <span style={{fontSize:"30px"}}>{this.props.data.submitter["name"]+" 的作业"}</span>
+                        <Button style={{marginLeft:"20%"}} size="large" type="primary" 
+                                onClick={this.showModal} disabled={(this.props.data["id"]===-1||moment().isBefore(this.props.deadline))?true:false}>批改作业</Button>
+                      </div>
+                      <br/>
+                      <div style={{fontSize:"18px",marginLeft:"-80%"}}>作业备注:</div>
+                      <TextArea value={this.props.data.description} style={{width:"95%"}} rows={4}/>
+                      <br/><br/><br/>
+                      <div style={{fontSize:"18px",marginLeft:"-75%"}}>学生提交的作业:</div>
+                      <br/><br/>
+                        <a href={"http://localhost:8000/media/"+this.props.data.zippedFile.data}
+                           style={{fontSize:"20px"}}>
+                           {this.props.data.zippedFile.data==="xxx"?"xxx":re2.exec(this.props.data.zippedFile.data)[1]}
+                        </a>
+                      <Modal
+                       title="批改作业"
+                       footer={null}
+                       onCancel={this.onClose}
+                       visible={this.state.visible}
+                       destroyOnClose
+                      >    
+                      <WrappedGivescore id={this.props.data["id"]} changeFlag={this.props.changeFlag} onClose={this.onClose}/> 
+                      </Modal> 
+                  </div>
+                )
+            }
+        }else{
+            if(this.props.data.zippedFile.data==="xxx"){
+              return(
+                <div>
+                    <div>
+                      <span style={{fontSize:"30px",marginRight:"5%"}}>{this.props.data.submitter["name"]+" 的作业"}</span>
+                      <Tag color={this.props.data.isExcellent?"gold":"cyan"}>{this.props.data.isExcellent?"优秀作业":"普通作业"}</Tag>
+                      <Button style={{marginLeft:"20%"}} size="large" type="primary" 
+                              onClick={this.showModal} disabled={(this.props.data["id"]===-1||moment().isBefore(this.props.deadline))?true:false}>更新批改</Button>
+                    </div>
+                    <br/>
+                    <div>
+                      <span style={{fontSize:"18px",marginRight:"5%"}}>分数:</span>
+                      <InputNumber value={this.props.data.score} min={this.props.data.score} max={this.props.data.score}/>
+                      <span style={{fontSize:"18px",marginLeft:"5%"}}>分</span>
+                    </div>
+                    <br/>
+                    <div style={{fontSize:"18px",marginLeft:"-80%"}}>作业备注:</div>
+                    <TextArea value={this.props.data.description} style={{width:"95%"}} rows={4}/>
+                    <br/><br/><br/>
+                    <div style={{fontSize:"18px",marginLeft:"-80%"}}>教师反馈:</div>
+                    <TextArea value={this.props.data.reviewComment} style={{width:"95%"}} rows={4}/>
+                    <br/><br/><br/>
+                    <div style={{fontSize:"18px",marginLeft:"-75%"}}>学生提交的作业:</div>
+                    <img src={"http://localhost:8000/media/"+this.props.data.longPicture.data} alt="图片作业" width="95%"/>
+                    <Modal
+                       title="批改作业"
+                       footer={null}
+                       onCancel={this.onClose}
+                       visible={this.state.visible}
+                       destroyOnClose
+                    >   
+                    <WrappedGivescore id={this.props.data["id"]} changeFlag={this.props.changeFlag} onClose={this.onClose}/> 
+                    </Modal> 
+                </div>
+               )
+            }
+            if(this.props.data.longPicture.data==="xxx"){
+              return(
+                <div>
+                <div>
+                    <span style={{fontSize:"30px",marginRight:"5%"}}>{this.props.data.submitter["name"]+" 的作业"}</span>
+                    <Tag color={this.props.data.isExcellent?"gold":"cyan"}>{this.props.data.isExcellent?"优秀作业":"普通作业"}</Tag>
+                    <Button style={{marginLeft:"20%"}} size="large" type="primary" 
+                            onClick={this.showModal} disabled={(this.props.data["id"]===-1||moment().isBefore(this.props.deadline))?true:false}>更新批改</Button>
+                </div>
+                <br/>
+                <div>
+                    <span style={{fontSize:"18px",marginRight:"5%"}}>分数:</span>
+                    <InputNumber value={this.props.data.score} min={this.props.data.score} max={this.props.data.score}/>
+                    <span style={{fontSize:"18px",marginLeft:"5%"}}>分</span>
+                </div>
+                <br/>
+                <div style={{fontSize:"18px",marginLeft:"-80%"}}>作业备注:</div>
+                <TextArea value={this.props.data.description} style={{width:"95%"}} rows={4}/>
+                <br/><br/><br/>
+                <div style={{fontSize:"18px",marginLeft:"-80%"}}>教师反馈:</div>
+                <TextArea value={this.props.data.reviewComment} style={{width:"95%"}} rows={4}/>
+                <br/><br/><br/>
+                <div style={{fontSize:"18px",marginLeft:"-75%"}}>学生提交的作业:</div>
+                <br/><br/>
+                  <a href={"http://localhost:8000/media/"+this.props.data.zippedFile.data}
+                     style={{fontSize:"20px"}}>
+                     {this.props.data.zippedFile.data==="xxx"?"xxx":re2.exec(this.props.data.zippedFile.data)[1]}
+                  </a>
+                <Modal
+                 title="批改作业"
+                 footer={null}
+                 onCancel={this.onClose}
+                 visible={this.state.visible}
+                 destroyOnClose
+                >    
+                <WrappedGivescore id={this.props.data["id"]} changeFlag={this.props.changeFlag} onClose={this.onClose}/> 
+                </Modal> 
+                </div>
+              )
+            }
+        }
+    }
+}
   
 class CorrectSpecificWork extends React.Component{
     constructor(props){
@@ -223,6 +482,7 @@ class CorrectSpecificWork extends React.Component{
                 isExcellent:false,
                 id:-1,
                 description:"xxx",
+                reviewComment:"xxx",
                 score:0,
                 longPicture:{
                     data:"xxx",
@@ -240,6 +500,7 @@ class CorrectSpecificWork extends React.Component{
             visible1:false,
             current:"notcorrected",
             correctId:-1,//当前批改的submission的ID,默认为待批改作业列表中的第一个
+            flag:true,//当givescore以后这个flag会反转，来重新获取一波作业数据
         }
     }
     
@@ -277,6 +538,7 @@ class CorrectSpecificWork extends React.Component{
                         isExcellent
                         id
                         description
+                        reviewComment
                         score
                         longPicture{
                             data
@@ -309,8 +571,81 @@ class CorrectSpecificWork extends React.Component{
     }
 
     componentWillUpdate(nextProps,nextState){
+        var that=this;
+        if(nextState.flag!==this.state.flag){
+            assignmentId=this.props.re.exec(window.location.pathname)[1];
+            var getAssignmentInfo=axios.create({
+                url:"http://localhost:8000/graphql/",
+                headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
+                method:'post',
+                data:{
+                   "query":`query{
+                     getAssignmentsByIds(ids:${[assignmentId]})
+                     {
+                        name
+                        description
+                        assignmentType
+                        startTime
+                        deadline
+                        courseClass{
+                            name
+                            students{
+                                name
+                                buptId
+                                classNumber
+                                gender                            
+                            }
+                        }
+                        addfile{
+                            data
+                        }
+                        assignmentSubmissions{
+                            aware
+                            isReviewed
+                            isExcellent
+                            id
+                            description
+                            reviewComment
+                            score
+                            longPicture{
+                                data
+                            }
+                            zippedFile{
+                                data
+                            }
+                            submitter{
+                                name
+                                buptId
+                                classNumber
+                                gender
+                            }
+                        }
+                     }
+                    }`//用反引号      
+                },
+                timeout:1000,
+            })
+            getAssignmentInfo().then(function(response){
+                let type=response.data.data.getAssignmentsByIds[0].assignmentType;
+                if(type==="IMAGE")response.data.data.getAssignmentsByIds[0].assignmentType="图片作业";
+                else if(type==="DOCS")response.data.data.getAssignmentsByIds[0].assignmentType="文件作业";
+                else response.data.data.getAssignmentsByIds[0].assignmentType="任意作业";
+                that.setState({assignmentInfo:response.data.data.getAssignmentsByIds[0]});
+            })
+            .catch(function(error){
+                console.log(error);
+            })
+        }
         if(nextState.correctId!==-1){
             nextState.submissionData=_.filter(nextState.assignmentInfo.assignmentSubmissions,(info)=>{return info["id"]===nextState.correctId})[0];
+            if(nextState.submissionData.zippedFile===null){
+                nextState.submissionData.zippedFile=new Object();
+                nextState.submissionData.zippedFile.data="xxx";
+            }
+            if(nextState.submissionData.longPicture===null){
+                nextState.submissionData.longPicture=new Object();
+                nextState.submissionData.longPicture.data="xxx";
+            }
         }
     }
 
@@ -330,6 +665,11 @@ class CorrectSpecificWork extends React.Component{
         this.setState({correctId:info});
     }
 
+    changeFlag=()=>{
+        let flag=this.state.flag;
+        this.setState({flag:!flag});
+    }
+
     render(){
         const isEnd=moment().isBefore(this.state.assignmentInfo.startTime,"minute")||moment().isAfter(this.state.assignmentInfo.deadline,"minute");
         return(
@@ -338,7 +678,7 @@ class CorrectSpecificWork extends React.Component{
               <Sider theme="light" width="650" style={{height:"90vh"}}>
               <div className="scrollprac">
               <br/>
-              <span style={{fontSize:"30px"}}>{this.state.submissionData.submitter["name"]+" 的作业"}</span>
+              <Studenthomework data={this.state.submissionData} changeFlag={this.changeFlag} deadline={this.state.assignmentInfo.deadline}/>
               </div>
               </Sider>
               <Content>

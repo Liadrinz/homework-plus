@@ -1,5 +1,5 @@
 import React from 'react';
-import {Button,Col,Row,Modal,Tag,Form,message,Input,Icon,Upload} from 'antd';
+import {Button,Col,Row,Modal,Tag,Form,message,Input,Icon,Upload,InputNumber} from 'antd';
 import axios from 'axios';
 import {_} from 'underscore';
 import moment from 'moment';
@@ -36,14 +36,6 @@ class UploadAssignmentFile extends React.Component{
                 </div>
             )
         }
-    }
-}
-
-class Review extends React.Component{
-    render(){
-        return(
-            <div>fuck world</div>
-        )
     }
 }
 
@@ -255,6 +247,7 @@ class Handin extends React.Component{
                 if(that.props.submittedID===-1){
                 if(that.props.type==="图片作业"){
                     handinHomework1().then(function(response){
+                        console.log(response)
                         if(response.data.data.createSubmission.ok==true){
                             message.success('作业上传成功!',3);
                             that.props.changeSubmitted(response.data.data.createSubmission.submission["id"]);
@@ -372,6 +365,269 @@ class Handin extends React.Component{
 }
 
 const WrappedHandin=Form.create()(Handin);
+
+class ReviewHomework extends React.Component{
+    render(){
+        if(this.props.review.isReviewed===true){
+            if(this.props.review.zippedFile.data==="xxx"){
+                return(
+                  <div>
+                    <div>
+                      <span style={{fontSize:"18px",marginRight:"2%"}}>分数:</span>
+                      <InputNumber value={this.props.review.score} min={this.props.review.score} max={this.props.review.score}/>
+                      <span style={{fontSize:"18px",marginLeft:"2%",marginRight:"10%"}}>分</span>
+                      <Tag color={this.props.review.isExcellent?"gold":"cyan"}>{this.props.review.isExcellent?"优秀作业":"普通作业"}</Tag>
+                    </div>
+                    <br/>
+                    <div style={{fontSize:"18px"}}>我的作业备注:</div>
+                    <TextArea value={this.props.review.description} style={{width:"95%"}} rows={4}/>
+                    <br/><br/><br/>
+                    <div style={{fontSize:"18px"}}>教师反馈:</div>
+                    <TextArea value={this.props.review.reviewComment} style={{width:"95%"}} rows={4}/>
+                    <br/><br/><br/>
+                    <div style={{fontSize:"18px"}}>我提交的作业:</div>
+                    <br/>
+                    <img src={"http://localhost:8000/media/"+this.props.review.longPicture.data} alt="图片作业" width="95%" />
+                  </div>
+                )
+            }
+            if(this.props.review.longPicture.data==="xxx"){
+                return(
+                    <div>
+                    <div>
+                      <span style={{fontSize:"18px",marginRight:"2%"}}>分数:</span>
+                      <InputNumber value={this.props.review.score} min={this.props.review.score} max={this.props.review.score}/>
+                      <span style={{fontSize:"18px",marginLeft:"2%",marginRight:"10%"}}>分</span>
+                      <Tag color={this.props.review.isExcellent?"gold":"cyan"}>{this.props.review.isExcellent?"优秀作业":"普通作业"}</Tag>
+                    </div>
+                    <br/>
+                    <div style={{fontSize:"18px"}}>我的作业备注:</div>
+                    <TextArea value={this.props.review.description} style={{width:"95%"}} rows={4}/>
+                    <br/><br/><br/>
+                    <div style={{fontSize:"18px"}}>教师反馈:</div>
+                    <TextArea value={this.props.review.reviewComment} style={{width:"95%"}} rows={4}/>
+                    <br/><br/><br/>
+                    <div style={{fontSize:"18px"}}>我提交的作业:</div>
+                    <br/>
+                      <a href={"http://localhost:8000/media/"+this.props.review.zippedFile.data}
+                         style={{fontSize:"20px"}}>
+                      {this.props.review.zippedFile.data==="xxx"?"xxx":re2.exec(this.props.review.zippedFile.data)[1]}
+                      </a>
+                  </div>
+                )
+            }
+        }else{
+            if(this.props.review.zippedFile.data==="xxx"){
+                return(
+                 <div>
+                    <div style={{fontSize:"18px"}}>作业备注:</div>
+                    <TextArea value={this.props.review.description} style={{width:"95%"}} rows={4}/>
+                    <br/><br/><br/>
+                    <div style={{fontSize:"18px"}}>我提交的作业:</div>
+                    <br/>
+                    <img src={"http://localhost:8000/media/"+this.props.review.longPicture.data} alt="图片作业" width="95%"/>
+                 </div>
+                )
+            }
+            if(this.props.review.longPicture.data==="xxx"){
+                return(
+                  <div>
+                      <div style={{fontSize:"18px"}}>作业备注:</div>
+                      <TextArea value={this.props.review.description} style={{width:"95%"}} rows={4}/>
+                      <br/><br/><br/>
+                      <div style={{fontSize:"18px"}}>我提交的作业:</div>
+                      <br/>
+                        <a href={"http://localhost:8000/media/"+this.props.review.zippedFile.data}
+                           style={{fontSize:"20px"}}>
+                           {this.props.review.zippedFile.data==="xxx"?"xxx":re2.exec(this.props.review.zippedFile.data)[1]}
+                        </a>
+                  </div>
+                )
+            }
+        }
+    }
+}
+
+class Review extends React.Component{
+    constructor(props){
+        super(props);
+        this.state={
+            assignmentInfo:{
+                id:-1,
+                name:"xxx",
+                description:"xxx",
+                assignmentType:"xxx",
+                startTime:"xxx",
+                deadline:"xxx",
+                courseClass:{
+                    name:"xxx",
+                },
+                addfile:[{
+                    data:"xxx",
+                }]
+            },
+            review:{
+                description:"xxx",
+                reviewComment:"xxx",
+                isReviewed:false,
+                score:0,
+                isExcellent:false,
+                longPicture:{
+                    data:"xxx",
+                },
+                zippedFile:{
+                    data:"xxx",
+                },
+                submitter:{
+                    id:this.props.userId,
+                }
+            },
+            visible1:false,
+            visible2:false,
+        }
+    }
+
+    componentWillMount(){
+        var that=this;
+        var getAssignmentInfo=axios.create({
+            url:"http://localhost:8000/graphql/",
+            headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
+            method:'post',
+            data:{
+               "query":`query{
+                 getAssignmentsByIds(ids:${[that.props.assignmentId]})
+                 {
+                    id
+                    name
+                    description
+                    assignmentType
+                    startTime
+                    deadline
+                    courseClass{
+                        name
+                    }
+                    addfile{
+                        data
+                    }
+                 }
+                }`//用反引号      
+            },
+            timeout:1000,
+        })
+        var getReview=axios.create({
+            url:"http://localhost:8000/graphql/",
+            headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
+            method:'post',
+            data:{
+               "query":`query{
+                getSubmissionsByAssignments(assignments:${[that.props.assignmentId]})
+                 {
+                    description
+                    reviewComment
+                    isReviewed
+                    score
+                    isExcellent
+                    longPicture{
+                        data
+                    }
+                    zippedFile{
+                        data
+                    }
+                    submitter{
+                        id
+                    }
+                 }
+                }`//用反引号      
+            },
+            timeout:1000,      
+        })
+        axios.all([getAssignmentInfo(),getReview()]).then(axios.spread(function(response1,response2){
+            let type=response1.data.data.getAssignmentsByIds[0].assignmentType;
+            let submission=response2.data.data.getSubmissionsByAssignments;
+            let submission2;
+            if(type==="IMAGE")response1.data.data.getAssignmentsByIds[0].assignmentType="图片作业";
+            else if(type==="DOCS")response1.data.data.getAssignmentsByIds[0].assignmentType="文件作业";
+            else response1.data.data.getAssignmentsByIds[0].assignmentType="任意作业";
+            for(let i in submission){
+                if(submission[i].submitter["id"]===that.props.userId){
+                    submission2=submission[i];
+                    if(submission2.zippedFile===null){
+                        submission2.zippedFile=new Object();
+                        submission2.zippedFile.data="xxx";
+                    }
+                    if(submission2.longPicture===null){
+                        submission2.longPicture=new Object();
+                        submission2.longPicture.data="xxx";
+                    }
+                    break;
+                }
+            }
+            if(submission2===undefined) that.setState({assignmentInfo:response1.data.data.getAssignmentsByIds[0]});
+            else that.setState({assignmentInfo:response1.data.data.getAssignmentsByIds[0],review:submission2});
+        }))
+    }
+
+    showModal=()=>{
+        this.setState({visible1:true})
+    };
+
+    showModal2=()=>{
+        this.setState({visible2:true})
+    }
+    
+    onClose=()=>{
+        this.setState({visible1:false})
+    };
+
+    onClose2=()=>{
+        this.setState({visible2:false})
+    };
+
+    render(){
+        return(
+        <div>
+            <div style={{marginBottom:"10px",marginTop:"10px"}}>
+                <span style={{fontSize:"20px"}}>
+                 {this.state.assignmentInfo.courseClass["name"]+
+                   "----"+
+                  this.state.assignmentInfo["name"]+"  "}
+                </span>  
+                <span style={{fontSize:"15px"}}>
+                 {this.state.assignmentInfo.assignmentType}
+                </span>  
+                <Button type="primary" shape="round" style={{marginLeft:"20px"}} onClick={this.showModal}>查看作业描述</Button>   
+                <Button shape="round" style={{marginLeft:"20px"}} onClick={this.showModal2}>{this.state.review.isReviewed?"查看作业批改":"查看已提交的作业"}</Button>     
+            </div> 
+            <div style={{marginBottom:"10px"}}>
+                <span style={{fontSize:"15px",marginRight:"30px"}}>
+                {"开始提交:"+ moment(this.state.assignmentInfo.startTime).format("YY"+"/"+"M"+"/"+"D"+" "+"HH"+":"+"mm")+"   "+
+                 "结束提交:"+ moment(this.state.assignmentInfo.deadline).format("YY"+"/"+"M"+"/"+"D"+" "+"HH"+":"+"mm")}   
+                </span>
+            </div> 
+            <Modal
+                title="作业要求描述"
+                footer={null}
+                onCancel={this.onClose}
+                visible={this.state.visible1}
+            >
+                <p>{this.state.assignmentInfo["description"]}</p>
+                <br/><br/><br/>
+                <UploadAssignmentFile addfile={this.state.assignmentInfo.addfile}/>
+            </Modal>
+            <Modal
+                title={this.state.review.isReviewed?"查看作业批改":"查看已提交的作业"}
+                footer={null}
+                onCancel={this.onClose2}
+                visible={this.state.visible2}
+                destroyOnClose
+                width={800}
+            >           
+            <ReviewHomework review={this.state.review}/>
+            </Modal>   
+        </div>
+        )
+    }
+}
 
 class SubmitHomework extends React.Component{
     constructor(props){
@@ -645,8 +901,8 @@ class MyHomework extends React.Component{
     }
 
     render(){
-        if(this.state.deadline==="") return <Review userId={this.props.userinformation["id"]} assignmentId={re.exec(window.location.pathname)[1]}/>;
-        else if(moment().isAfter(this.state.deadline,"minute")) return <Review userId={this.props.userinformation["id"]} assignmentId={re.exec(window.location.pathname)[1]}/>;
+        if(this.state.deadline==="") return <div/>;
+        else if(!moment().isBefore(this.state.deadline,"minute")) return <Review userId={this.props.userinformation["id"]} assignmentId={re.exec(window.location.pathname)[1]}/>;
         else return <SubmitHomework userId={this.props.userinformation["id"]} assignmentId={re.exec(window.location.pathname)[1]}/>;
     }
 }

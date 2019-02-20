@@ -9,6 +9,7 @@ import {Link} from 'react-router-dom';
 var courseid;//特定课程的id
 var courseStudents;//该课程的所有学生
 var re=/^\/teachercenter\/teacherclass\/(.*)\/$/;
+var re2=/^(.*)\+(.*)$/;
 var toDate=/^(\d{4})\-(\d{2})\-(\d{2})(.*)$/;
 var usernamechildren=[];//手动添加成员里通过搜索用户名的标签
 var schoolIdchildren=[];//手动添加成员里通过搜索学号的标签
@@ -72,7 +73,7 @@ class AddAssignment extends React.Component{
                             assignmentType:"${values.作业类型}",
                             name:"${values.作业名称}",
                             description:"${values.作业描述}",
-                            deadline:"${moment(values.截止时间).format()}",
+                            deadline:"${re2.exec(moment(values.截止时间).format())[1]}",
                             addfile:[${addfile}],
                           }
                         ){

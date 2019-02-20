@@ -153,7 +153,7 @@ class SubmitHomework extends React.Component{
                                    onClick={this.props.redirecttocourse}
                              >更新提交</Link>);
             }
-        },]
+        }]
         const data=this.state.assignmentInfo;
         return(
             <div>
