@@ -53,6 +53,11 @@ class SubmissionType(DjangoObjectType):
         model = models.HWFSubmission
 
 
+class TotalMarksType(DjangoObjectType):
+    class Meta:
+        model = models.TotalMarks
+
+
 class MessageFileType(DjangoObjectType):
     class Meta:
         model = models.MessageFile

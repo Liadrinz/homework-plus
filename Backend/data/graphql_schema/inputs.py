@@ -90,10 +90,15 @@ class SubmissionEditionInput(graphene.InputObjectType):
     description = graphene.String(required=False)
 
 
-# submission cannot be edited by student
 # arguments of giving score
 class ScoreGivingInput(graphene.InputObjectType):
     submission = graphene.Int(required=True)
     score = graphene.Float(required=True)
     review_comment = graphene.String(required=False)
     is_excellent = graphene.Boolean(required=False)
+
+
+# arguments of calculating total score
+class TotalCalculationInput(graphene.InputObjectType):
+    course = graphene.Int(required=True)
+    student = graphene.Int(required=True)

@@ -4,6 +4,7 @@ import graphene
 import data.schema
 
 class Query(
+    data.schema.QueryTotalMarks, 
     data.schema.QueryMessage, 
     data.schema.QueryUser, 
     data.schema.QuerySubmission, 
@@ -24,4 +25,5 @@ class Mutations(graphene.ObjectType):
     create_submission = data.schema.CreateSubmission.Field()
     create_course = data.schema.CreateCourse.Field()
     create_assignment = data.schema.CreateAssignment.Field()
+    calculate_total = data.schema.CalculateTotal.Field()
 schema = graphene.Schema(query=Query, mutation=Mutations)

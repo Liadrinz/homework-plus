@@ -134,6 +134,12 @@ class HWFSubmission(models.Model):
     is_excellent = models.BooleanField(default=False)
 
 
+class TotalMarks(models.Model):
+    student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='student_total_marks')
+    course_class = models.ForeignKey(HWFCourseClass, on_delete=models.CASCADE, related_name='course_total_marks')
+    total_marks = models.FloatField(default=0.0)
+
+
 class MessageFile(models.Model):
     data = models.FileField(upload_to='chat_file', null=True)
     initial_upload_time = models.DateTimeField(auto_now_add=True)

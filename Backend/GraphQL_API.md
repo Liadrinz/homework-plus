@@ -23,6 +23,7 @@
   teachingAssistantsCourses: List<CourseType>  // 以该用户作为助教的所有课程
   studentsCourses: List<CourseType>  // 以该用户作为学生的所有课程
   mySubmissions: List<SubmissionType>  // 该用户提交的作业
+  studentTotalMarks: List<TotalMarksType>  // 该用户各课程的总分信息 $$$$$$$$$$
 }
 ```
 
@@ -48,7 +49,7 @@ query {
 需要登录
 ##### 参数
 ```gql
-(ids: List<Int>)
+(ids: List<Int>!)
 ```
 ##### 用法
 ```gql
@@ -64,7 +65,7 @@ query {
 需要登录
 ##### 参数
 ```gql
-(usernames: List<String>)
+(usernames: List<String>!)
 ```
 ##### 用法
 ```gql
@@ -80,7 +81,7 @@ query {
 需要登录
 ##### 参数
 ```gql
-(buptIds: List<String>)
+(buptIds: List<String>!)
 ```
 ##### 用法
 ```gql
@@ -96,7 +97,7 @@ query {
 需要登录
 ##### 参数
 ```gql
-(names: List<String>)
+(names: List<String>!)
 ```
 ##### 用法
 ```gql
@@ -112,7 +113,7 @@ query {
 需要登录
 ##### 参数
 ```gql
-(courseId: Int)
+(courseId: Int!)
 ```
 ##### 用法
 ```gql
@@ -133,10 +134,11 @@ query {
 ##### 参数
 ```gql
 (userData: {
+  id: Int!
   username: String,
   classNumber: String,
   phone: String
-})
+}!)
 ```
 ##### 返回字段
 ```gql
@@ -175,6 +177,7 @@ mutation {
   teachingAssistants: List<UserType>
   students: List<UserType>
   courseAssignments: List<AssignmentType>  // 该课程的作业
+  courseTotalMarks: List<TotalMarksType>  // 该课程各学生的总分信息 $$$$$$$$$$
 }
 ```
 
@@ -200,7 +203,7 @@ query {
 需要登录
 ##### 参数
 ```gql
-(ids: List<Int>)
+(ids: List<Int>!)
 ```
 ##### 用法
 ```gql
@@ -216,7 +219,7 @@ query {
 需要登录
 ##### 参数
 ```gql
-(keywords: String)
+(keywords: String!)
 ```
 ##### 用法
 ```gql
@@ -232,7 +235,7 @@ query {
 需要登录
 ##### 参数
 ```gql
-(name: String)
+(name: String!)
 ```
 ##### 用法
 ```gql
@@ -248,7 +251,7 @@ query {
 需要登录
 ##### 参数
 ```gql
-(teacherName: String)
+(teacherName: String!)
 ```
 ##### 用法
 ```gql
@@ -278,7 +281,7 @@ query {
   school: String!,
   startTime: DateTime!,
   endTime: DateTime!
-})
+}!)
 ```
 ##### 返回字段
 ```gql
@@ -307,16 +310,17 @@ mutation {
 ##### 参数
 ```gql
 (courseData: {
+  id: Int!
   name: String
   description: String
   marks: Float
   teachers: List<Int>,  // 只增不减
   teachingAssistants: List<Int>,  // 只增不减
   students: List<Int>,  // 只增不减
-  school: String!,
-  startTime: DateTime!,
-  endTime: DateTime!
-})
+  school: String,
+  startTime: DateTime,
+  endTime: DateTime
+}!)
 ```
 ##### 返回字段
 ```gql
@@ -378,7 +382,7 @@ query {
 需要登录
 ##### 参数
 ```gql
-(ids: List<Int>)
+(ids: List<Int>!)
 ```
 ##### 用法
 ```gql
@@ -394,7 +398,7 @@ query {
 需要登录
 ##### 参数
 ```gql
-(courses: List<Int>)
+(courses: List<Int>!)
 ```
 ##### 用法
 ```gql
@@ -410,7 +414,7 @@ query {
 需要登录
 ##### 参数
 ```gql
-(deadline: DateTime)
+(deadline: DateTime!)
 ```
 ##### 用法
 ```gql
@@ -426,7 +430,7 @@ query {
 需要登录
 ##### 参数
 ```gql
-(name: String)
+(name: String!)
 ```
 ##### 用法
 ```gql
@@ -442,7 +446,7 @@ query {
 需要登录
 ##### 参数
 ```gql
-(keywords: String)
+(keywords: String!)
 ```
 ##### 用法
 ```gql
@@ -469,7 +473,7 @@ query {
   assignmentType: "image" or "docs" or "vary"!
   deadline: DateTime!
   addfile: List<Int>!
-})
+}!)
 ```
 ##### 返回字段
 ```gql
@@ -502,7 +506,7 @@ mutation {
   assignmentType: "image" or "docs" or "vary"
   deadline: DateTime
   addfile: List<Int>
-})
+}!)
 ```
 ##### 返回字段
 ```gql
@@ -530,7 +534,7 @@ mutation {
 ```gql
 (assignmentData: {
   ids: Lits<Int>!  // 所需删除的所有对象的id列表
-})
+}!)
 ```
 ##### 返回字段
 ```gql
@@ -595,7 +599,7 @@ query {
 需要登录
 ##### 参数
 ```gql
-(ids: List<Int>)
+(ids: List<Int>!)
 ```
 ##### 用法
 ```gql
@@ -611,7 +615,7 @@ query {
 需要登录
 ##### 参数
 ```gql
-(owners: List<Int>)
+(owners: List<Int>!)
 ```
 ##### 用法
 ```gql
@@ -627,7 +631,7 @@ query {
 需要登录
 ##### 参数
 ```gql
-(assignments: List<Int>)
+(assignments: List<Int>!)
 ```
 ##### 用法
 ```gql
@@ -643,7 +647,7 @@ query {
 需要登录
 ##### 参数
 ```gql
-(courses: List<Int>)
+(courses: List<Int>!)
 ```
 ##### 用法
 ```gql
@@ -668,7 +672,7 @@ query {
   description: String
   image: List<Int>
   addfile: List<Int>
-})
+}!)
 ```
 ##### 返回字段
 ```gql
@@ -699,7 +703,7 @@ mutation {
   description: String
   image: List<Int>
   addfile: List<Int>
-})
+}!)
 ```
 ##### 返回字段
 ```gql
@@ -729,7 +733,7 @@ mutation {
   submission: Int!
   score: Float!
   isExcellent: Boolean
-})
+}!)
 ```
 ##### 返回字段
 ```gql
@@ -764,5 +768,88 @@ mutation {
   pdfSubmission: List<SubmissionType>  // 以该文件作为pdf的submission
   longPicSubmission: List<SubmissionType>  // 以该文件作为长图的submission
   addfileSubmission: List<SubmissionType>  // 以该文件作为附加文件的submission
+}
+```
+
+### 6. TotalMarksType (总分) $$$$$$$$$$
+
+### 1) query
+
+### 可以查询的字段 (非基础类型的字段都需要展开)
+```gql
+{
+  id: Int
+  student: Int
+  courseClass: Int
+  totalMarks: Float
+}
+```
+
+### query 的方法
+#### getTotalMarks
+##### 权限
+根据查询参数有所不同, 在用法中具体解释
+##### 参数
+```gql
+(student: Int, course: Int)  // 注意: 此处参数非必需
+```
+##### 用法
+```gql
+// 获取指定学生各课程的总分信息
+// 权限: 需要该学生自己
+query {
+  getTotalMarks(student: 指定学生的id) {
+    // 需要查询的字段
+  }
+}
+
+// 获取指定课程各学生的总分信息
+// 权限: 需要该课程的老师或助教
+query {
+  getTotalMarks(course: 指定课程的id) {
+    // 需要查询的字段
+  }
+}
+
+// 获取指定学生指定课程的总分信息
+// 权限: 以上两个权限的或
+// 注意: 虽然查询结果只可能有一个, 但还是返回的列表
+query {
+  getTotalMarks(student: 指定学生的id, course: 指定课程的id) {
+    // 需要查询的字段
+  }
+}
+```
+
+### 2) mutation
+
+### mutation 的方法
+
+#### calculateTotal
+##### 权限
+需要该学生该课的老师或助教
+##### 参数
+```gql
+(calcTarget: {
+  course: Int!,
+  student: Int!
+}!)
+```
+##### 返回字段
+```gql
+{
+  ok: Boolean
+  msg: JSONString // 提示信息
+  totalMarks: TotalMarksType
+}
+```
+###### 用法
+```gql
+mutation {
+  calculateTotal(calcTarget: {
+    // 参数字段
+  }) {
+    // 需要的返回字段
+  }
 }
 ```
