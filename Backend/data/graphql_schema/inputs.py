@@ -104,3 +104,9 @@ class ScoreGivingInput(graphene.InputObjectType):
 class TotalCalculationInput(graphene.InputObjectType):
     course = graphene.Int(required=True)
     student = graphene.Int(required=True)
+
+
+# arguments of setting weights
+class WeightSettingInput(graphene.InputObjectType):
+    assignments = graphene.List(of_type=graphene.Int, required=True)
+    weights = graphene.List(of_type=graphene.Float, required=True)
