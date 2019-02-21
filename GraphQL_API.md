@@ -558,6 +558,36 @@ mutation {
 }
 ```
 
+#### setWeights $$$$$$$$$$
+##### 权限
+需要该课的老师
+##### 参数
+```gql
+(weightData: {
+  // 注意: assignments与weights必须一一对应
+  assignments: List<Int>
+  weights: List<Float>
+})
+```
+##### 返回字段
+```gql
+{
+  ok: Boolean
+  msg: JSONString
+  assignments: List<AssignmentType>
+}
+```
+##### 用法
+```gql
+mutation {
+  setWeights(weightData: {
+    // 参数字段
+  }) {
+    // 需要返回的字段
+  }
+}
+```
+
 ### 4. SubmissionType (学生提交的作业)
 
 ### 1) query
