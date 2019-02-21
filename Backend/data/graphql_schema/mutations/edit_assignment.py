@@ -15,7 +15,6 @@ from data.graphql_schema.resp_msg import public_msg, create_msg
 
 # editing an assignment
 class EditAssignment(graphene.Mutation):
-
     class Arguments:
         assignment_data = AssignmentEditionInput(required=True)
 
@@ -27,24 +26,34 @@ class EditAssignment(graphene.Mutation):
 
         # id validation
         try:
-            realuser = token.confirm_validate_token(info.context.META['HTTP_TOKEN'])
+            realuser = token.confirm_validate_token(
+                info.context.META['HTTP_TOKEN'])
             realuser = models.User.objects.get(pk=realuser)
-            editing_assignment = models.HWFAssignment.objects.get(pk=assignment_data['id'])
+            editing_assignment = models.HWFAssignment.objects.get(
+                pk=assignment_data['id'])
         except:
             try:
-                realuser = models.User.objects.get(wechat=encrypt.getHash(info.context.META['HTTP_TOKEN']))
-                editing_assignment = models.HWFAssignment.objects.get(pk=assignment_data['id'])
+                realuser = models.User.objects.get(
+                    wechat=encrypt.getHash(info.context.META['HTTP_TOKEN']))
+                editing_assignment = models.HWFAssignment.objects.get(
+                    pk=assignment_data['id'])
             except:
                 return EditAssignment(ok=False, msg=public_msg['not_login'])
 
         try:
 
             # time validation
-            if datetime.now() > editing_assignment.deadline.replace(tzinfo=None):
-                return EditAssignment(ok=False, msg=create_msg(4151, "该作业截止日期已过，无法修改"))
+            if datetime.now() > editing_assignment.deadline.replace(
+                    tzinfo=None):
+                return EditAssignment(
+                    ok=False, msg=create_msg(4151, "该作业截止日期已过，无法修改"))
 
             # owner validation
-            if len(editing_assignment.course_class.teachers.filter(pk=realuser.id)) == 0 or len(editing_assignment.course_class.teaching_assistants.filter(pk=realuser.id)) == 0:
+            if len(
+                    editing_assignment.course_class.teachers.filter(
+                        pk=realuser.id)) == 0 or len(
+                            editing_assignment.course_class.
+                            teaching_assistants.filter(pk=realuser.id)) == 0:
                 return EditAssignment(ok=False, msg=public_msg['forbidden'])
             else:
                 # file validation
@@ -53,28 +62,62 @@ class EditAssignment(graphene.Mutation):
                     for fid in addfile:
                         models.HWFFile.objects.get(fid)
                 except:
-                    return EditAssignment(ok=False, msg=create_msg(4103, "file %d cannot be found" % fid))
+                    return EditAssignment(
+                        ok=False,
+                        msg=create_msg(4103, "file %d cannot be found" % fid))
                 if 'name' in assignment_data:
                     editing_assignment.name = assignment_data['name']
                 if 'description' in assignment_data:
-                    editing_assignment.description = assignment_data['description']
+                    editing_assignment.description = assignment_data[
+                        'description']
 
                 # type validation
                 if 'assignment_type' in assignment_data:
-                    if assignment_data['assignment_type'] in ('image', 'docs', 'vary'):
-                        editing_assignment.type = assignment_data['assignment_type']
+                    if assignment_data['assignment_type'] in ('image', 'docs',
+                                                              'vary'):
+                        editing_assignment.type = assignment_data[
+                            'assignment_type']
                     else:
-                        return EditAssignment(ok=False, msg=create_msg(4101, "\"%s\" is not a valid assignment type"%assignment_data['assignment_type']))
+                        return EditAssignment(
+                            ok=False,
+                            msg=create_msg(
+                                4101, "\"%s\" is not a valid assignment type" %
+                                assignment_data['assignment_type']))
 
                 if 'addfile' in assignment_data:
+                    # file validation
+                    fid = 0
+                    try:
+                        for fid in assignment_data['addfile']:
+                            models.HWFFile.objects.get(fid)
+                    except:
+                        return EditAssignment(
+                            ok=False,
+                            msg=create_msg(4103,
+                                           "file %d cannot be found" % fid))
                     for file_id in assignment_data['addfile']:
-                        editing_assignment.addfile.add(models.HWFFile.objects.get(pk=file_id))
+                        editing_assignment.addfile.add(
+                            models.HWFFile.objects.get(pk=file_id))
                 if 'deadline' in assignment_data:
+                    # time validation
+                    if assignment_data['deadline'].replace(
+                            tzinfo=None) < datetime.now():
+                        return CreateAssignment(
+                            ok=False,
+                            msg=create_msg(
+                                4102, "\"%s\" is an expired datetime" %
+                                assignment_data['deadline']))
                     editing_assignment.deadline = assignment_data['deadline']
 
+                if 'weight' in assignment_data:
+                    editing_assignment.weight = assignment_data['weight']
+
                 editing_assignment.save()
-                return EditAssignment(ok=True, assignment=editing_assignment, msg=public_msg['success'])
-        
+                return EditAssignment(
+                    ok=True,
+                    assignment=editing_assignment,
+                    msg=public_msg['success'])
+
         # bad request
         except:
             return EditAssignment(ok=False, msg=public_msg['badreq'])

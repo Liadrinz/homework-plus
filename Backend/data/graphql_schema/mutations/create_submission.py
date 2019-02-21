@@ -46,7 +46,8 @@ class CreateSubmission(graphene.Mutation):
             # type validation
             if 'addfile' in submission_data:
                 if models.HWFAssignment.objects.get(
-                        pk=submission_data['assignment']).assignment_type == 'image':
+                        pk=submission_data['assignment']
+                ).assignment_type == 'image':
                     return CreateSubmission(
                         ok=False,
                         msg=create_msg(
@@ -78,7 +79,9 @@ class CreateSubmission(graphene.Mutation):
                     for fid in submission_data['image']:
                         models.HWFFile.objects.get(pk=fid)
                 except:
-                    return CreateSubmission(ok=False, msg=create_msg(4103, "file %d cannot be found" % fid))
+                    return CreateSubmission(
+                        ok=False,
+                        msg=create_msg(4103, "file %d cannot be found" % fid))
                 aware_vector[0] = 0
             if 'addfile' in submission_data:
                 # file validation
@@ -87,14 +90,16 @@ class CreateSubmission(graphene.Mutation):
                     for fid in submission_data['addfile']:
                         models.HWFFile.objects.get(pk=fid)
                 except:
-                    return CreateSubmission(ok=False, msg=create_msg(4103, "file %d cannot be found" % fid))
+                    return CreateSubmission(
+                        ok=False,
+                        msg=create_msg(4103, "file %d cannot be found" % fid))
                 aware_vector[1] = 0
 
             new_submission = models.HWFSubmission.objects.create(
                 description=submission_data['description'],
                 assignment_id=submission_data['assignment'],
                 submitter_id=realuser.pk)
-                
+
             if 'image' in submission_data:
                 convert_thread = Thread(
                     target=generate_pdf_for_submission,

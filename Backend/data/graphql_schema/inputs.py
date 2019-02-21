@@ -57,6 +57,7 @@ class AssignmentCreationInput(graphene.InputObjectType):
     assignment_type = graphene.String(required=True)
     deadline = graphene.DateTime(required=True)
     addfile = graphene.List(of_type=graphene.Int, required=True)
+    weight = graphene.Float(required=False)
 
 
 # arguments of editing an Assignment
@@ -67,6 +68,7 @@ class AssignmentEditionInput(graphene.InputObjectType):
     assignment_type = graphene.String(required=False)
     deadline = graphene.DateTime(required=False)
     addfile = graphene.List(of_type=graphene.Int, required=False)
+    weight = graphene.Float(required=False)
 
 
 # arguments of deleting an Assignment

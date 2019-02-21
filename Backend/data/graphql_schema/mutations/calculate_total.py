@@ -44,7 +44,9 @@ class CalculateTotal(graphene.Mutation):
                 return CalculateTotal(ok=False, msg=public_msg['forbidden'])
             else:
                 # calculate the total marks
+                count = 0
                 total = 0.0
+                average = 0.0
                 for assignment in editing_course.course_assignments.all():
                     submission_score = 0
                     try:
@@ -52,12 +54,16 @@ class CalculateTotal(graphene.Mutation):
                         submission_score = target_submission.score
                     except ObjectDoesNotExist:
                         pass
-                    total += assignment.weight * submission_score
-                
+                    average += assignment.weight * submission_score
+                    total += submission_score
+                    count += 1
+                if average == 0.0:
+                    average = total / count
                 try:
                     # 已有记录, 则覆盖
                     record = models.TotalMarks.objects.get(student_id=calc_target['student'], course_class_id=calc_target['course'])
-                    record.total_marks = total
+                    record.average = average
+                    record.total = total
                     record.save()
                     return CalculateTotal(ok=True, msg=public_msg['success'], total_marks=record)
                 except ObjectDoesNotExist:

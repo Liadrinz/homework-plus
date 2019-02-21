@@ -353,6 +353,7 @@ mutation {
   description: String
   assignmentType: String
   startTime: String
+  weight: Float
   deadline: DateTime
   courseClass: CourseType
   addfile: FileType
@@ -473,6 +474,7 @@ query {
   assignmentType: "image" or "docs" or "vary"!
   deadline: DateTime!
   addfile: List<Int>!
+  weight: Float
 }!)
 ```
 ##### 返回字段
@@ -506,6 +508,7 @@ mutation {
   assignmentType: "image" or "docs" or "vary"
   deadline: DateTime
   addfile: List<Int>
+  weight: Float
 }!)
 ```
 ##### 返回字段
@@ -781,7 +784,8 @@ mutation {
   id: Int
   student: Int
   courseClass: Int
-  totalMarks: Float
+  average: Float  // 平均分/加权分 $$$$$$$$$$
+  total: Float  // 总分数 $$$$$$$$$$
 }
 ```
 

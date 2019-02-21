@@ -137,7 +137,8 @@ class HWFSubmission(models.Model):
 class TotalMarks(models.Model):
     student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='student_total_marks')
     course_class = models.ForeignKey(HWFCourseClass, on_delete=models.CASCADE, related_name='course_total_marks')
-    total_marks = models.FloatField(default=0.0)
+    average = models.FloatField(default=0.0)
+    total = models.FloatField(default=0.0)
 
 
 class MessageFile(models.Model):
