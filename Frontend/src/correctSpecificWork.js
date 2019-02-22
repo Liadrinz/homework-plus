@@ -231,10 +231,31 @@ class Givescore extends React.Component{
                     },
                     timeout:1000,
                 })
+                var calcTotal=axios.create({
+                    url:"http://localhost:8000/graphql/",
+                    headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
+                    method:'post',
+                    data:{
+                      "query":`mutation{
+                        calculateTotal(
+                          calcTarget:{
+                             course:${that.props.courseId}
+                             student:${that.props.studentId}
+                          }
+                        ){
+                           ok
+                           msg
+                        }
+                      }`
+                    },
+                    timeout:1000,
+                })
                 givescore().then(function(response){
-                    console.log(response.data.data.giveScore.msg)
                     if(response.data.data.giveScore.ok==true){
                         message.success('作业批改成功!',3);
+                        calcTotal().catch(function(error1){
+                            console.log(error1);
+                        })
                         that.props.changeFlag();
                         that.props.onClose();
                     }else{
@@ -343,7 +364,7 @@ class Studenthomework extends React.Component{
                        visible={this.state.visible}
                        destroyOnClose
                     >   
-                    <WrappedGivescore id={this.props.data["id"]} changeFlag={this.props.changeFlag} onClose={this.onClose}/> 
+                    <WrappedGivescore id={this.props.data["id"]} studentId={this.props.data.submitter["id"]} courseId={this.props.courseId} changeFlag={this.props.changeFlag} onClose={this.onClose}/> 
                     </Modal> 
                 </div>
               )
@@ -373,7 +394,7 @@ class Studenthomework extends React.Component{
                        visible={this.state.visible}
                        destroyOnClose
                       >    
-                      <WrappedGivescore id={this.props.data["id"]} changeFlag={this.props.changeFlag} onClose={this.onClose}/> 
+                      <WrappedGivescore id={this.props.data["id"]} studentId={this.props.data.submitter["id"]} courseId={this.props.courseId} changeFlag={this.props.changeFlag} onClose={this.onClose}/> 
                       </Modal> 
                   </div>
                 )
@@ -410,7 +431,7 @@ class Studenthomework extends React.Component{
                        visible={this.state.visible}
                        destroyOnClose
                     >   
-                    <WrappedGivescore id={this.props.data["id"]} changeFlag={this.props.changeFlag} onClose={this.onClose}/> 
+                    <WrappedGivescore id={this.props.data["id"]} studentId={this.props.data.submitter["id"]} courseId={this.props.courseId} changeFlag={this.props.changeFlag} onClose={this.onClose}/> 
                     </Modal> 
                 </div>
                )
@@ -450,7 +471,7 @@ class Studenthomework extends React.Component{
                  visible={this.state.visible}
                  destroyOnClose
                 >    
-                <WrappedGivescore id={this.props.data["id"]} changeFlag={this.props.changeFlag} onClose={this.onClose}/> 
+                <WrappedGivescore id={this.props.data["id"]} studentId={this.props.data.submitter["id"]} courseId={this.props.courseId} changeFlag={this.props.changeFlag} onClose={this.onClose}/> 
                 </Modal> 
                 </div>
               )
@@ -491,6 +512,7 @@ class CorrectSpecificWork extends React.Component{
                     data:"xxx",
                 },
                 submitter:{
+                    id:-1,
                     name:"xxx",
                     buptId:"xxx",
                     classNumber:"xxx",
@@ -521,6 +543,7 @@ class CorrectSpecificWork extends React.Component{
                     startTime
                     deadline
                     courseClass{
+                        id
                         name
                         students{
                             name
@@ -547,6 +570,7 @@ class CorrectSpecificWork extends React.Component{
                             data
                         }
                         submitter{
+                            id
                             name
                             buptId
                             classNumber
@@ -588,6 +612,7 @@ class CorrectSpecificWork extends React.Component{
                         startTime
                         deadline
                         courseClass{
+                            id
                             name
                             students{
                                 name
@@ -614,6 +639,7 @@ class CorrectSpecificWork extends React.Component{
                                 data
                             }
                             submitter{
+                                id
                                 name
                                 buptId
                                 classNumber
@@ -678,7 +704,7 @@ class CorrectSpecificWork extends React.Component{
               <Sider theme="light" width="650" style={{height:"90vh"}}>
               <div className="scrollprac">
               <br/>
-              <Studenthomework data={this.state.submissionData} changeFlag={this.changeFlag} deadline={this.state.assignmentInfo.deadline}/>
+              <Studenthomework data={this.state.submissionData} changeFlag={this.changeFlag} deadline={this.state.assignmentInfo.deadline} courseId={this.state.assignmentInfo.courseClass["id"]}/>
               </div>
               </Sider>
               <Content>
