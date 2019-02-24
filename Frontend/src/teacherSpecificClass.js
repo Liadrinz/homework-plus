@@ -645,9 +645,11 @@ class Setweight extends React.Component{
       timeout:1000,
     }) 
     setWeights().then(function(response){
-      if(response.data.data.setWeights.ok===true){
+      if(response.data.data.setWeight.ok===true){
         message.success("权重修改成功!",3);
-        that.props.changeFlag();
+        setTimeout(()=>{
+          that.props.changeFlag();
+        },2000);
       }else message.error("权重修改失败!",3); 
     })    
     .catch(function(error){
@@ -1145,7 +1147,7 @@ class Member extends React.Component{
                 onCancel={this.handleClose3}
                 destroyOnClose={true}
             >
-            <WrappedSetweight courseId={this.props.courseId} changeFlag={this.changeFlag}/>
+            <WrappedSetweight courseId={this.props.courseId} changeFlag={this.changeFlag} handleClose3={this.handleClose3}/>
             </Modal>
             <br/><br/><br/>
             <Table columns={column} dataSource={data} bordered rowKey={record=>record["id"]} rowSelection={rowSelection}/>
