@@ -1,0 +1,1439 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>Homework+ API</title>
+    <link rel="stylesheet" href="lib/eleme-index.css"/>
+    <link rel="stylesheet" href="lib/github-markdown.css"/>
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+        }
+
+        #main-title {
+            color: #efefef;
+            margin-left: 10px;
+        }
+
+        #markdown {
+            position: absolute;
+        }
+
+        #left-menu {
+            overflow-y: auto;
+            position: fixed;
+            width: 350px;
+        }
+
+        [v-cloak] {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div id="markdown-code" style="display: none;">
+<div id="0"></div>
+<div id="1-1-1">
+# RESTful API
+### 注册流程
+
+#### 1. 创建用户
+##### url: /data/users/
+##### method: POST
+##### 权限: 任何人(需要做出频次限制)
+##### data:
+```json
+{
+  "username": String,
+  "name": String,
+  "gender": "male" or "female",
+  "usertype": "student" or "teacher",
+  "password": String,
+  "bupt_id": String,
+  "class_number": String,
+  "email": String,
+  "phone": String
+}
+```
+##### return:
+```json
+{
+  "result": {
+    "code": 错误码,
+    "msg": 提示信息
+  },
+  "data": {
+    "id": Int,
+    "is_active": Boolean,
+    "date_joined": DateTime,
+    "username": String,
+    "name": String,
+    "gender": String,
+    "useravatar": List<Int>,
+    "usertype": String,
+    "bupt_id": String,
+    "class_number": String,
+    "email": String,
+    "phone": String,
+    "wechat": String
+  }
+}
+```
+##### 作用:
+根据提供的信息创建用户
+
+#### 2. 激活用户
+##### url: /account/activate/
+##### method: POST
+##### 权限: 需要创建用户后发送给用户邮箱的token
+##### data:
+```json
+{}
+```
+##### return:
+```json
+{
+  "result": {
+    "code": 错误码,
+    "msg": 提示信息
+  },
+  "data": {
+    "id": Int,
+    "is_active": Boolean,
+    "date_joined": DateTime,
+    "username": String,
+    "name": String,
+    "gender": String,
+    "useravatar": List<Int>,
+    "usertype": String,
+    "bupt_id": String,
+    "class_number": String,
+    "email": String,
+    "phone": String,
+    "wechat": String
+  }
+}
+```
+</div>
+<div id="1-1-2">
+### 注册查重
+##### url: /data/is_repeated/
+##### method: POST
+##### 权限: 任何人(需要做出频次限制)
+##### data:
+```json
+{
+  "type": "username" or "email" or "phone" or "bupt_id" or "wechat",
+  "content": String
+}
+```
+##### return:
+```json
+{
+  "result": {
+    "id": 错误码,
+    "msg": 提示信息
+  },
+  "data": {
+    repeat: Boolean
+  }
+}
+```
+##### 作用:
+判断以content注册为新用户的type值是否重复
+##### 示例:
+以下入参判断以123456为用户名注册是否重复
+```json
+{
+  "type": "username",
+  "content": "123456"
+}
+```
+</div>
+<div id="1-1-3">
+### 登录
+##### url: /login/
+##### method: POST
+##### 权限: 任何人(需要做出频次限制)
+##### data:
+```json
+{
+  "username": 学号、手机、用户名或邮箱,
+  "password": 密码
+}
+```
+##### return:
+```json
+"result": {
+  "code": 错误码,
+  "msg": 提示信息
+},
+"data": {
+  "id": Int,
+  "is_active": Boolean,
+  "date_joined": DateTime,
+  "username": String,
+  "name": String,
+  "gender": String,
+  "useravatar": List<Int>,
+  "usertype": String,
+  "bupt_id": String,
+  "class_number": String,
+  "email": String,
+  "phone": String,
+  "wechat": String
+}
+```
+##### response headers:
+```json
+{
+  "token": 用户登录token
+}
+```
+</div>
+<div id="1-2-1">
+### 修改密码
+##### url: /account/change_password/
+##### method: POST
+##### 权限: 需要自己
+##### data:
+```json
+{
+  "old_pass": String,
+  "new_pass": String
+}
+```
+</div>
+<div id="1-2-2">
+### 重置密码流程
+
+#### 1. 请求忘记密码
+##### url: /account/forget_password/
+##### method: POST
+##### 权限: 任何人
+##### data:
+```json
+{
+  "username": 学号、手机、用户名或邮箱
+}
+```
+
+#### 2. 确认忘记密码
+##### url: /account/confirm_forgotten/
+##### method: POST
+##### 权限: 需要请求忘记密码后发送给用户邮箱的token
+##### data:
+```json
+{}
+```
+
+#### 3. 直接修改密码
+##### url: /account/change_directly/
+##### method: POST
+##### 权限: 需要请求忘记密码后发送给用户邮箱的token
+##### data:
+```json
+{
+  "new_pass": String
+}
+```
+</div>
+<div id="1-3">
+### 文件上传
+##### url: /upload_file/
+##### method: POST
+##### 权限: 需要登录
+##### data:
+```json
+{
+  "data": File
+}
+```
+##### return:
+```json
+{
+  "id": 刚上传的文件的id
+}
+```
+</div>
+<div id="1-4">
+### 头像修改
+##### url: /data/avatars/
+##### method: POST
+##### 权限: 需要自己
+##### data: 
+```json
+{
+  "user": 用户id,
+  "useravatar": File
+}
+```
+</div>
+<div id="2-1-1-1">
+# GraphQL API
+
+### 1. UserType (用户)
+### 1) query
+### 可以查询的字段
+
+```gql
+{
+  dateJoined: DateTime
+  username: String
+  buptId: String
+  name: String
+  email: String
+  phone: String
+  gender: "male" or "female"
+  usertype: "teacher" or "student"
+  classNumber: String
+  wechat: String
+  forgotten: Boolean
+  useravatar: FileType
+  teachersCourses: List<CourseType>  // 以该用户作为老师的所有课程
+  teachingAssistantsCourses: List<CourseType>  // 以该用户作为助教的所有课程
+  studentsCourses: List<CourseType>  // 以该用户作为学生的所有课程
+  mySubmissions: List<SubmissionType>  // 该用户提交的作业
+  studentTotalMarks: List<TotalMarksType>  // 该用户各课程的总分信息
+}
+```
+</div>
+<div id="2-1-1-2">
+### query 的方法
+#### allUsers
+##### 权限
+需要登录
+##### 参数
+```gql
+()
+```
+##### 用法
+```gql
+query {
+  allUsers {
+    // 需要查询的字段
+  }
+}
+```
+</div>
+<div id="2-1-1-3">
+#### getUsersByIds
+##### 权限
+需要登录
+##### 参数
+```gql
+(ids: List<Int>!)
+```
+##### 用法
+```gql
+query {
+  getUsersByIds(ids: 指定id列表) {
+    // 需要查询的字段
+  }
+}
+```
+</div>
+<div id="2-1-1-4">
+#### getUsersByUsernames
+##### 权限
+需要登录
+##### 参数
+```gql
+(usernames: List<String>!)
+```
+##### 用法
+```gql
+query {
+  getUsersByUsernames(usernames: 指定username列表) {
+    // 需要查询的字段
+  }
+}
+```
+</div>
+<div id="2-1-1-5">
+#### getUsersByBuptIds
+##### 权限
+需要登录
+##### 参数
+```gql
+(buptIds: List<String>!)
+```
+##### 用法
+```gql
+query {
+  getUsersByBuptIds(buptIds: 指定buptId列表) {
+    // 需要查询的字段
+  }
+}
+```
+</div>
+<div id="2-1-1-6">
+#### getUsersByNames
+##### 权限
+需要登录
+##### 参数
+```gql
+(names: List<String>!)
+```
+##### 用法
+```gql
+query {
+  getUsersByNames(names: 指定name列表) {
+    // 需要查询的字段
+  }
+}
+```
+</div>
+<div id="2-1-1-7">
+#### getUsersByCourseId
+##### 权限
+需要登录
+##### 参数
+```gql
+(courseId: Int!)
+```
+##### 用法
+```gql
+query {
+  getUsersByCourseId(courseId: 指定课程id) {
+    // 需要查询的字段
+  }
+}
+```
+</div>
+<div id="2-1-2-1">
+### 2) mutation
+
+### mutation 的方法
+
+#### editUser
+##### 权限
+需要用户本人
+##### 参数
+```gql
+(userData: {
+  id: Int!
+  username: String,
+  classNumber: String,
+  phone: String
+}!)
+```
+##### 返回字段
+```gql
+{
+  ok: Boolean
+  msg: JSONString,
+  user: UserType
+}
+```
+##### 用法
+```gql
+mutation {
+  editUser(userData: {
+    // 参数字段
+  }) {
+    // 返回字段
+  }
+}
+```
+</div>
+<div id="2-2-1-1">
+### 2. CourseType (课程)
+
+### 1) query
+
+### 可以查询的字段 (非基础类型的字段都需要展开)
+```gql
+{
+  id: Int
+  name: String
+  description: String
+  school: String
+  marks: Float
+  startTime: DateTime
+  endTime: DateTime
+  teachers: List<UserType>
+  teachingAssistants: List<UserType>
+  students: List<UserType>
+  courseAssignments: List<AssignmentType>  // 该课程的作业
+  courseTotalMarks: List<TotalMarksType>  // 该课程各学生的总分信息
+}
+```
+</div>
+<div id="2-2-1-2">
+### query 的方法
+#### allCourses
+##### 权限
+需要登录
+##### 参数
+```gql
+()
+```
+##### 用法
+```gql
+query {
+  allCourses {
+    // 需要查询的字段
+  }
+}
+```
+</div>
+<div id="2-2-1-3">
+#### getCoursesByIds
+##### 权限
+需要登录
+##### 参数
+```gql
+(ids: List<Int>!)
+```
+##### 用法
+```gql
+query {
+  getCoursesByIds(ids: 指定id列表) {
+    // 需要查询的字段
+  }
+}
+```
+</div>
+<div id="2-2-1-4">
+#### searchCoursesByKeywords
+##### 权限
+需要登录
+##### 参数
+```gql
+(keywords: String!)
+```
+##### 用法
+```gql
+query {
+  searchCoursesByKeywords(keywords: 指定关键字) {
+    // 需要查询的字段
+  }
+}
+```
+</div>
+<div id="2-2-1-5">
+#### searchCoursesByName
+##### 权限
+需要登录
+##### 参数
+```gql
+(name: String!)
+```
+##### 用法
+```gql
+query {
+  searchCoursesByName(name: 指定名称) {
+    // 需要查询的字段
+  }
+}
+```
+</div>
+<div id="2-2-1-6">
+#### searchCoursesByTeacherName
+##### 权限
+需要登录
+##### 参数
+```gql
+(teacherName: String!)
+```
+##### 用法
+```gql
+query {
+  searchCoursesByTeacherName(teacherName: 指定老师名称) {
+    // 需要查询的字段
+  }
+}
+```
+</div>
+<div id="2-2-2-1">
+### 2) mutation
+
+#### mutation 的方法
+
+#### createCourse
+##### 权限
+需要老师身份
+##### 参数
+```gql
+(courseData: {
+  name: String!
+  description: String!
+  marks: Float!
+  teachers: List<Int>!,
+  teachingAssistants: List<Int>!,
+  students: List<Int>!,
+  school: String!,
+  startTime: DateTime!,
+  endTime: DateTime!
+}!)
+```
+##### 返回字段
+```gql
+{
+  ok: Boolean,
+  msg: JSONString,
+  course: CourseType
+}
+```
+##### 用法
+```gql
+mutation {
+  createCourse(courseData: {
+    // 参数字段
+  }) {
+    // 需要的返回字段
+  }
+}
+```
+</div>
+<div id="2-2-2-2">
+#### editCourse
+##### 权限
+需要该课教师或助教 <br>
+教师权限: 可修改以下所有字段 <br>
+助教权限: 可修改除name, teachers, teachingAssistants之外的字段
+##### 参数
+```gql
+(courseData: {
+  id: Int!
+  name: String
+  description: String
+  marks: Float
+  teachers: List<Int>,  // 只增不减
+  teachingAssistants: List<Int>,  // 只增不减
+  students: List<Int>,  // 只增不减
+  school: String,
+  startTime: DateTime,
+  endTime: DateTime
+}!)
+```
+##### 返回字段
+```gql
+{
+  ok: Boolean,
+  msg: JSONString,
+  course: CourseType
+}
+```
+##### 用法
+```gql
+mutation {
+  editCourse(courseData: {
+    // 参数字段
+  }) {
+    // 需要的返回字段
+  }
+}
+```
+</div>
+<div id="2-3-1-1">
+### 3. AssignmentType (老师布置的作业)
+
+### 1) query
+
+### 可以查询的字段 (非基础类型的字段都需要展开)
+```gql
+{
+  id: Int
+  name: String
+  description: String
+  assignmentType: String
+  startTime: String
+  weight: Float
+  deadline: DateTime
+  courseClass: CourseType
+  addfile: FileType
+  assignmentSubmissions: List<SubmissionType>  // 该assignment的所有submission
+}
+```
+</div>
+<div id="2-3-1-2">
+### query 的方法
+#### allAssignments
+##### 权限
+需要登录
+##### 参数
+```gql
+()
+```
+##### 用法
+```gql
+query {
+  allAssignments {
+    // 需要查询的字段
+  }
+}
+```
+</div>
+<div id="2-3-1-3">
+#### getAssignmentsByIds
+##### 权限
+需要登录
+##### 参数
+```gql
+(ids: List<Int>!)
+```
+##### 用法
+```gql
+query {
+  getAssignmentsByIds(ids: 需要查询的id的列表) {
+    // 需要查询的字段
+  }
+}
+```
+</div>
+<div id="2-3-1-4">
+#### getAssignmentsByCourses
+##### 权限
+需要登录
+##### 参数
+```gql
+(courses: List<Int>!)
+```
+##### 用法
+```gql
+query {
+  getAssignmentsByCourses(courses: 指定课程的id列表) {
+    // 需要查询的字段
+  }
+}
+```
+</div>
+<div id="2-3-1-5">
+#### getAssignmentsByDeadline (查找ddl在某个日期之前的所有作业)
+##### 权限
+需要登录
+##### 参数
+```gql
+(deadline: DateTime!)
+```
+##### 用法
+```gql
+query {
+  getAssignmentsByDeadline(deadline: 指定日期) {
+    // 需要查询的字段
+  }
+}
+```
+</div>
+<div id="2-3-1-6">
+#### getAssignmentsByName
+##### 权限
+需要登录
+##### 参数
+```gql
+(name: String!)
+```
+##### 用法
+```gql
+query {
+  getAssignmentsByName(name: 指定名称) {
+    // 需要查询的字段
+  }
+}
+```
+</div>
+<div id="2-3-1-7">
+#### getAssignmentsByKeywords (模糊搜索)
+##### 权限
+需要登录
+##### 参数
+```gql
+(keywords: String!)
+```
+##### 用法
+```gql
+query {
+  getAssignmentsByKeywords(keywords: 指定关键词) {
+    // 需要查询的字段
+  }
+}
+```
+</div>
+<div id="2-3-2-1">
+### 2) mutation
+
+### mutation 的方法
+
+#### createAssignment
+##### 权限
+需要该课老师或助教
+##### 参数
+```gql
+(assignmentData: {
+  courseClass: Int! // 对应课程的id
+  name: String!
+  description: String!
+  assignmentType: "image" or "docs" or "vary"!
+  deadline: DateTime!
+  addfile: List<Int>!
+  weight: Float
+}!)
+```
+##### 返回字段
+```gql
+{
+  ok: Boolean
+  msg: JSONString // 提示信息
+  assignment: AssignmentType
+}
+```
+##### 用法
+```gql
+mutation {
+  createAssignment(assginmentData: {
+    // 参数字段
+  }) {
+    // 需要的返回字段
+  }
+}
+```
+</div>
+<div id="2-3-2-2">
+#### editAssignment
+##### 权限
+需要该课老师或助教
+##### 参数
+```gql
+(assignmentData: {
+  id: Int!  // 所需修改对象的id
+  name: String
+  description: String
+  assignmentType: "image" or "docs" or "vary"
+  deadline: DateTime
+  addfile: List<Int>
+  weight: Float
+}!)
+```
+##### 返回字段
+```gql
+{
+  ok: Boolean
+  msg: JSONString // 提示信息
+  assignment: AssignmentType
+}
+```
+##### 用法
+```gql
+mutation {
+  editAssignment(assginmentData: {
+    // 参数字段
+  }) {
+    // 需要的返回字段
+  }
+}
+```
+</div>
+<div id="2-3-2-3">
+#### deleteAssignment
+##### 权限
+需要该课老师
+##### 参数
+```gql
+(assignmentData: {
+  ids: Lits<Int>!  // 所需删除的所有对象的id列表
+}!)
+```
+##### 返回字段
+```gql
+{
+  ok: Boolean
+  msg: JSONString // 提示信息
+  assignments: List<AssignmentType>  // 删掉的assignments
+}
+```
+##### 用法
+```gql
+mutation {
+  deleteAssignment(assginmentData: {
+    // 参数字段
+  }) {
+    // 需要的返回字段
+  }
+}
+```
+</div>
+<div id="2-3-2-4">
+#### setWeights
+##### 权限
+需要该课的老师
+##### 参数
+```gql
+(weightData: {
+  // 注意: assignments与weights必须一一对应
+  assignments: List<Int>
+  weights: List<Float>
+})
+```
+##### 返回字段
+```gql
+{
+  ok: Boolean
+  msg: JSONString
+  assignments: List<AssignmentType>
+}
+```
+##### 用法
+```gql
+mutation {
+  setWeights(weightData: {
+    // 参数字段
+  }) {
+    // 需要返回的字段
+  }
+}
+```
+</div>
+<div id="2-4-1-1">
+### 4. SubmissionType (学生提交的作业)
+
+### 1) query
+
+### 可以查询的字段
+```gql
+{
+  aware: Boolean
+  description: String
+  reviewComment: String
+  isReviewed: Boolean
+  score: Float
+  isExcellent: Boolean
+  pdf: FileType
+  longPicture: FileType  // 长图
+  zippedFile: FileType  // 压缩包
+  submitTime: DateTime
+  assignment: AssignmentType
+  submitter: UserType
+}
+```
+</div>
+<div id="2-4-1-2">
+### query 的方法
+#### allSubmissions
+##### 权限
+需要登录
+##### 参数
+```gql
+()
+```
+##### 用法
+```gql
+query {
+  allSubmissions {
+    // 需要查询的字段
+  }
+}
+```
+</div>
+<div id="2-4-1-3">
+#### getSubmissionsByIds
+##### 权限
+需要登录
+##### 参数
+```gql
+(ids: List<Int>!)
+```
+##### 用法
+```gql
+query {
+  getSubmissionsByIds(ids: 指定submission的id列表) {
+    // 需要查询的字段
+  }
+}
+```
+</div>
+<div id="2-4-1-4">
+#### getSubmissionsByOwners
+##### 权限
+需要登录
+##### 参数
+```gql
+(owners: List<Int>!)
+```
+##### 用法
+```gql
+query {
+  getSubmissionsByOwners(owners: 指定提交者的id列表) {
+    // 需要查询的字段
+  }
+}
+```
+</div>
+<div id="2-4-1-5">
+#### getSubmissionsByAssignments
+##### 权限
+需要登录
+##### 参数
+```gql
+(assignments: List<Int>!)
+```
+##### 用法
+```gql
+query {
+  getSubmissionsByAssignments(assignments: 指定老师布置的作业的id列表) {
+    // 需要查询的字段
+  }
+}
+```
+</div>
+<div id="2-4-1-6">
+#### getSubmissionsByCourses
+##### 权限
+需要登录
+##### 参数
+```gql
+(courses: List<Int>!)
+```
+##### 用法
+```gql
+query {
+  getSubmissionsByCourses(courses: 指定课程的id列表) {
+    // 需要查询的字段
+  }
+}
+```
+</div>
+<div id="2-4-2-1">
+### 2) mutation
+
+### mutation 的方法
+
+#### createSubmission
+##### 权限
+需要该课的学生
+##### 参数
+```gql
+(submissionData: {
+  assignment: Int!
+  description: String
+  image: List<Int>
+  addfile: List<Int>
+}!)
+```
+##### 返回字段
+```gql
+{
+  ok: Boolean
+  msg: JSONString
+  submission: SubmissionType
+}
+```
+##### 用法
+```gql
+mutation {
+  createSubmission(submissionData: {
+    // 参数字段
+  }) {
+    // 返回字段
+  }
+}
+```
+</div>
+<div id="2-4-2-2">
+#### editSubmission
+##### 权限
+需要该作业的提交者
+##### 参数
+```gql
+(submissionData: {
+  id: Int!
+  description: String
+  image: List<Int>
+  addfile: List<Int>
+}!)
+```
+##### 返回字段
+```gql
+{
+  ok: Boolean
+  msg: JSONString
+  submission: SubmissionType
+}
+```
+##### 用法
+```gql
+mutation {
+  editSubmission(submissionData: {
+    // 参数字段
+  }) {
+    // 返回字段
+  }
+}
+```
+</div>
+<div id="2-4-2-3">
+#### giveScore
+##### 权限
+该课的老师或助教
+##### 参数
+```gql
+(scoreGivingData: {
+  submission: Int!
+  score: Float!
+  isExcellent: Boolean
+}!)
+```
+##### 返回字段
+```gql
+{
+  ok: Boolean
+  msg: JSONString
+  submission: SubmissionType
+}
+```
+##### 用法
+```gql
+mutation {
+  giveScore(scoreGivingData: {
+    // 参数字段
+  }) {
+    // 返回字段
+  }
+}
+```
+</div>
+<div id="2-5">
+### 5. FileType (文件) (不能单独操作)
+
+#### 可以展开的字段
+```gql
+{
+  data: String  // 文件的相对url
+  initialUploadUser: UserType  // 上传者
+  initialUploadTime: DateTime  // 上传时间
+  // 以下为冗余字段
+  assignments: List<AssignmentType>  // 以该文件作为附加文件的assignment
+  imageSubmission: List<SubmissionType>  // 以该文件作为图片的submission
+  pdfSubmission: List<SubmissionType>  // 以该文件作为pdf的submission
+  longPicSubmission: List<SubmissionType>  // 以该文件作为长图的submission
+  addfileSubmission: List<SubmissionType>  // 以该文件作为附加文件的submission
+}
+```
+</div>
+<div id="2-6-1-1">
+### 6. TotalMarksType (总分)
+
+### 1) query
+
+### 可以查询的字段 (非基础类型的字段都需要展开)
+```gql
+{
+  id: Int
+  student: Int
+  courseClass: Int
+  average: Float  // 平均分/加权分
+  total: Float  // 总分数
+}
+```
+</div>
+<div id="2-6-1-2">
+### query 的方法
+#### getTotalMarks
+##### 权限
+根据查询参数有所不同, 在用法中具体解释
+##### 参数
+```gql
+(student: Int, course: Int)  // 注意: 此处参数非必需
+```
+##### 用法
+```gql
+// 获取指定学生各课程的总分信息
+// 权限: 需要该学生自己
+query {
+  getTotalMarks(student: 指定学生的id) {
+    // 需要查询的字段
+  }
+}
+
+// 获取指定课程各学生的总分信息
+// 权限: 需要该课程的老师或助教
+query {
+  getTotalMarks(course: 指定课程的id) {
+    // 需要查询的字段
+  }
+}
+
+// 获取指定学生指定课程的总分信息
+// 权限: 以上两个权限的或
+// 注意: 虽然查询结果只可能有一个, 但还是返回的列表
+query {
+  getTotalMarks(student: 指定学生的id, course: 指定课程的id) {
+    // 需要查询的字段
+  }
+}
+```
+</div>
+<div id="2-6-2-1">
+### 2) mutation
+
+### mutation 的方法
+
+#### calculateTotal
+##### 权限
+需要该学生该课的老师或助教
+##### 参数
+```gql
+(calcTarget: {
+  course: Int!,
+  student: List<Int>!
+}!)
+```
+##### 返回字段
+```gql
+{
+  ok: Boolean
+  msg: JSONString // 提示信息
+  totalMarks: List<TotalMarksType>
+}
+```
+###### 用法
+```gql
+mutation {
+  calculateTotal(calcTarget: {
+    // 参数字段
+  }) {
+    // 需要的返回字段
+  }
+}
+```
+</div></div>
+<div id="app" v-cloak>
+  <div id="top" style="position: fixed; right: 50px; bottom: 50px; z-index: 9999;">
+    <el-button icon="el-icon-arrow-up" id="top-btn" @click="goTop"></el-button>
+  </div>
+    <el-row style="position: fixed; width: 100%; z-index: 9999;">
+        <el-col :span="24" style="background: #444444; height: 60px;" id="header">
+            <h2 id="main-title">Homework+ API Documentation</h2>
+        </el-col>
+    </el-row>
+    <el-row>
+        <el-col :span="6">
+            <el-menu ref="lmenu" id="left-menu" @select="handleMenuSelected" @open="handleMenuOpened" @close="handleMenuClose">
+                <el-submenu index="1" @open="handleMenuOpened" @close="handleMenuClose">
+                    <template slot="title">
+                        RESTful API
+                    </template>
+                    <el-submenu index="1-1" @open="handleMenuOpened" @close="handleMenuClose">
+                      <template slot="title">
+                        登录和注册
+                      </template>
+                      <el-menu-item index="1-1-1">注册</el-menu-item>
+                      <el-menu-item index="1-1-2">注册查重</el-menu-item>
+                      <el-menu-item index="1-1-3">登录</el-menu-item>
+                    </el-submenu>
+                    <el-submenu index="1-2" @open="handleMenuOpened" @close="handleMenuClose">
+                      <template slot="title">
+                        密码修改和重置
+                      </template>
+                      <el-menu-item index="1-2-1">修改密码</el-menu-item>
+                      <el-menu-item index="1-2-2">忘记密码</el-menu-item>
+                    </el-submenu>
+                    <el-menu-item index="1-3">文件上传</el-menu-item>
+                    <el-menu-item index="1-4">头像修改</el-menu-item>
+                </el-submenu>
+                <el-submenu index="2" @open="handleMenuOpened" @close="handleMenuClose">
+                    <template slot="title">
+                        GraphQL API
+                    </template>
+                    <el-submenu index="2-1" @open="handleMenuOpened" @close="handleMenuClose">
+                        <template slot="title">
+                            UserType (用户)
+                        </template>
+                        <el-submenu index="2-1-1" @open="handleMenuOpened" @close="handleMenuClose">
+                            <template slot="title">
+                                query
+                            </template>
+                            <el-menu-item index="2-1-1-1">字段</el-menu-item>
+                            <el-menu-item index="2-1-1-2">allUsers</el-menu-item>
+                            <el-menu-item index="2-1-1-3">getUsersByIds</el-menu-item>
+                            <el-menu-item index="2-1-1-4">getUsersByUsernames</el-menu-item>
+                            <el-menu-item index="2-1-1-5">getUsersByBuptIds</el-menu-item>
+                            <el-menu-item index="2-1-1-6">getUsersByNames</el-menu-item>
+                            <el-menu-item index="2-1-1-7">getUsersByCourseId</el-menu-item>
+                        </el-submenu>
+                        <el-submenu index="2-1-2" @open="handleMenuOpened" @close="handleMenuClose">
+                            <template slot="title">
+                                mutation
+                            </template>
+                            <el-menu-item index="2-1-2-1">editUser</el-menu-item>
+                        </el-submenu>
+                    </el-submenu>
+                    <el-submenu index="2-2" @open="handleMenuOpened" @close="handleMenuClose">
+                        <template slot="title">
+                            CourseType (课程)
+                        </template>
+                        <el-submenu index="2-2-1" @open="handleMenuOpened" @close="handleMenuClose">
+                            <template slot="title">
+                                query
+                            </template>
+                            <el-menu-item index="2-2-1-1">字段</el-menu-item>
+                            <el-menu-item index="2-2-1-2">allCourses</el-menu-item>
+                            <el-menu-item index="2-2-1-3">getCoursesByIds</el-menu-item>
+                            <el-menu-item index="2-2-1-4">searchCoursesByKeywords</el-menu-item>
+                            <el-menu-item index="2-2-1-5">searchCoursesByName</el-menu-item>
+                            <el-menu-item index="2-2-1-6">searchCoursesByTeacherName</el-menu-item>
+                        </el-submenu>
+                        <el-submenu index="2-2-2">
+                            <template slot="title">
+                                mutation
+                            </template>
+                            <el-menu-item index="2-2-2-1">createCourse</el-menu-item>
+                            <el-menu-item index="2-2-2-2">editCourse</el-menu-item>
+                        </el-submenu>
+                    </el-submenu>
+                    <el-submenu index="2-3">
+                        <template slot="title">
+                            AssignmentType (教师布置的作业)
+                        </template>
+                        <el-submenu index="2-3-1">
+                            <template slot="title">
+                                query
+                            </template>
+                            <el-menu-item index="2-3-1-1">字段</el-menu-item>
+                            <el-menu-item index="2-3-1-2">allAssignments</el-menu-item>
+                            <el-menu-item index="2-3-1-3">getAssignmentsByIds</el-menu-item>
+                            <el-menu-item index="2-3-1-4">getAssignmentsByCourses</el-menu-item>
+                            <el-menu-item index="2-3-1-5">getAssignmentsByDeadline</el-menu-item>
+                            <el-menu-item index="2-3-1-6">getAssignmentsByName</el-menu-item>
+                            <el-menu-item index="2-3-1-7">getAssignmentsByKeywords</el-menu-item>
+                        </el-submenu>
+                        <el-submenu index="2-3-2" @open="handleMenuOpened" @close="handleMenuClose">
+                            <template slot="title">
+                                mutation
+                            </template>
+                            <el-menu-item index="2-3-2-1">createAssignment</el-menu-item>
+                            <el-menu-item index="2-3-2-2">editAssignment</el-menu-item>
+                            <el-menu-item index="2-3-2-3">deleteAssignment</el-menu-item>
+                            <el-menu-item index="2-3-2-4">setWeights</el-menu-item>
+                        </el-submenu>
+                    </el-submenu>
+                    <el-submenu index="2-4">
+                        <template slot="title">
+                            SubmissionType (学生提交的作业)
+                        </template>
+                        <el-submenu index="2-4-1">
+                            <template slot="title">
+                                query
+                            </template>
+                            <el-menu-item index="2-4-1-1">字段</el-menu-item>
+                            <el-menu-item index="2-4-1-2">allSubmissions</el-menu-item>
+                            <el-menu-item index="2-4-1-3">getSubmissionsByIds</el-menu-item>
+                            <el-menu-item index="2-4-1-4">getSubmissionsByOwners</el-menu-item>
+                            <el-menu-item index="2-4-1-5">getSubmissionsByAssignments</el-menu-item>
+                            <el-menu-item index="2-4-1-6">getSubmissionsByCourses</el-menu-item>
+                        </el-submenu>
+                        <el-submenu index="2-4-2">
+                            <template slot="title">
+                                mutation
+                            </template>
+                            <el-menu-item index="2-4-2-1">createSubmission</el-menu-item>
+                            <el-menu-item index="2-4-2-2">editSubmission</el-menu-item>
+                            <el-menu-item index="2-4-2-3">giveScore</el-menu-item>
+                        </el-submenu>
+                    </el-submenu>
+                    <el-menu-item index="2-5">FileType (文件)</el-menu-item>
+                    <el-submenu index="2-6" @open="handleMenuOpened" @close="handleMenuClose">
+                        <template slot="title">
+                            TotalMarksType (总成绩)
+                        </template>
+                        <el-submenu index="2-6-1" @open="handleMenuOpened" @close="handleMenuClose">
+                            <template slot="title">
+                                query
+                            </template>
+                            <el-menu-item index="2-6-1-1">字段</el-menu-item>
+                            <el-menu-item index="2-6-1-2">getTotalMarks</el-menu-item>
+                        </el-submenu>
+                        <el-submenu index="2-6-2" @open="handleMenuOpened" @close="handleMenuClose">
+                            <template slot="title">
+                                mutation
+                            </template>
+                            <el-menu-item index="2-6-2-1">calculateTotal</el-menu-item>
+                        </el-submenu>
+                    </el-submenu>
+                </el-submenu>
+            </el-menu>
+        </el-col>
+        <el-col :span="18">
+        <article id="markdown" class="markdown-body" style="margin: 50px; top: -200px; margin-right: 150px;"></article>
+        </el-col>
+    </el-row>
+</div>
+</body>
+<script src="lib/vue.js"></script>
+<script src="lib/eleme-index.js"></script>
+<script src="lib/marked.js"></script>
+<script>
+    var app = new Vue({
+        el: '#app',
+        data: function() {
+            return {
+              activeMenu: [],
+              prevIndex: "#atc-1-1-1"
+            }
+        },
+        mounted: function() {
+          for(let index of JSON.parse(localStorage.getItem("active-index"))) {
+            this.$refs.lmenu.open(index);
+          }
+        },
+        methods: {
+          handleMenuSelected: function(index) {
+            document.querySelector(`#atc-${index}`).scrollIntoView(true);
+            document.querySelector(this.prevIndex).style['color'] = "";
+            document.querySelector(`#atc-${index}`).style['color'] = "#409EFF";
+            this.prevIndex = `#atc-${index}`;
+            localStorage.setItem("prevIndex", this.prevIndex);
+          },
+          handleMenuOpened: function(index, indexPath) {
+            this.activeMenu.push(indexPath[indexPath.length - 1]);
+            localStorage.setItem("active-index", JSON.stringify(this.activeMenu));
+          },
+          handleMenuClose: function(index, indexPath) {
+            this.activeMenu.splice(this.activeMenu.indexOf(indexPath), 1);
+            localStorage.setItem("active-index", JSON.stringify(this.activeMenu));
+          },
+          goTop: function() {
+            document.querySelector("#atc-1-1-1").scrollIntoView(true);
+          }
+        }
+    })
+    var hd = document.querySelector("#header");
+    var mt = document.querySelector("#main-title");
+    var lm = document.querySelector("#left-menu");
+    var md = document.querySelector("#markdown");
+    var tpbtn = document.querySelector("#top-btn");
+
+    tpbtn.style.height = tpbtn.clientWidth + "px";
+
+    mt.style['marginTop'] = 0.5 * (hd.clientHeight - mt.clientHeight) + "px";
+    lm.style['height'] = window.innerHeight - hd.clientHeight + "px";
+    lm.parentElement.parentElement.style['paddingTop'] = hd.clientHeight + "px";
+    md.style['left'] = lm.clientWidth + "px";
+    md.style['width'] = window.innerWidth - lm.clientWidth - Number(md.style['marginLeft'].replace("px", "")) - Number(md.style['marginRight'].replace("px", "")) + "px";
+
+    window.onresize = () => {
+        mt.style['marginTop'] = 0.5 * (hd.clientHeight - mt.clientHeight) + "px";
+        lm.style['height'] = window.innerHeight - hd.clientHeight + "px";
+        lm.parentElement.parentElement.style['paddingTop'] = hd.clientHeight + "px";
+        md.style['left'] = lm.clientWidth + "px";
+        md.style['width'] = window.innerWidth - lm.clientWidth - Number(md.style['marginLeft'].replace("px", "")) - Number(md.style['marginRight'].replace("px", "")) + "px";
+    };
+    
+    // md.innerHTML = marked(document.querySelector("#markdown-code").innerHTML);
+    var mdHtml = ""
+    for(let child of document.querySelector("#markdown-code").children) {
+      mdHtml += `<div id="atc-${child['id']}" style="margin-top: -280px; padding-top: 300px;">` + marked(child.innerHTML) + `</div>`;
+    }
+    md.innerHTML = mdHtml
+    
+    try {
+      document.querySelector(localStorage.getItem("prevIndex")).style['color'] = "#409EFF";
+    } catch (e) {
+
+    }
+
+</script>
+</html>

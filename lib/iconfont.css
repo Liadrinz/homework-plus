@@ -1,0 +1,13 @@
+@font-face {font-family: "iconfont";
+  src: url('./fonts/iconfont.ttf?t=1525781798537') format('truetype'),
+  url('./fonts/iconfont.svg?t=1525781798537#iconfont') format('svg');
+}
+
+.iconfont {
+  font-family:"iconfont" !important;
+  font-style:normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-box-:before { content: "\e602"; }
