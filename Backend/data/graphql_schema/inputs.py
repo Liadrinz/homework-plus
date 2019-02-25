@@ -103,7 +103,7 @@ class ScoreGivingInput(graphene.InputObjectType):
 # arguments of calculating total score
 class TotalCalculationInput(graphene.InputObjectType):
     course = graphene.Int(required=True)
-    student = graphene.Int(required=True)
+    student = graphene.List(of_type=graphene.Int, required=True)
 
 
 # arguments of setting weights

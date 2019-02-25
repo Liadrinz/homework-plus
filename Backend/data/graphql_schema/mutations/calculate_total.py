@@ -36,6 +36,7 @@ class CalculateTotal(graphene.Mutation):
                 return CalculateTotal(ok=False, msg=public_msg['not_login'])
         
         editing_course = models.HWFCourseClass.objects.get(pk=calc_target['course'])
+        return_list = []
 
         try:
             
@@ -43,34 +44,37 @@ class CalculateTotal(graphene.Mutation):
             if len(editing_course.teachers.filter(pk=realuser.pk)) == 0 and len(editing_course.teaching_assistants.filter(pk=realuser.pk)) == 0:
                 return CalculateTotal(ok=False, msg=public_msg['forbidden'])
             else:
-                # calculate the total marks
-                count = 0
-                total = 0.0
-                average = 0.0
-                for assignment in editing_course.course_assignments.all():
-                    submission_score = 0
+                for target_pk in calc_target['student']:
+                    # calculate the total marks
+                    count = 0
+                    total = 0.0
+                    average = 0.0
+                    for assignment in editing_course.course_assignments.all():
+                        submission_score = 0
+                        try:
+                            target_submission = assignment.assignment_submissions.get(submitter_id=target_pk)
+                            submission_score = target_submission.score
+                        except ObjectDoesNotExist:
+                            pass
+                        average += assignment.weight * submission_score
+                        total += submission_score
+                        count += 1
+                    if average == 0.0:
+                        average = total / count
                     try:
-                        target_submission = assignment.assignment_submissions.get(submitter_id=calc_target['student'])
-                        submission_score = target_submission.score
+                        # 已有记录, 则覆盖
+                        record = models.TotalMarks.objects.get(student_id=target_pk, course_class_id=calc_target['course'])
+                        record.average = average
+                        record.total = total
+                        record.save()
+                        return_list.append(record)
                     except ObjectDoesNotExist:
-                        pass
-                    average += assignment.weight * submission_score
-                    total += submission_score
-                    count += 1
-                if average == 0.0:
-                    average = total / count
-                try:
-                    # 已有记录, 则覆盖
-                    record = models.TotalMarks.objects.get(student_id=calc_target['student'], course_class_id=calc_target['course'])
-                    record.average = average
-                    record.total = total
-                    record.save()
-                    return CalculateTotal(ok=True, msg=public_msg['success'], total_marks=record)
-                except ObjectDoesNotExist:
-                    # 没有记录, 则创建
-                    new_record = models.TotalMarks.objects.create(student_id=calc_target['student'], course_class_id=calc_target['course'], total_marks=total)
-                    new_record.save()
-                    return CalculateTotal(ok=True, msg=public_msg['success'], total_marks=new_record)
+                        # 没有记录, 则创建
+                        new_record = models.TotalMarks.objects.create(student_id=target_pk, course_class_id=calc_target['course'], total=total, average=average)
+                        new_record.save()
+                        return_list.append(record)
+                
+                return CalculateTotal(ok=True, msg=public_msg['success'], total_marks=return_list)
 
         except Exception as e:
             print(e)
