@@ -5,6 +5,8 @@ import { Upload, Icon, message,Row,Col,Button,Modal,Form,Input ,Card} from 'antd
 import {Link} from 'react-router-dom';
 import axios from 'axios';
 import {_} from 'underscore'
+import weburl from './url.js'
+import timeout from './timeout.js'
 import {moment} from 'moment'
 var avatarFile;//头像文件
 var courseRow=[];//作为学生的课程列表
@@ -22,11 +24,11 @@ const gridStyle={
   textAlign:'center',
 }
 var loginUser=axios.create({
-  url:"http://localhost:8000/data/is_repeated/",
+  url:weburl+"/data/is_repeated/",
   headers:{"content-type":"application/json"},
   method:'post',
   data:Userlogin,
-  timeout:1000,
+  timeout:timeout,
 })
 function getBase64(img, callback) {
     const reader = new FileReader();
@@ -83,7 +85,7 @@ class UploadAvatar extends React.Component {
           listType="picture-card"
           className="avatar-uploader"
           showUploadList={false}
-          action="http://localhost:8000/data/avatars/"
+          action={weburl+"/data/avatars/"}
           headers={{"content-type":"application/json","token":localStorage.getItem('token')}}
           beforeUpload={beforeUpload}
           onChange={this.handleChange}
@@ -200,11 +202,11 @@ class Studentcenter extends React.Component{
 
     componentDidMount(){
       var getQRcode=axios.create({
-        url:"http://localhost:8000/data/bind_wechat_qrcode/",
+        url:weburl+"/data/bind_wechat_qrcode/",
         headers:{"content-type":"application/json","token":localStorage.getItem('token')},
         method:'post',
         data:{
-          "user_id":localStorage.getItem("userloginkey")
+          "user_id":localStorage.getItem('userloginKey')
         },
         timeout:1000,
       })
@@ -369,11 +371,11 @@ class Studentcenter extends React.Component{
               pass.old_pass=values.原密码;
               pass.new_pass=values.新的密码;
               var changePass=axios.create({
-                url:"http://localhost:8000/account/change_password/",
+                url:weburl+"/account/change_password/",
                 headers:{"content-type":"application/json","token":localStorage.getItem('token')},
                 method:'post',
                 data:pass,
-                timeout:1000,
+                timeout:timeout,
               })
               changePass().then(function(response){
                 if(response.data.result.code==1000){
@@ -381,7 +383,6 @@ class Studentcenter extends React.Component{
                 }else if(response.data.result.code==4040){
                   message.error('密码修改失败，可能是由于您的原密码不符',3);
                 }
-                console.log(response)
               })
               .catch(function(error){
                 message.error('密码修改失败，可能是由于您的原密码不符',3);
@@ -447,7 +448,7 @@ class Studentcenter extends React.Component{
             user.phone=values.手机号;
           }
              var changeuserinformation=axios.create({
-              url:"http://localhost:8000/graphql/",
+              url:weburl+"/graphql/",
               headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
               method:'post',
               data:{
@@ -469,7 +470,7 @@ class Studentcenter extends React.Component{
                   }
                 }`
               },
-              timeout:1000,
+              timeout:timeout,
             })
              var that=this;
              if(values.用户名||values.班级号||values.手机号){

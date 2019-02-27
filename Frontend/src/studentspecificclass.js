@@ -5,6 +5,8 @@ import './studentspecificclass.css';
 import moment from 'moment';
 import axios from 'axios';
 import {Link} from 'react-router-dom';
+import weburl from './url.js'
+import timeout from './timeout.js'
 import {_} from 'underscore'
 var courseid;//特定课程的id
 var re=/^\/studentcenter\/class\/(.*)\/$/;
@@ -23,7 +25,7 @@ class SubmitHomework extends React.Component{
     componentWillMount(){
         var that=this;
         var getAllHomework=axios.create({
-            url:"http://localhost:8000/graphql/",
+            url:weburl+"/graphql/",
             headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
             method:'post',
             data:{
@@ -44,7 +46,7 @@ class SubmitHomework extends React.Component{
                     }
                 }`//用反引号      
             },
-            timeout:1000,
+            timeout:timeout,
         })
         getAllHomework().then(function(response){
            const assignments=response.data.data.getAssignmentsByCourses;
@@ -74,7 +76,7 @@ class SubmitHomework extends React.Component{
     componentWillUpdate(nextProps,nextState){
         if(nextState.flag!==this.state.flag){
         var getAllHomework=axios.create({
-            url:"http://localhost:8000/graphql/",
+            url:weburl+"/graphql/",
             headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
             method:'post',
             data:{
@@ -94,7 +96,7 @@ class SubmitHomework extends React.Component{
                     }
                 }`//用反引号      
             },
-            timeout:1000,
+            timeout:timeout,
         })
         getAllHomework().then(function(response){
            const assignments=response.data.data.getAssignmentsByCourses;

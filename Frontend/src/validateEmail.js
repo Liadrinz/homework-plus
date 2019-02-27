@@ -2,6 +2,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './validateEmail.css';
 import axios from 'axios';
+import weburl from './url.js'
+import timeout from './timeout.js'
 var gotToken='';
 var re=/^([0-9a-zA-Z\_\.\/\:]*)\?token=(.*)$/;
 class ValidateEmail extends React.Component{
@@ -9,10 +11,10 @@ class ValidateEmail extends React.Component{
        if(gotToken===''){
            gotToken=re.exec(window.location.href)[2];
            var postToken=axios.create({
-            url:"http://localhost:8000/account/activate/",
+            url:weburl+"/account/activate/",
             headers:{"content-type":"application/json","token":gotToken},
             method:'post',
-            timeout:1000,
+            timeout:timeout,
            })
            postToken().then(function(response){
                console.log(response);

@@ -3,6 +3,8 @@ import {Button,Col,Row,Modal,Tag,Form,message,Input,Icon,Upload,InputNumber} fro
 import axios from 'axios';
 import {_} from 'underscore';
 import moment from 'moment';
+import weburl from './url.js';
+import timeout from './timeout.js'
 import './myHomework.css';
 
 var re=/^\/studentcenter\/myHomeWork\/(.*)\/$/;
@@ -22,7 +24,7 @@ class UploadAssignmentFile extends React.Component{
             for(var i=0;i<this.props.addfile.length;i++){
                 filelist.push(
                     <div>
-                    <a href={"http://localhost:8000/media/"+this.props.addfile[i].data}
+                    <a href={weburl+"/media/"+this.props.addfile[i].data}
                        style={{fontSize:"20px"}}>
                     {re2.exec(this.props.addfile[i]["data"])[1]}
                     </a>
@@ -50,7 +52,7 @@ class CheckHomework extends React.Component{
     componentWillMount(){
         var that=this;
         var getHomework=axios.create({
-            url:"http://localhost:8000/graphql/",
+            url:weburl+"/graphql/",
             headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
             method:'post',
             data:{
@@ -67,7 +69,7 @@ class CheckHomework extends React.Component{
                 }
               }`
             },
-            timeout:1000,
+            timeout:timeout,
         })
         getHomework().then(function(response){
             let url="xxx";
@@ -86,7 +88,7 @@ class CheckHomework extends React.Component{
         var that=this;
         if(nextProps.changeflag!==this.props.changeflag||(nextProps.isSubmitted===true&&this.props.isSubmitted===false)){
             var getHomework=axios.create({
-                url:"http://localhost:8000/graphql/",
+                url:weburl+"/graphql/",
                 headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
                 method:'post',
                 data:{
@@ -103,7 +105,7 @@ class CheckHomework extends React.Component{
                     }
                   }`
                 },
-                timeout:1000,
+                timeout:timeout,
             })
             getHomework().then(function(response){
                 let url="xxx";
@@ -127,7 +129,7 @@ class CheckHomework extends React.Component{
                <br/><br/>
                <span style={{fontSize:"20px"}}>已提交的作业：</span>
                <br/><br/>
-               <img src={"http://localhost:8000/media/"+this.state.url} alt="图片作业" width="750px"/>
+               <img src={weburl+"/media/"+this.state.url} alt="图片作业" width="750px"/>
             </div>
         )}else if(this.props.type==="文件作业") return(
             <div>
@@ -136,7 +138,7 @@ class CheckHomework extends React.Component{
                <br/><br/>
                <span style={{fontSize:"20px"}}>已提交的作业：</span>
                <br/><br/>
-               <a href={"http://localhost:8000/media/"+this.state.url}
+               <a href={weburl+"/media/"+this.state.url}
                   style={{fontSize:"20px"}}>
                 {this.state.url==="xxx"?"xxx":re2.exec(this.state.url)[1]}
                </a>
@@ -163,7 +165,7 @@ class Handin extends React.Component{
             if(!err){
                 if(values.作业备注===undefined)values.作业备注="";
                 var handinHomework1=axios.create({
-                    url:"http://localhost:8000/graphql/",
+                    url:weburl+"/graphql/",
                     headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
                     method:'post',
                     data:{
@@ -182,10 +184,10 @@ class Handin extends React.Component{
                         }
                       }`
                     },
-                    timeout:1000,
+                    timeout:timeout,
                 })
                 var handinHomework2=axios.create({
-                    url:"http://localhost:8000/graphql/",
+                    url:weburl+"/graphql/",
                     headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
                     method:'post',
                     data:{
@@ -204,10 +206,10 @@ class Handin extends React.Component{
                         }
                       }`
                     },
-                    timeout:1000,
+                    timeout:timeout,
                 })
                 var updateHomework1=axios.create({
-                    url:"http://localhost:8000/graphql/",
+                    url:weburl+"/graphql/",
                     headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
                     method:'post',
                     data:{
@@ -223,10 +225,10 @@ class Handin extends React.Component{
                         }
                       }`
                     },
-                    timeout:1000,
+                    timeout:timeout,
                 })
                 var updateHomework2=axios.create({
-                    url:"http://localhost:8000/graphql/",
+                    url:weburl+"/graphql/",
                     headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
                     method:'post',
                     data:{
@@ -242,7 +244,7 @@ class Handin extends React.Component{
                         }
                       }`
                     },
-                    timeout:1000,
+                    timeout:timeout,
                 })
                 if(that.props.submittedID===-1){
                 if(that.props.type==="图片作业"){
@@ -329,7 +331,7 @@ class Handin extends React.Component{
         };
         const uploadProps = { //放进Upload组件里的一些属性
             name: 'data',
-            action: "http://localhost:8000/upload_file/",
+            action: weburl+"/upload_file/",
             headers: {
                 token:localStorage.getItem('token'),
             },
@@ -387,7 +389,7 @@ class ReviewHomework extends React.Component{
                     <br/><br/><br/>
                     <div style={{fontSize:"18px"}}>我提交的作业:</div>
                     <br/>
-                    <img src={"http://localhost:8000/media/"+this.props.review.longPicture.data} alt="图片作业" width="95%" />
+                    <img src={weburl+"/media/"+this.props.review.longPicture.data} alt="图片作业" width="95%" />
                   </div>
                 )
             }
@@ -409,7 +411,7 @@ class ReviewHomework extends React.Component{
                     <br/><br/><br/>
                     <div style={{fontSize:"18px"}}>我提交的作业:</div>
                     <br/>
-                      <a href={"http://localhost:8000/media/"+this.props.review.zippedFile.data}
+                      <a href={weburl+"/media/"+this.props.review.zippedFile.data}
                          style={{fontSize:"20px"}}>
                       {this.props.review.zippedFile.data==="xxx"?"xxx":re2.exec(this.props.review.zippedFile.data)[1]}
                       </a>
@@ -425,7 +427,7 @@ class ReviewHomework extends React.Component{
                     <br/><br/><br/>
                     <div style={{fontSize:"18px"}}>我提交的作业:</div>
                     <br/>
-                    <img src={"http://localhost:8000/media/"+this.props.review.longPicture.data} alt="图片作业" width="95%"/>
+                    <img src={weburl+"/media/"+this.props.review.longPicture.data} alt="图片作业" width="95%"/>
                  </div>
                 )
             }
@@ -437,7 +439,7 @@ class ReviewHomework extends React.Component{
                       <br/><br/><br/>
                       <div style={{fontSize:"18px"}}>我提交的作业:</div>
                       <br/>
-                        <a href={"http://localhost:8000/media/"+this.props.review.zippedFile.data}
+                        <a href={weburl+"/media/"+this.props.review.zippedFile.data}
                            style={{fontSize:"20px"}}>
                            {this.props.review.zippedFile.data==="xxx"?"xxx":re2.exec(this.props.review.zippedFile.data)[1]}
                         </a>
@@ -490,7 +492,7 @@ class Review extends React.Component{
     componentWillMount(){
         var that=this;
         var getAssignmentInfo=axios.create({
-            url:"http://localhost:8000/graphql/",
+            url:weburl+"/graphql/",
             headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
             method:'post',
             data:{
@@ -512,10 +514,10 @@ class Review extends React.Component{
                  }
                 }`//用反引号      
             },
-            timeout:1000,
+            timeout:timeout,
         })
         var getReview=axios.create({
-            url:"http://localhost:8000/graphql/",
+            url:weburl+"/graphql/",
             headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
             method:'post',
             data:{
@@ -539,7 +541,7 @@ class Review extends React.Component{
                  }
                 }`//用反引号      
             },
-            timeout:1000,      
+            timeout:timeout,      
         })
         axios.all([getAssignmentInfo(),getReview()]).then(axios.spread(function(response1,response2){
             let type=response1.data.data.getAssignmentsByIds[0].assignmentType;
@@ -659,7 +661,7 @@ class SubmitHomework extends React.Component{
     componentWillMount(){
         var that=this;
         var getAssignmentInfo=axios.create({
-            url:"http://localhost:8000/graphql/",
+            url:weburl+"/graphql/",
             headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
             method:'post',
             data:{
@@ -681,10 +683,10 @@ class SubmitHomework extends React.Component{
                  }
                 }`//用反引号      
             },
-            timeout:1000,
+            timeout:timeout,
         })
         var checkSubmission=axios.create({
-            url:"http://localhost:8000/graphql/",
+            url:weburl+"/graphql/",
             headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
             method:'post',
             data:{
@@ -697,7 +699,7 @@ class SubmitHomework extends React.Component{
                  }
                 }`//用反引号      
             },
-            timeout:1000,      
+            timeout:timeout,      
         })
         axios.all([getAssignmentInfo(),checkSubmission()]).then(axios.spread(function(response1,response2){
             let type=response1.data.data.getAssignmentsByIds[0].assignmentType;
@@ -719,7 +721,7 @@ class SubmitHomework extends React.Component{
         var that=this;
         if(this.state.isSubmitted===false&&nextState.isSubmitted===true){
             var getSubmissionID=axios.create({
-                url:"http://localhost:8000/graphql/",
+                url:weburl+"/graphql/",
                 headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
                 method:'post',
                 data:{
@@ -733,7 +735,7 @@ class SubmitHomework extends React.Component{
                      }
                     }`//用反引号      
                 },
-                timeout:1000,      
+                timeout:timeout,      
             })
             getSubmissionID().then(function(response){
                 let submission=response.data.data.getSubmissionsByAssignments;
@@ -864,7 +866,7 @@ class MyHomework extends React.Component{
     componentWillMount(){
         var that=this;
         var getDeadline=axios.create({
-            url:"http://localhost:8000/graphql/",
+            url:weburl+"/graphql/",
             headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
             method:'post',
             data:{
@@ -875,7 +877,7 @@ class MyHomework extends React.Component{
                  }
                 }`//用反引号      
             },
-            timeout:1000,
+            timeout:timeout,
         })
         getDeadline().then(function(response){
             that.setState({deadline:response.data.data.getAssignmentsByIds[0].deadline});

@@ -5,6 +5,8 @@ import './teacherSpecificClass.css';
 import {_} from 'underscore'
 import moment from 'moment';
 import axios from 'axios';
+import weburl from './url.js';
+import timeout from './timeout.js'
 import {Link} from 'react-router-dom';
 var courseid;//特定课程的id
 var courseStudents;//该课程的所有学生
@@ -34,7 +36,7 @@ function disabledDateTime() {
 }
 const uploadProps = { //放进Upload组件里的一些属性
     name: 'data',
-    action: "http://localhost:8000/upload_file/",
+    action: weburl+"/upload_file/",
     headers: {
         token:localStorage.getItem('token'),
     },
@@ -62,7 +64,7 @@ class AddAssignment extends React.Component{
         this.props.form.validateFieldsAndScroll(["作业名称","作业描述","截止时间","作业类型"],(err,values)=>{
             if(!err){
                 var createAssignment=axios.create({
-                    url:"http://localhost:8000/graphql/",
+                    url:weburl+"/graphql/",
                     headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
                     method:'post',
                     data:{
@@ -81,7 +83,7 @@ class AddAssignment extends React.Component{
                         }
                       }`
                     },
-                    timeout:1000,
+                    timeout:timeout,
                   })
                   createAssignment().then(function(response){
                     if(response.data.data.createAssignment.ok==true){
@@ -201,7 +203,7 @@ class Homework extends React.Component{
     componentWillMount(){
         var that=this;
         var getAllHomework=axios.create({
-            url:"http://localhost:8000/graphql/",
+            url:weburl+"/graphql/",
             headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
             method:'post',
             data:{
@@ -215,7 +217,7 @@ class Homework extends React.Component{
                     }
                 }`//用反引号      
             },
-            timeout:1000,
+            timeout:timeout,
         })
         getAllHomework().then(function(response){
            const assignments=response.data.data.getAssignmentsByCourses;
@@ -231,7 +233,7 @@ class Homework extends React.Component{
     componentWillUpdate(nextProps,nextState){
         if(nextState.flag!==this.state.flag){
         var getAllHomework=axios.create({
-            url:"http://localhost:8000/graphql/",
+            url:weburl+"/graphql/",
             headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
             method:'post',
             data:{
@@ -245,7 +247,7 @@ class Homework extends React.Component{
                     }
                 }`//用反引号      
             },
-            timeout:1000,
+            timeout:timeout,
         })
         getAllHomework().then(function(response){
            const assignments=response.data.data.getAssignmentsByCourses;
@@ -285,7 +287,7 @@ class Homework extends React.Component{
         },{
             title:'点击进入批改',
             dataIndex:'id',
-            render:(text)=>(<Link to={'/studentcenter/correctWork/'+text+'/'} 
+            render:(text)=>(<Link to={'/teachercenter/correctWork/'+text+'/'} 
                                   style={{color:"blue"}}
                                   onClick={this.props.redirecttocourse}
                             >
@@ -330,7 +332,7 @@ class SelectUsername extends React.Component{
   
     componentDidMount(){
       var getStudentsUsername=axios.create({
-        url:"http://localhost:8000/graphql/",
+        url:weburl+"/graphql/",
         headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
         method:'post',
         data:{
@@ -341,7 +343,7 @@ class SelectUsername extends React.Component{
              }
             }`      
         },
-        timeout:1000,
+        timeout:timeout,
       })
       getStudentsUsername().then(function(response){
         if(JSON.stringify(lastUpdateUsername)!==JSON.stringify(response.data.data.getUsersByUsertype)){
@@ -398,7 +400,7 @@ class SelectSchoolId extends React.Component{
   
     componentDidMount(){
       var getStudentsSchoolId=axios.create({
-        url:"http://localhost:8000/graphql/",
+        url:weburl+"/graphql/",
         headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
         method:'post',
         data:{
@@ -409,7 +411,7 @@ class SelectSchoolId extends React.Component{
              }
             }`      
         },
-        timeout:1000,
+        timeout:timeout,
       })
       getStudentsSchoolId().then(function(response){
         if(JSON.stringify(lastUpdateSchoolId)!==JSON.stringify(response.data.data.getUsersByUsertype)){
@@ -589,7 +591,7 @@ class Setweight extends React.Component{
   componentWillMount(){
     var that=this;
     var getAssignmentsWeight=axios.create({
-        url:"http://localhost:8000/graphql/",
+        url:weburl+"/graphql/",
         headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
         method:'post',
         data:{
@@ -603,7 +605,7 @@ class Setweight extends React.Component{
               }
             }`//用反引号      
         },
-        timeout:1000,
+        timeout:timeout,
     })    
     getAssignmentsWeight().then(function(response){
       let info=response.data.data.getCoursesByIds[0].courseAssignments;
@@ -627,7 +629,7 @@ class Setweight extends React.Component{
   handleSubmit=()=>{
     var that=this;
     var setWeights=axios.create({
-      url:"http://localhost:8000/graphql/",
+      url:weburl+"/graphql/",
       headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
       method:'post',
       data:{
@@ -642,7 +644,7 @@ class Setweight extends React.Component{
             }
           }`//用反引号      
       },
-      timeout:1000,
+      timeout:timeout,
     }) 
     setWeights().then(function(response){
       if(response.data.data.setWeight.ok===true){
@@ -706,7 +708,7 @@ class Member extends React.Component{
     componentWillMount(){
         var that=this;
         var getAllStudentInformation=axios.create({
-            url:"http://localhost:8000/graphql/",
+            url:weburl+"/graphql/",
             headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
             method:'post',
             data:{
@@ -740,7 +742,7 @@ class Member extends React.Component{
                   }
                 }`//用反引号      
             },
-            timeout:1000,
+            timeout:timeout,
         })
         getAllStudentInformation().then(function(response){
             var dataRow=[];//学生姓名列表
@@ -776,7 +778,7 @@ class Member extends React.Component{
     componentWillUpdate(nextProps,nextState){
         if(nextState.flag!==this.state.flag){
             var getAllStudentInformation=axios.create({
-                url:"http://localhost:8000/graphql/",
+                url:weburl+"/graphql/",
                 headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
                 method:'post',
                 data:{
@@ -810,7 +812,7 @@ class Member extends React.Component{
                       }
                     }`//用反引号      
                 },
-                timeout:1000,
+                timeout:timeout,
             })
             getAllStudentInformation().then(function(response){
                 var dataRow=[];//学生姓名列表
@@ -893,7 +895,7 @@ class Member extends React.Component{
         this.props.form.validateFieldsAndScroll(["学生"],(err,values)=>{
         if(!err&&typeof(values.学生)!=="undefined"){
           var getAllStudentIdByUsername=axios.create({
-            url:"http://localhost:8000/graphql/",
+            url:weburl+"/graphql/",
             headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
             method:'post',
             data:{
@@ -903,10 +905,10 @@ class Member extends React.Component{
                     }
                 }`//用反引号      
             },
-            timeout:1000,
+            timeout:timeout,
           })
           var getAllStudentIdBySchoolId=axios.create({
-            url:"http://localhost:8000/graphql/",
+            url:weburl+"/graphql/",
             headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
             method:'post',
             data:{
@@ -916,10 +918,10 @@ class Member extends React.Component{
                     }
                 }`//用反引号      
             },
-            timeout:1000,
+            timeout:timeout,
           })
           var getStudentsIdInCourse=axios.create({
-            url:"http://localhost:8000/graphql/",
+            url:weburl+"/graphql/",
             headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
             method:'post',
             data:{
@@ -931,13 +933,13 @@ class Member extends React.Component{
                     }
                 }`//用反引号      
             },
-            timeout:1000,
+            timeout:timeout,
           })
           if(this.state.value===1){
               getAllStudentIdByUsername().then(function(response1){
                   getStudentsIdInCourse().then(function(response2){
                   var addStudents=axios.create({
-                    url:"http://localhost:8000/graphql/",
+                    url:weburl+"/graphql/",
                     headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
                     method:'post',
                     data:{
@@ -953,7 +955,7 @@ class Member extends React.Component{
                             }
                         }`//用反引号      
                     },
-                    timeout:1000,                     
+                    timeout:timeout,                     
                   })
                   addStudents().then(function(response3){
                       if(response3.data.data.editCourse.ok===true){
@@ -982,7 +984,7 @@ class Member extends React.Component{
             getAllStudentIdBySchoolId().then(function(response1){
                 getStudentsIdInCourse().then(function(response2){
                     var addStudents=axios.create({
-                      url:"http://localhost:8000/graphql/",
+                      url:weburl+"/graphql/",
                       headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
                       method:'post',
                       data:{
@@ -998,7 +1000,7 @@ class Member extends React.Component{
                               }
                           }`//用反引号      
                       },
-                      timeout:1000,                     
+                      timeout:timeout,                     
                     })
                     addStudents().then(function(response3){
                         if(response3.data.data.editCourse.ok===true){
@@ -1195,14 +1197,14 @@ class TeacherSpecificclass extends React.Component{
     showQRCode=()=>{
         var that=this;
         var getQRCode=axios.create({
-            url:"http://localhost:8000/data/get_qrcode/",
+            url:weburl+"/data/get_qrcode/",
             headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
             method:'post',
             data:{course_id:courseid},
-            timeout:1000,
+            timeout:timeout,
         })
         getQRCode().then(function(response){
-            that.setState({visible1:true,qrcode:response.data.qrcode});
+          that.setState({visible1:true,qrcode:response.data.qrcode});
         })
         .catch(function(error){
             console.log(error);
