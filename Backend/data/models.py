@@ -14,6 +14,13 @@ def default_phone():
     return 'noPhone' + str(count)
 
 
+class HostInfo(models.Model):
+    host = models.CharField(max_length=32)
+    count = models.IntegerField()
+    start_time = models.DateTimeField(null=True)
+    is_locked = models.BooleanField(default=False)
+
+
 # User Profile
 class User(AbstractUser):
     date_joined = models.DateTimeField(auto_now_add=True, null=True)
@@ -61,7 +68,9 @@ class HWFCourseClass(models.Model):
     school = models.TextField(null=True, blank=True)
     start_time = models.DateTimeField(null=True, blank=True)
     end_time = models.DateTimeField(null=True, blank=True)
-
+    semester_info = models.CharField(max_length=256, default="2019春季学期")  # e.g. 2019春季学期 2019暑假学期 2019秋季学期
+    class_info = models.CharField(max_length=1024, default="软件学院2017211501,2017211502,2017211503,2017211504")  # e.g. 软件学院2017211501,2017211502,2017211503,2017211504 马克思主义学院...,...,...
+    
     def __str__(self):
         return self.name
 

@@ -28,17 +28,9 @@ class EditSubmission(graphene.Mutation):
         global aware_vector
 
         # id validation
-        try:
-            realuser = token.confirm_validate_token(
-                info.context.META['HTTP_TOKEN'])
-            realuser = models.User.objects.get(pk=realuser)
-        except:
-            try:
-                realuser = models.User.objects.get(
-                    wechat=encrypt.getHash(info.context.META['HTTP_TOKEN']))
-                print('wechat valid')
-            except:
-                return EditSubmission(ok=False, msg=public_msg['not_login'])
+        realuser = models.User.objects.filter(pk=info.context.META['realuser']).first()
+        if realuser == None:
+            return EditSubmission(ok=False, msg=public_msg['not_login'])
 
         editing_submission = models.HWFSubmission.objects.get(
             pk=submission_data['id'])
@@ -66,23 +58,9 @@ class EditSubmission(graphene.Mutation):
                 return EditSubmission(ok=False, msg=create_msg(4191, "it's not your homework"))
 
             if 'image' in submission_data:
-                # file validation
-                fid = 0
-                try:
-                    for fid in submission_data['image']:
-                        models.HWFFile.objects.get(pk=fid)
-                except:
-                    return EditSubmission(ok=False, msg=create_msg(4103, "file %d cannot be found" % fid))
                 aware_vector[0] = 0
                 editing_submission.aware = False
             if 'addfile' in submission_data:
-                # file validation
-                fid = 0
-                try:
-                    for fid in submission_data['addfile']:
-                        models.HWFFile.objects.get(pk=fid)
-                except:
-                    return EditSubmission(ok=False, msg=create_msg(4103, "file %d cannot be found" % fid))
                 aware_vector[1] = 0
                 editing_submission.aware = False
             editing_submission.save()

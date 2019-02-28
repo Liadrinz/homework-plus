@@ -24,19 +24,14 @@ class EditCourse(graphene.Mutation):
 
     def mutate(self, info, course_data):
 
-        is_from_wechat = False
+        is_from_wechat = info.context.META['is_wechat']
         # id validation
-        try:
-            realuser = token.confirm_validate_token(info.context.META['HTTP_TOKEN'])
-            realuser = models.User.objects.get(pk=realuser)
-            editing_course = models.HWFCourseClass.objects.get(pk=course_data['id'])
-        except:
-            try:
-                realuser = models.User.objects.get(wechat=encrypt.getHash(info.context.META['HTTP_TOKEN']))
-                editing_course = models.HWFCourseClass.objects.get(pk=course_data['id'])
-                is_from_wechat = True
-            except:
-                return EditCourse(ok=False, msg=public_msg['not_login'])
+        realuser = models.User.objects.filter(pk=info.context.META['realuser']).first()
+        if realuser == None:
+            return EditCourse(ok=False, msg=public_msg['not_login'])
+        
+        editing_course = models.HWFCourseClass.objects.get(pk=course_data['id'])
+
         try:
 
             # usertype validation

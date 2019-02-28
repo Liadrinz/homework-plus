@@ -10,6 +10,8 @@ import WrappedAddcourse from './teacheraddcourse.js'
 import TeacherSpecificClass from './teacherSpecificClass.js';
 import CorrectWork from './correctWork.js';
 import CorrectSpecificWork from './correctSpecificWork.js';
+import weburl from './url.js'
+import timeout from './timeout.js'
 import {_} from 'underscore'
 
  //大多数的地方使用graphql技术获取和传送数据
@@ -57,7 +59,7 @@ class TeacherIndex extends React.Component{
       textAlign:'center',
     }
      var getbuptId=axios.create({
-      url:"http://localhost:8000/graphql/",
+      url:weburl+"/graphql/",
       headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
       method:'post',
       data:{
@@ -77,7 +79,7 @@ class TeacherIndex extends React.Component{
            }
           }`//用反引号      
       },
-      timeout:1000,
+      timeout:timeout,
      })
      var that=this;
      getbuptId().then(function(response){
@@ -104,7 +106,7 @@ class TeacherIndex extends React.Component{
      var lastUpdateassistantcourse=[];//教师作为助教参加的课程
      this.getCourse=setInterval(()=>{
      var getUserCourse=axios.create({
-       url:"http://localhost:8000/graphql/",
+       url:weburl+"/graphql/",
        headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
        method:'post',
        data:{
@@ -162,7 +164,7 @@ class TeacherIndex extends React.Component{
            }
           }`
        },
-       timeout:1000,
+       timeout:timeout,
      })
      getUserCourse().then(function(response){
        //获得该用户拥有的所有的课程版的ID

@@ -1,14 +1,17 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {Row,Col,Card,Button,Modal,Menu,Select,Table,Form,Radio,message,Input,DatePicker,Upload,Icon} from'antd'
+import {Row,Col,Card,Button,Modal,Menu,Select,Table,Form,Radio,message,Input,DatePicker,Upload,Icon,Tag,InputNumber} from'antd'
 import './teacherSpecificClass.css';
 import {_} from 'underscore'
 import moment from 'moment';
 import axios from 'axios';
+import weburl from './url.js';
+import timeout from './timeout.js'
 import {Link} from 'react-router-dom';
 var courseid;//特定课程的id
 var courseStudents;//该课程的所有学生
 var re=/^\/studentcenter\/assistantclass\/(.*)\/$/;
+var re2=/^(.*)\+(.*)$/;
 var toDate=/^(\d{4})\-(\d{2})\-(\d{2})(.*)$/;
 var usernamechildren=[];//手动添加成员里通过搜索用户名的标签
 var schoolIdchildren=[];//手动添加成员里通过搜索学号的标签
@@ -33,7 +36,7 @@ function disabledDateTime() {
 }
 const uploadProps = { //放进Upload组件里的一些属性
     name: 'data',
-    action: "http://localhost:8000/upload_file/",
+    action: weburl+"/upload_file/",
     headers: {
         token:localStorage.getItem('token'),
     },
@@ -61,7 +64,7 @@ class AddAssignment extends React.Component{
         this.props.form.validateFieldsAndScroll(["作业名称","作业描述","截止时间","作业类型"],(err,values)=>{
             if(!err){
                 var createAssignment=axios.create({
-                    url:"http://localhost:8000/graphql/",
+                    url:weburl+"/graphql/",
                     headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
                     method:'post',
                     data:{
@@ -72,7 +75,7 @@ class AddAssignment extends React.Component{
                             assignmentType:"${values.作业类型}",
                             name:"${values.作业名称}",
                             description:"${values.作业描述}",
-                            deadline:"${moment(values.截止时间).format()}",
+                            deadline:"${re2.exec(moment(values.截止时间).format())[1]}",
                             addfile:[${addfile}],
                           }
                         ){
@@ -80,7 +83,7 @@ class AddAssignment extends React.Component{
                         }
                       }`
                     },
-                    timeout:1000,
+                    timeout:timeout,
                   })
                   createAssignment().then(function(response){
                     if(response.data.data.createAssignment.ok==true){
@@ -200,7 +203,7 @@ class Homework extends React.Component{
     componentWillMount(){
         var that=this;
         var getAllHomework=axios.create({
-            url:"http://localhost:8000/graphql/",
+            url:weburl+"/graphql/",
             headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
             method:'post',
             data:{
@@ -214,7 +217,7 @@ class Homework extends React.Component{
                     }
                 }`//用反引号      
             },
-            timeout:1000,
+            timeout:timeout,
         })
         getAllHomework().then(function(response){
            const assignments=response.data.data.getAssignmentsByCourses;
@@ -230,7 +233,7 @@ class Homework extends React.Component{
     componentWillUpdate(nextProps,nextState){
         if(nextState.flag!==this.state.flag){
         var getAllHomework=axios.create({
-            url:"http://localhost:8000/graphql/",
+            url:weburl+"/graphql/",
             headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
             method:'post',
             data:{
@@ -244,7 +247,7 @@ class Homework extends React.Component{
                     }
                 }`//用反引号      
             },
-            timeout:1000,
+            timeout:timeout,
         })
         getAllHomework().then(function(response){
            const assignments=response.data.data.getAssignmentsByCourses;
@@ -329,7 +332,7 @@ class SelectUsername extends React.Component{
   
     componentDidMount(){
       var getStudentsUsername=axios.create({
-        url:"http://localhost:8000/graphql/",
+        url:weburl+"/graphql/",
         headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
         method:'post',
         data:{
@@ -340,7 +343,7 @@ class SelectUsername extends React.Component{
              }
             }`      
         },
-        timeout:1000,
+        timeout:timeout,
       })
       getStudentsUsername().then(function(response){
         if(JSON.stringify(lastUpdateUsername)!==JSON.stringify(response.data.data.getUsersByUsertype)){
@@ -397,7 +400,7 @@ class SelectSchoolId extends React.Component{
   
     componentDidMount(){
       var getStudentsSchoolId=axios.create({
-        url:"http://localhost:8000/graphql/",
+        url:weburl+"/graphql/",
         headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
         method:'post',
         data:{
@@ -408,7 +411,7 @@ class SelectSchoolId extends React.Component{
              }
             }`      
         },
-        timeout:1000,
+        timeout:timeout,
       })
       getStudentsSchoolId().then(function(response){
         if(JSON.stringify(lastUpdateSchoolId)!==JSON.stringify(response.data.data.getUsersByUsertype)){
@@ -468,12 +471,236 @@ class SelectStudents extends React.Component{
     }    
 }
 
+class CheckDetail extends React.Component{
+  constructor(props){
+    super(props);
+    this.state={
+      assignments:[],
+      total:0,
+    }
+  }
+
+  componentWillMount(){
+    let length1=this.props.assignment.length;
+    let assignments=[];
+    let total=0;
+    for(let i=0;i<length1;i++){
+      let length2=this.props.assignment[i].assignmentSubmissions.length;
+      for(let j=0;j<length2;j++){
+        if(this.props.assignment[i].assignmentSubmissions[j].submitter["id"]===this.props.studentInfo[0]["id"]){
+           assignments.push(this.props.assignment[i].assignmentSubmissions[j]);break;
+        }
+      }
+    }
+    length1=this.props.totalInfo.length;
+    for(let i=0;i<length1;i++){
+      if(this.props.totalInfo[i].student["id"]===this.props.studentInfo[0]["id"]){
+        total=this.props.totalInfo[i].average;break;
+      }
+    }
+    this.setState({assignments:assignments,total:total});
+  }
+
+  componentWillReceiveProps(nextProps){
+    if(nextProps.assignment!==this.props.assignment){
+    let length1=nextProps.assignment.length;
+    let assignments=[];
+    for(let i=0;i<length1;i++){
+      let length2=nextProps.assignment[i].assignmentSubmissions.length;
+      for(let j=0;j<length2;j++){
+        if(nextProps.assignment[i].assignmentSubmissions[j].submitter["id"]===nextProps.studentInfo[0]["id"]){
+           assignments.push(nextProps.assignment[i].assignmentSubmissions[j]);break;
+        }
+      }
+    }
+    this.setState({assignments:assignments});
+   }
+    if(nextProps.totalInfo!==this.props.totalInfo){
+      let length1=nextProps.totalInfo.length;
+      let total=0;
+      for(let i=0;i<length1;i++){
+        if(nextProps.totalInfo[i].student["id"]===nextProps.studentInfo[0]["id"]){
+          total=nextProps.totalInfo[i].average;break;
+        }
+      }
+      this.setState({total:total});
+    }
+  }
+
+  render(){
+    const data=[];
+    let length=this.state.assignments.length;
+    if(length===0)return(
+      <div>
+        <div>
+        <span style={{fontSize:"25px",marginLeft:"5vw"}}>{this.props.studentInfo[0].name+"  的作业"}</span>
+        <span style={{fontSize:"18px",marginLeft:"5vw"}}>作业总成绩:0分</span>
+        </div>
+        <br/><br/><br/>
+        <span style={{fontSize:"25px",marginLeft:"5vw",color:"blue"}}>该学生的所有作业可能未交</span>
+      </div>
+    )
+    for(let i=0;i<length;i++){
+      data.push(
+        <div>
+          <span style={{fontSize:"20px",marginLeft:"3vw"}}>{this.state.assignments[i].assignment.name}</span> 
+          <span style={{fontSize:"18px",marginLeft:"5vw"}}>{"作业分数:  "+this.state.assignments[i].score.toFixed(1)+" 分"}</span>
+          <Tag style={{marginLeft:"5vw"}}color={this.state.assignments[i].isExcellent?"gold":"cyan"}>{this.state.assignments[i].isExcellent?"优秀作业":"普通作业"}</Tag>
+          <br/><br/>
+        </div>  
+      )
+    }
+    return(
+      <div>
+        <div>
+        <span style={{fontSize:"25px",marginLeft:"5vw"}}>{this.props.studentInfo[0].name+"  的作业"}</span>
+        <span style={{fontSize:"18px",marginLeft:"5vw"}}>{"作业总成绩:  "+this.state.total.toFixed(1)+" 分"}</span>
+        </div>       
+        <br/><br/>
+        {data}
+      </div>
+    )
+  }
+}
+
+class Eachweight extends React.Component{
+  onChange=(value)=>{
+     var that=this; 
+     this.props.changeWeight(value,that.props.weightId);
+  }
+
+  render(){
+    return(
+    <InputNumber 
+            style={{marginLeft:"2vw"}} min={0} step={0.01} 
+            defaultValue={this.props.weight} onChange={this.onChange}/>
+    )
+  }
+}
+
+class Setweight extends React.Component{
+  constructor(props){
+    super(props);
+    this.state={
+      assignments:[],
+      weights:[],
+      assignmentsName:[],
+    }
+  }
+
+  componentWillMount(){
+    var that=this;
+    var getAssignmentsWeight=axios.create({
+        url:weburl+"/graphql/",
+        headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
+        method:'post',
+        data:{
+           "query":`query{
+              getCoursesByIds(ids:${[this.props.courseId]}){
+                  courseAssignments{
+                     name
+                     id
+                     weight
+                  }
+              }
+            }`//用反引号      
+        },
+        timeout:timeout,
+    })    
+    getAssignmentsWeight().then(function(response){
+      let info=response.data.data.getCoursesByIds[0].courseAssignments;
+      that.setState({
+        assignments:_.pluck(info,'id'),weights:_.pluck(info,"weight"),assignmentsName:_.pluck(info,"name"),
+      })
+    })
+    .catch(function(error){
+      console.log(error);
+    })
+  }
+
+  changeWeight=(weight,id)=>{
+     if(weight!==this.state.weights[id]){
+        let weights=this.state.weights;
+        weights[id]=weight;
+        this.setState({weights:weights});
+     }
+  }
+
+  handleSubmit=()=>{
+    var that=this;
+    var setWeights=axios.create({
+      url:weburl+"/graphql/",
+      headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
+      method:'post',
+      data:{
+         "query":`mutation{
+            setWeight(weightData:{
+               assignments:[${this.state.assignments}],
+               weights:[${this.state.weights}]
+            })
+            {
+               ok
+               msg
+            }
+          }`//用反引号      
+      },
+      timeout:1000,
+    }) 
+    setWeights().then(function(response){
+      if(response.data.data.setWeight.ok===true){
+        message.success("权重修改成功!",3);
+        setTimeout(()=>{
+          that.props.changeFlag();
+        },2000); 
+      }else message.error("权重修改失败!",3); 
+    })    
+    .catch(function(error){
+      message.error("权重修改失败!",3); 
+    })   
+  }
+
+  render(){
+    if(this.state.assignments.length===0){
+      return(<div/>);
+    }
+    let length=this.state.assignments.length;
+    let data=[];
+    for(let i=0;i<length;i++){
+      data.push(
+        <div key={i}>
+          <span style={{fontSize:"18px",marginLeft:"2vw"}}>{this.state.assignmentsName[i]+"  的权:"}</span>
+          <Eachweight key={i} weight={this.state.weights[i]} weightId={i} changeWeight={this.changeWeight}/>
+          <br/><br/>
+        </div>
+      )
+    }
+    return(
+      <div>
+        <div style={{fontSize:"16px",marginLeft:"2vw"}}>在没设置权重之前，作业总分默认是几次作业分数的平均分</div>
+        <div style={{fontSize:"16px",marginLeft:"2vw"}}>作业权重可以加权平均(权重之和等于1)</div>
+        <div style={{fontSize:"16px",marginLeft:"2vw"}}>也可以加权累积(权重之和大于1)</div>
+        <br/>
+        <div style={{fontSize:"20px",marginLeft:"2vw"}}>权重选择:</div>
+        <br/>
+        {data}
+        <Button type="primary" style={{marginLeft:"40%"}} onClick={this.handleSubmit}>改变权重</Button>
+        <br/>
+      </div>
+    )
+  }
+}
+
+const WrappedSetweight=Form.create()(Setweight);
+
 class Member extends React.Component{
     constructor(props){
         super(props);
         this.state={
             visible:false,
+            visible2:false,
+            visible3:false,
             value:1,//手动添加成员中多选框的value
+            selectedRowKey:[],
             flag:false,
         }
     }
@@ -481,12 +708,30 @@ class Member extends React.Component{
     componentWillMount(){
         var that=this;
         var getAllStudentInformation=axios.create({
-            url:"http://localhost:8000/graphql/",
+            url:weburl+"/graphql/",
             headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
             method:'post',
             data:{
                "query":`query{
                   getCoursesByIds(ids:${[this.props.courseId]}){
+                      courseTotalMarks{
+                        student{
+                          id
+                        }
+                        average
+                      }
+                      courseAssignments{
+                        assignmentSubmissions{
+                          score
+                          isExcellent
+                          assignment{
+                            name
+                          }
+                          submitter{
+                            id
+                          }
+                        }
+                      }
                       students{
                         id
                         name
@@ -497,7 +742,7 @@ class Member extends React.Component{
                   }
                 }`//用反引号      
             },
-            timeout:1000,
+            timeout:timeout,
         })
         getAllStudentInformation().then(function(response){
             var dataRow=[];//学生姓名列表
@@ -508,9 +753,21 @@ class Member extends React.Component{
                     <Option value={response.data.data.getCoursesByIds[0].students[i]["name"]}>{response.data.data.getCoursesByIds[0].students[i]["name"]}</Option>
                 )
             } 
+            let length1=courseStudents.length;
+            for(let i=0;i<length1;i++) _.extend(courseStudents[i],{score:0});
+            for(let i=0;i<length1;i++){
+              let length2=response.data.data.getCoursesByIds[0].courseTotalMarks.length;
+              for(let j=0;j<length2;j++){
+                if(response.data.data.getCoursesByIds[0].courseTotalMarks[j].student["id"]===courseStudents[i]["id"]){
+                  courseStudents[i].score=response.data.data.getCoursesByIds[0].courseTotalMarks[j].average.toFixed(1);break;
+                }
+              }
+            }
             that.setState({
                studentsInformation:courseStudents,
                studentsNameRow:dataRow,
+               totalInfo:response.data.data.getCoursesByIds[0].courseTotalMarks,
+               assignment:response.data.data.getCoursesByIds[0].courseAssignments,
             })
         })
         .catch(function(error){
@@ -521,12 +778,30 @@ class Member extends React.Component{
     componentWillUpdate(nextProps,nextState){
         if(nextState.flag!==this.state.flag){
             var getAllStudentInformation=axios.create({
-                url:"http://localhost:8000/graphql/",
+                url:weburl+"/graphql/",
                 headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
                 method:'post',
                 data:{
                    "query":`query{
                       getCoursesByIds(ids:${[this.props.courseId]}){
+                          courseTotalMarks{
+                            student{
+                            id
+                            }
+                            average
+                          }
+                          courseAssignments{
+                            assignmentSubmissions{
+                              score
+                              isExcellent
+                              assignment{
+                                name
+                              }
+                              submitter{
+                                id
+                              }
+                            }
+                          }
                           students{
                             id
                             name
@@ -537,7 +812,7 @@ class Member extends React.Component{
                       }
                     }`//用反引号      
                 },
-                timeout:1000,
+                timeout:timeout,
             })
             getAllStudentInformation().then(function(response){
                 var dataRow=[];//学生姓名列表
@@ -548,8 +823,20 @@ class Member extends React.Component{
                         <Option value={response.data.data.getCoursesByIds[0].students[i]["name"]}>{response.data.data.getCoursesByIds[0].students[i]["name"]}</Option>
                     )
                 } 
+                let length1=courseStudents.length;
+                for(let i=0;i<length1;i++) _.extend(courseStudents[i],{score:0});
+                for(let i=0;i<length1;i++){
+                  let length2=response.data.data.getCoursesByIds[0].courseTotalMarks.length;
+                  for(let j=0;j<length2;j++){
+                    if(response.data.data.getCoursesByIds[0].courseTotalMarks[j].student["id"]===courseStudents[i]["id"]){
+                      courseStudents[i].score=response.data.data.getCoursesByIds[0].courseTotalMarks[j].average.toFixed(1);break;
+                    }
+                  }
+                }
                 nextState.studentsInformation=courseStudents;
                 nextState.studentsNameRow=dataRow;
+                nextState.totalInfo=response.data.data.getCoursesByIds[0].courseTotalMarks;
+                nextState.assignment=response.data.data.getCoursesByIds[0].courseAssignments;
             })
             .catch(function(error){
                 console.log(error);
@@ -559,15 +846,43 @@ class Member extends React.Component{
 
     handleSelect=(value)=>{
         if(value==='显示全部') this.setState({studentsInformation:courseStudents});
-        else this.setState({studentsInformation:_.filter(courseStudents,function(student){return student["name"]===value})})
+        else{
+           let info=_.filter(courseStudents,function(student){return student["name"]===value});
+           this.setState({studentsInformation:info,selectedRowKey:[info[0]["id"]]});
+        }
     }
 
     showModal=()=>{
         this.setState({visible:true});
     }
 
+    showModal2=()=>{
+      this.setState({visible2:true});
+    }
+
+    showModal3=()=>{
+      this.setState({visible3:true});
+    }
+
     handleClose=()=>{
         this.setState({visible:false});
+    }
+
+    handleClose2=()=>{
+      this.setState({visible2:false});
+    }
+
+    handleClose3=()=>{
+      this.setState({visible3:false});
+    }
+
+    changeFlag=()=>{
+      let flag=this.state.flag;
+      this.setState({flag:!flag});
+    }
+
+    handleChange=(selectedRowKeys)=>{
+        this.setState({selectedRowKey:selectedRowKeys});
     }
 
     onChange=(e)=>{
@@ -580,7 +895,7 @@ class Member extends React.Component{
         this.props.form.validateFieldsAndScroll(["学生"],(err,values)=>{
         if(!err&&typeof(values.学生)!=="undefined"){
           var getAllStudentIdByUsername=axios.create({
-            url:"http://localhost:8000/graphql/",
+            url:weburl+"/graphql/",
             headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
             method:'post',
             data:{
@@ -590,10 +905,10 @@ class Member extends React.Component{
                     }
                 }`//用反引号      
             },
-            timeout:1000,
+            timeout:timeout,
           })
           var getAllStudentIdBySchoolId=axios.create({
-            url:"http://localhost:8000/graphql/",
+            url:weburl+"/graphql/",
             headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
             method:'post',
             data:{
@@ -603,10 +918,10 @@ class Member extends React.Component{
                     }
                 }`//用反引号      
             },
-            timeout:1000,
+            timeout:timeout,
           })
           var getStudentsIdInCourse=axios.create({
-            url:"http://localhost:8000/graphql/",
+            url:weburl+"/graphql/",
             headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
             method:'post',
             data:{
@@ -618,13 +933,13 @@ class Member extends React.Component{
                     }
                 }`//用反引号      
             },
-            timeout:1000,
+            timeout:timeout,
           })
           if(this.state.value===1){
               getAllStudentIdByUsername().then(function(response1){
                   getStudentsIdInCourse().then(function(response2){
                   var addStudents=axios.create({
-                    url:"http://localhost:8000/graphql/",
+                    url:weburl+"/graphql/",
                     headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
                     method:'post',
                     data:{
@@ -640,7 +955,7 @@ class Member extends React.Component{
                             }
                         }`//用反引号      
                     },
-                    timeout:1000,                     
+                    timeout:timeout,                     
                   })
                   addStudents().then(function(response3){
                       if(response3.data.data.editCourse.ok===true){
@@ -669,7 +984,7 @@ class Member extends React.Component{
             getAllStudentIdBySchoolId().then(function(response1){
                 getStudentsIdInCourse().then(function(response2){
                     var addStudents=axios.create({
-                      url:"http://localhost:8000/graphql/",
+                      url:weburl+"/graphql/",
                       headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
                       method:'post',
                       data:{
@@ -685,7 +1000,7 @@ class Member extends React.Component{
                               }
                           }`//用反引号      
                       },
-                      timeout:1000,                     
+                      timeout:timeout,                     
                     })
                     addStudents().then(function(response3){
                         if(response3.data.data.editCourse.ok===true){
@@ -730,25 +1045,25 @@ class Member extends React.Component{
         const column=[{
             title:'姓名',
             dataIndex:'name',
+            width:150,
         },{
             title:'性别',
             dataIndex:'gender',
             render:text=>text=="MALE"?'男':'女',
+            width:150,
         },{
             title:'班级',
             dataIndex:'classNumber',
+            width:200,
         },{
             title:'学号',
             dataIndex:'buptId',
+            width:200,
         },{
-            title:'平均成绩',
-            dataIndex:'averageScore',
-        },{
-            title:'优秀作业',
-            dataIndex:'goodHomework',
-        },{
-            title:'缺交作业',
-            dataIndex:'lostHomework',
+            title:'作业总成绩',
+            dataIndex:'score',
+            sorter: (a, b) =>b.score-a.score,
+            width:150,
         }]
         const tips=(
             <div>
@@ -756,6 +1071,12 @@ class Member extends React.Component{
             </div>
         )
         const data=this.state.studentsInformation;
+        const rowSelection={
+          selectedRowKeys:this.state.selectedRowKey,
+          type:"radio",
+          onChange:this.handleChange,
+          columnTitle:"选择学生",
+        }
         return(
             <div>
             <br/><br/>
@@ -806,8 +1127,32 @@ class Member extends React.Component{
                  </FormItem>
               </Form>
             </Modal>
-            <br/><br/><br/><br/>
-            <Table columns={column} dataSource={data} bordered rowKey={record=>record["id"]} />
+            <br/><br/><br/>
+            <Button size="large" type="primary" disabled={this.state.selectedRowKey.length===0} onClick={this.showModal2}>学生详细作业分数</Button>
+            <Button size="large" onClick={this.showModal3} style={{marginLeft:"5vw"}}>设置作业分数权重</Button>
+            <Modal
+                title="查看学生所有交过的作业分数"
+                visible={this.state.visible2}
+                footer={null}
+                onCancel={this.handleClose2}
+                destroyOnClose={true}
+                width={700}
+            >
+            <CheckDetail studentInfo={_.filter(this.state.studentsInformation,(info)=>{return info["id"]===this.state.selectedRowKey[0]})}
+                         assignment={this.state.assignment}
+                         totalInfo={this.state.totalInfo}/>
+            </Modal>
+            <Modal
+                title="设置作业分数权重"
+                visible={this.state.visible3}
+                footer={null}
+                onCancel={this.handleClose3}
+                destroyOnClose={true}
+            >
+            <WrappedSetweight courseId={this.props.courseId} changeFlag={this.changeFlag} handleClose3={this.handleClose3}/>
+            </Modal>
+            <br/><br/><br/>
+            <Table columns={column} dataSource={data} bordered rowKey={record=>record["id"]} rowSelection={rowSelection}/>
             </div>
         )
     }
@@ -852,14 +1197,14 @@ class AssistantSpecificclass extends React.Component{
     showQRCode=()=>{
         var that=this;
         var getQRCode=axios.create({
-            url:"http://localhost:8000/data/get_qrcode/",
+            url:weburl+"/data/get_qrcode/",
             headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
             method:'post',
             data:{course_id:courseid},
-            timeout:1000,
+            timeout:timeout,
         })
         getQRCode().then(function(response){
-            that.setState({visible1:true,qrcode:response.data.qrcode});
+          that.setState({visible1:true,qrcode:response.data.qrcode});
         })
         .catch(function(error){
             console.log(error);
@@ -878,11 +1223,6 @@ class AssistantSpecificclass extends React.Component{
     render(){
         const gridStyle={
             width:"33.3%",
-            textAlign:'center',
-            height:"125px"
-        }
-        const gridStyle2={
-            width:"16.65%",
             textAlign:'center',
             height:"125px"
         }

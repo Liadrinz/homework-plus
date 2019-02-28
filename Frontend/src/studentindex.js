@@ -11,6 +11,8 @@ import AssistantSpecificclass from './assistantspecificclass.js'
 import CorrectWork from './correctWork.js';
 import CorrectSpecificWork from './correctSpecificWork.js';
 import MyHomework from './myHomework.js'
+import weburl from './url.js'
+import timeout from './timeout.js'
 import {_} from 'underscore'
 
 //大多数的地方使用graphql技术获取和传送数据
@@ -59,7 +61,7 @@ class StudentIndex extends React.Component{
       textAlign:'center',
     }
      var getbuptId=axios.create({
-      url:"http://localhost:8000/graphql/",
+      url:weburl+"/graphql/",
       headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
       method:'post',
       data:{
@@ -79,7 +81,7 @@ class StudentIndex extends React.Component{
            }
           }`//用反引号      
       },
-      timeout:1000,
+      timeout:timeout,
      })
      var that=this;
      getbuptId().then(function(response){
@@ -106,7 +108,7 @@ class StudentIndex extends React.Component{
       var lastUpdateassistantcourse=[];//学生作为助教参加的课程
       this.getCourse=setInterval(()=>{
       var getUserCourse=axios.create({
-        url:"http://localhost:8000/graphql/",
+        url:weburl+"/graphql/",
         headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
         method:'post',
         data:{
@@ -158,7 +160,7 @@ class StudentIndex extends React.Component{
             }
            }`
         },
-        timeout:1000,
+        timeout:timeout,
       })
       getUserCourse().then(function(response){
         //获得该用户拥有的所有的课程版的ID
@@ -349,24 +351,5 @@ class StudentIndex extends React.Component{
         )
     }
 }
-
-
-
-//const StudentIndex=()=>(
-//    <main>
-//        <Switch>
-//           <Route exact path='/studentcenter/' component={Studentcenter}/>
-//           <Route exact path='/studentcenter/class/' component={Studentclass}/>
-//           <Route path='/studentcenter/class/courseid/' component={StudentclassID}/>
-//           <Route path='/studentcenter/feedback/' component={StudentFeedback}/>
-//           <Route path='/studentcenter/homework/' component={Studenthomework}/>
-//           <Route path='/studentcenter/message/' component={StudentMessage}/>
-//           <Route path='/studentcenter/showhomework/' component={Showhomework}/>
-//           <Route path='/studentcenter/handling/' component={Handling}/>
-//           <Route path='/aboutus/' component={Introducing}/>
-//        </Switch>
-//    </main>    
-//)
-
 
 export default StudentIndex;

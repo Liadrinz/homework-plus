@@ -2,6 +2,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './modifyPassword.css';
 import {Modal,Button,Input,Form}from'antd';
+import weburl from './url.js'
+import timeout from './timeout.js'
 import axios from 'axios';
 const FormItem = Form.Item;
 var gotToken='';
@@ -22,10 +24,10 @@ class ModifyPassword extends React.Component{
         if(gotToken===''){
             gotToken=re.exec(window.location.href)[2];
             var confirm=axios.create({
-             url:"http://localhost:8000/account/confirm_forgotten/",
+             url:weburl+"/account/confirm_forgotten/",
              headers:{"content-type":"application/json","token":gotToken},
              method:'post',
-             timeout:1000,
+             timeout:timeout,
             })
             var that=this;
             confirm().then(function(response){
@@ -71,11 +73,11 @@ class ModifyPassword extends React.Component{
           if (!err) {
             password.new_pass=values.密码;
             var changePassword=axios.create({
-                url:"http://homeworkplus.cn/account/change_directly/",
+                url:weburl+"/account/change_directly/",
                 headers:{"content-type":"application/json","token":gotToken},
                 data:password,
                 method:'post',
-                timeout:1000,
+                timeout:timeout,
             })
             changePassword().then(function(response){
                 const modal = Modal.success({

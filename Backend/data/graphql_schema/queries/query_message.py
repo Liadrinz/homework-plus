@@ -13,14 +13,9 @@ class QueryMessage(object):
 
     
     def resolve_get_messages_by_sender_and_receiver(self, info, **kwargs):
-        try:
-            realuser = token.confirm_validate_token(info.context.META['HTTP_TOKEN'])
-            realuser = models.User.objects.get(pk=realuser)
-        except:
-            try:
-                realuser = models.User.objects.get(wechat=encrypt.getHash(info.context.META['HTTP_TOKEN']))
-            except:
-                return
+        realuser = models.User.objects.filter(pk=info.context.META['realuser']).first()
+        if realuser == None:
+            return
         sender = kwargs['sender']
         receiver = kwargs['receiver']
         # 不能获取与自己无关的消息

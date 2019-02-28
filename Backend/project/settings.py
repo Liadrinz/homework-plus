@@ -54,6 +54,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'data.middlewares.FrequencyLimit',
+    'data.middlewares.Verification',
 ]
 
 ROOT_URLCONF = 'project.urls'
@@ -194,7 +196,7 @@ CORS_EXPOSE_HEADERS=(
 )
 
 FRONTEND_DOMAIN = "localhost:3000"
-BACKEND_DOMIAN = "homeworkplus.cn"
+BACKEND_DOMIAN = "localhost:8000"
 
 # GraphQL config
 GQL_PAHT_NAME = 'graphql_schema'

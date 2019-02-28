@@ -9,6 +9,8 @@ import ValidateEmail from './validateEmail.js'
 import WrappedModifyPassword from './modifyPassword.js'
 import StudentIndex from './studentindex.js'
 import TeacherIndex from './teacherindex.js'
+import weburl from './url.js'
+import timeout from './timeout.js'
 const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
 
@@ -22,35 +24,35 @@ var vaildEmail=/^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z0-9]{2,
 var validPhone=/^1\d{10}$/;
 var validPassword =/^\w{6,20}$/;
 var enrollUser=axios.create({
-  url:"http://localhost:8000/data/users/",
+  url:weburl+"/data/users/",
   headers:{"content-type":"application/json"},
   method:'post',
   data:User,
-  timeout:1000,
+  timeout:timeout,
 });
 
 var loginUser=axios.create({
-  url:"http://localhost:8000/data/is_repeated/",
+  url:weburl+"/data/is_repeated/",
   headers:{"content-type":"application/json"},
   method:'post',
   data:Userlogin,
-  timeout:1000,
+  timeout:timeout,
 })
 
 var takeToken=axios.create({
-  url:"http://localhost:8000/login/",
+  url:weburl+"/login/",
   headers:{"content-type":"application/json"},
   method:'post',
   data:Userlogin2,
-  timeout:1000,
+  timeout:timeout,
 })
 
 var forgetPassword=axios.create({
-  url:"http://localhost:8000/account/forget_password/",
+  url:weburl+"/account/forget_password/",
   headers:{"content-type":"application/json"},
   method:'post',
   data:userinformation,
-  timeout:1000,
+  timeout:timeout,
 })
 
 class Login extends React.Component{

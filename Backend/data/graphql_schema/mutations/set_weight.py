@@ -28,14 +28,9 @@ class SetWeights(graphene.Mutation):
     def mutate(self, info, weight_data):
 
         # id validation
-        try:
-            realuser = token.confirm_validate_token(info.context.META['HTTP_TOKEN'])
-            realuser = models.User.objects.get(pk=realuser)
-        except:
-            try:
-                realuser = models.User.objects.get(wechat=encrypt.getHash(info.context.META['HTTP_TOKEN']))
-            except:
-                return SetWeights(ok=False, msg=public_msg['not_login'])
+        realuser = models.User.objects.filter(pk=info.context.META['realuser']).first()
+        if realuser == None:
+            return SetWeights(ok=False, msg=public_msg['not_login'])
         
         try:
             for assignment_pk in weight_data['assignments']:

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+        <title>Homework+ WebSocket 测试</title>
+        <style>
+            #record {
+                width: 500px;
+                height: 600px;
+            }
+
+            #content {
+                width: 420px;
+            }
+
+            #send {
+                width: 50px;
+                margin: 0 15px;
+            }
+
+            #login-as, #talking-with {
+                font-weight: lighter;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Homework+ WS 测试</h1>
+        <h3>注意: 未保存cookie, 刷新需重新登录</h3>
+        <h3>Log in as: <span id="login-as"></span></h3>
+        <h3>Chatting with: <span id="talking-with"></span></h3>
+        用户名:
+        <input id="username" type="text"/>
+        密码:
+        <input id="password" type="password"/>
+        <input type="button" id="login" onclick="login()" value="登录"/>
+        <p>
+            对方用户名:
+            <input id="receiver" type="text"/>
+            <input type="button" id="sock" onclick="sock()" value="接入"/>
+        </p>
+        <p><textarea id="record"></textarea></p>
+        <p><input id="content" type="text"/><input type="button" id="send" onclick="send()" value="发送"/></p>
+
+        <script>
+
+            var webSocket;          // WebSocket连接对象
+            var vtk;                // 登录者的token
+            var senderId;           // 发送者的id(本页面发送者即为本页面登录者)
+            var receiverId;         // 接收者的id
+            var messageList = [];   // 历史消息列表(不包含接入后发送的消息)
+            
+            // 展示消息的textarea
+            var record = document.getElementById("record");
+            
+            // 禁止在展示框输入(直接disabled不好,因为会禁用滚动)
+            record.onfocus = function () {
+                var originalValue = record.value;
+                record.oninput = function () {
+                    record.value = originalValue;
+                }
+            }
+            
+            // 根据消息列表显示历史消息
+            function showHistory(msgList) {
+                record.value = "";
+                for (let msg of msgList) {
+                    record.value += msg['sender']['username'] + ": " + msg['content']['text'] + "\n";
+                }
+            }
+            
+            function login() {
+                $.ajax({
+                    url: 'http://localhost:8000/login/',
+                    method: 'post',
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Accept": "application/json"
+                    },
+                    data: JSON.stringify({
+                        username: document.getElementById("username").value,
+                        password: document.getElementById("password").value
+                    }),
+                    success: function (res, _, header) {
+                        try {
+                            senderId = res.data['id'];
+                            vtk = header.getResponseHeader("token");
+                            document.getElementById("login-as").innerHTML = res.data['username'];
+                            alert("登录成功!");
+                        } catch (e) {
+                            alert("登录失败!");
+                        }
+                    },
+                    error: function () {
+                        alert("登录失败!");
+                    }
+                });
+            }
+            
+            function sock() {
+                // 根据用户输入的username查找对应的id
+                var gql = `query {
+                    getUsersByUsernames (usernames: ["${document.getElementById("receiver").value}"]) {
+                        id
+                        username
+                    }
+                }`;
+                $.ajax({
+                    url: 'http://localhost:8000/graphql/',
+                    method: 'post',
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Accept": "application/json",
+                        "token": vtk
+                    },
+                    data: JSON.stringify({
+                        query: gql
+                    }),
+                    success: function(res, _, headers) {
+                        record.value = "";
+                        try {
+                            receiverId = res.data['getUsersByUsernames'][0]['id'];
+                            alert("接入成功!");
+                        } catch (e) {
+                            alert("接入失败!");
+                            return;
+                        }
+                        document.getElementById("talking-with").innerHTML = res.data['getUsersByUsernames'][0]['username'];
+
+                        // 建立WebSocket连接(url为ws://localhost:8000/ws/message/chat/, 拥有查询参数sender和receiver, sender传token, receiver传id)
+                        if (webSocket) webSocket.close();
+                        webSocket = new WebSocket("ws://localhost:8000/ws/message/chat/?sender=" + vtk + "&receiver=" + receiverId);
+
+                        // 设置WebSocket的onmessage事件函数
+                        // 从后端逻辑来看, 聊天的二人在同一个group中, 其中一人发送消息, 他自己的WebSocket连接以及对方的WebSocket连接都会触发onmessage
+                        webSocket.onmessage = function (e) {
+                            var data = JSON.parse(e.data);
+                            record.value += data['sender']['username'] + ': ' + data['message']['text'] + '\n';
+                        }
+
+                        // 接入后获取历史消息
+                        gql = `query{
+                            getMessagesBySenderAndReceiver(sender: ${senderId}, receiver: ${receiverId}) {
+                                sender {
+                                    username
+                                }
+                                sendTime
+                                content {
+                                    text
+                                }
+                            }
+                        }`;
+                        $.ajax({
+                            url: 'http://localhost:8000/graphql/',
+                            method: 'post',
+                            headers: {
+                                "Content-Type": "application/json",
+                                "Accept": "application/json",
+                                "token": vtk
+                            },
+                            data: JSON.stringify({
+                                query: gql
+                            }),
+                            success: function(res, _, header) {
+                                while (messageList[0]) {
+                                    messageList.pop();
+                                }
+                                for (let msg of res.data['getMessagesBySenderAndReceiver']) {
+                                    messageList.push(msg);
+                                }
+                                showHistory(messageList);
+                            }
+                        })
+                    }
+                })
+            }
+            
+            // 发送ws包
+            /*
+            发送格式:
+            message: {
+                text: String, // 文字
+                audio: Int, // 语音文件
+                picture: Int, // 图像文件
+                addfile: Int, // 普通文件
+            }
+            改测试器仅支持发送文字
+            */
+            function send() {
+                webSocket.send(JSON.stringify({
+                    message: {
+                        text: (() => {
+                            var temp = document.getElementById("content").value;
+                            // 发送时清空(为了同步我把这里写成立即执行函数了)
+                            document.getElementById("content").value = "";
+                            return temp;
+                        })()
+                    }
+                }))
+            }
+
+        </script>
+    </body>
+</html>

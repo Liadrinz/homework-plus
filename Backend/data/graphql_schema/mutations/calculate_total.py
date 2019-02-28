@@ -26,14 +26,9 @@ class CalculateTotal(graphene.Mutation):
 
     def mutate(self, info, calc_target):
         # id validation
-        try:
-            realuser = token.confirm_validate_token(info.context.META['HTTP_TOKEN'])
-            realuser = models.User.objects.get(pk=realuser)
-        except:
-            try:
-                realuser = models.User.objects.get(wechat=encrypt.getHash(info.context.META['HTTP_TOKEN']))
-            except:
-                return CalculateTotal(ok=False, msg=public_msg['not_login'])
+        realuser = models.User.objects.filter(pk=info.context.META['realuser']).first()
+        if realuser == None:
+            return CalculateTotal(ok=False, msg=public_msg['not_login'])
         
         editing_course = models.HWFCourseClass.objects.get(pk=calc_target['course'])
         return_list = []

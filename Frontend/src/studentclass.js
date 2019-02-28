@@ -5,6 +5,8 @@ import {Row,Col,Button,Card,Select,Menu} from'antd'
 import {Link} from 'react-router-dom';
 import axios from 'axios';
 import {_} from 'underscore'
+import weburl from './url.js'
+import timeout from './timeout.js'
 import moment from 'moment'
 var classRow=[];//课程班显示在网页卡片上的列表
 const Option=Select.Option;

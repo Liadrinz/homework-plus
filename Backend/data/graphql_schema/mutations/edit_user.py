@@ -23,16 +23,12 @@ class EditUser(graphene.Mutation):
     def mutate(self, info, user_data):
 
         # id validation
-        try:
-            realuser = token.confirm_validate_token(info.context.META['HTTP_TOKEN'])
-            realuser = models.User.objects.get(pk=realuser)
-            editing_user = models.User.objects.get(pk=user_data['id'])
-        except:
-            try:
-                realuser = models.User.objects.get(wechat=encrypt.getHash(info.context.META['HTTP_TOKEN']))
-                editing_user = models.User.objects.get(pk=user_data['id'])
-            except:
-                return EditUser(ok=False, msg=public_msg['not_login'])
+        realuser = models.User.objects.filter(pk=info.context.META['realuser']).first()
+        if realuser == None:
+            return EditUser(ok=False, msg=public_msg['not_login'])
+        
+        editing_user = models.User.objects.get(pk=user_data['id'])
+        
         try:
 
             # owner validation

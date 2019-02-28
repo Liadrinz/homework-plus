@@ -25,21 +25,13 @@ class EditAssignment(graphene.Mutation):
     def mutate(self, info, assignment_data):
 
         # id validation
-        try:
-            realuser = token.confirm_validate_token(
-                info.context.META['HTTP_TOKEN'])
-            realuser = models.User.objects.get(pk=realuser)
-            editing_assignment = models.HWFAssignment.objects.get(
+        realuser = models.User.objects.filter(pk=info.context.META['realuser']).first()
+        if realuser == None:
+            return EditAssignment(ok=False, msg=public_msg['not_login'])
+        
+        editing_assignment = models.HWFAssignment.objects.get(
                 pk=assignment_data['id'])
-        except:
-            try:
-                realuser = models.User.objects.get(
-                    wechat=encrypt.getHash(info.context.META['HTTP_TOKEN']))
-                editing_assignment = models.HWFAssignment.objects.get(
-                    pk=assignment_data['id'])
-            except:
-                return EditAssignment(ok=False, msg=public_msg['not_login'])
-
+        
         try:
 
             # time validation
@@ -56,15 +48,6 @@ class EditAssignment(graphene.Mutation):
                             teaching_assistants.filter(pk=realuser.id)) == 0:
                 return EditAssignment(ok=False, msg=public_msg['forbidden'])
             else:
-                # file validation
-                fid = 0
-                try:
-                    for fid in addfile:
-                        models.HWFFile.objects.get(fid)
-                except:
-                    return EditAssignment(
-                        ok=False,
-                        msg=create_msg(4103, "file %d cannot be found" % fid))
                 if 'name' in assignment_data:
                     editing_assignment.name = assignment_data['name']
                 if 'description' in assignment_data:
@@ -85,16 +68,6 @@ class EditAssignment(graphene.Mutation):
                                 assignment_data['assignment_type']))
 
                 if 'addfile' in assignment_data:
-                    # file validation
-                    fid = 0
-                    try:
-                        for fid in assignment_data['addfile']:
-                            models.HWFFile.objects.get(fid)
-                    except:
-                        return EditAssignment(
-                            ok=False,
-                            msg=create_msg(4103,
-                                           "file %d cannot be found" % fid))
                     for file_id in assignment_data['addfile']:
                         editing_assignment.addfile.add(
                             models.HWFFile.objects.get(pk=file_id))

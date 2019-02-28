@@ -29,17 +29,9 @@ class CreateSubmission(graphene.Mutation):
         global aware_vector
 
         # id validation
-        try:
-            realuser = token.confirm_validate_token(
-                info.context.META['HTTP_TOKEN'])
-            realuser = models.User.objects.get(pk=realuser)
-        except:
-            try:
-                realuser = models.User.objects.get(
-                    wechat=encrypt.getHash(info.context.META['HTTP_TOKEN']))
-                print('wechat valid')
-            except:
-                return CreateSubmission(ok=False, msg=public_msg['not_login'])
+        realuser = models.User.objects.filter(pk=info.context.META['realuser']).first()
+        if realuser == None:
+            return CreateSubmission(ok=False, msg=public_msg['not_login'])
 
         try:
 
@@ -73,26 +65,8 @@ class CreateSubmission(graphene.Mutation):
                                    "you are not a student of this course"))
 
             if 'image' in submission_data:
-                # file validation
-                fid = 0
-                try:
-                    for fid in submission_data['image']:
-                        models.HWFFile.objects.get(pk=fid)
-                except:
-                    return CreateSubmission(
-                        ok=False,
-                        msg=create_msg(4103, "file %d cannot be found" % fid))
                 aware_vector[0] = 0
             if 'addfile' in submission_data:
-                # file validation
-                fid = 0
-                try:
-                    for fid in submission_data['addfile']:
-                        models.HWFFile.objects.get(pk=fid)
-                except:
-                    return CreateSubmission(
-                        ok=False,
-                        msg=create_msg(4103, "file %d cannot be found" % fid))
                 aware_vector[1] = 0
 
             new_submission = models.HWFSubmission.objects.create(

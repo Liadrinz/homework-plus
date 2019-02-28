@@ -2,7 +2,7 @@
 
 .scrollprac{
     width: 100%;
-    height: 200px;
+    height: 90vh;/*vh为视口高度，1vh等于视口高度的1%*/
     overflow-x: hidden;
     overflow-y: scroll;
     line-height: 30px;
@@ -17,59 +17,9 @@
 .scrollprac::-webkit-scrollbar-thumb {/*滚动条里面小方块*/
     border-radius: 10px;
      -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
-    background: #535353;
+    background: rgba(88, 215, 247, 0.966);
 }
 .scrollprac::-webkit-scrollbar-track {/*滚动条里面轨道*/
-    -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
-    border-radius: 10px;
-    background: #EDEDED;
-}
-
-.scrollprac2{
-    width: 100%;
-    height: 200px;
-    overflow-x: hidden;
-    overflow-y: scroll;
-    line-height: 30px;
-    text-align: center;
-}
-
-.scrollprac2::-webkit-scrollbar{
-    width: 10px;     
-    height: 1px;
-}
-
-.scrollprac2::-webkit-scrollbar-thumb {/*滚动条里面小方块*/
-    border-radius: 10px;
-     -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
-    background: #FFCC00;
-}
-.scrollprac2::-webkit-scrollbar-track {/*滚动条里面轨道*/
-    -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
-    border-radius: 10px;
-    background: #EDEDED;
-}
-
-.scrollprac3{
-    width: 100%;
-    height: 200px;
-    overflow-x: hidden;
-    overflow-y: scroll;
-    line-height: 30px;
-    text-align: center;
-}
-
-.scrollprac3::-webkit-scrollbar{
-    width: 10px;     
-    height: 1px;
-}
-
-.scrollprac3::-webkit-scrollbar-thumb {/*滚动条里面小方块*/
-    border-radius: 10px;
-     -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
-    background: #22D3FF;
-}
-.scrollprac3::-webkit-scrollbar-track {/*滚动条里面轨道*/
     -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
     border-radius: 10px;
     background: #EDEDED;

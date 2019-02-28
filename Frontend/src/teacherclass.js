@@ -6,6 +6,8 @@ import {Link} from 'react-router-dom';
 import axios from 'axios';
 import {_} from 'underscore'
 import moment from 'moment'
+import weburl from './url.js'
+import timeout from './timeout.js'
 const Option=Select.Option;
 var toDate=/^(\d{4})\-(\d{2})\-(\d{2})(.*)$/;
 var classRow=[];//课程班显示在网页卡片上的列表

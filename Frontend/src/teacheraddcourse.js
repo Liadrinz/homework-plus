@@ -4,6 +4,8 @@ import './teacheraddcourse.css';
 import {Row,Col,Button,Form,Input,Select,DatePicker,InputNumber,message} from 'antd';
 import axios from 'axios';
 import {_} from 'underscore';
+import weburl from './url.js'
+import timeout from './timeout.js'
 
 const FormItem = Form.Item;
 const Option=Select.Option;
@@ -26,7 +28,7 @@ class SelectTeacher extends React.Component{
 
     componentDidMount(){
       var getTeachersusername=axios.create({
-        url:"http://localhost:8000/graphql/",
+        url:weburl+"/graphql/",
         headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
         method:'post',
         data:{
@@ -37,7 +39,7 @@ class SelectTeacher extends React.Component{
              }
             }`      
         },
-        timeout:1000,
+        timeout:timeout,
       })
       getTeachersusername().then(function(response){
         if(JSON.stringify(lastUpdateteachersusername)!==JSON.stringify(response.data.data.getUsersByUsertype)){
@@ -102,7 +104,7 @@ class SelectAssistant extends React.Component{
 
   componentDidMount(){
     var getAssistantsusername=axios.create({
-      url:"http://localhost:8000/graphql/",
+      url:weburl+"/graphql/",
       headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
       method:'post',
       data:{
@@ -113,7 +115,7 @@ class SelectAssistant extends React.Component{
            }
           }`      
       },
-      timeout:1000,
+      timeout:timeout,
     })
     getAssistantsusername().then(function(response){
       if(JSON.stringify(lastUpdateassistantsusername)!==JSON.stringify(response.data.data.allUsers)){
@@ -185,7 +187,7 @@ class Addcourse extends React.Component{
               "开课时间":[values.开课时间[0].format('YYYY-MM-DD'), values.开课时间[1].format('YYYY-MM-DD')],
             }
             var getTeachersId=axios.create({
-              url:"http://localhost:8000/graphql/",
+              url:weburl+"/graphql/",
               headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
               method:'post',
               data:{
@@ -196,13 +198,13 @@ class Addcourse extends React.Component{
                    }
                 }`
               },
-              timeout:1000,
+              timeout:timeout,
             })
             if(typeof(value.助教)=="undefined"){
               value.助教=[];
             }
             var getAssistantsId=axios.create({
-              url:"http://localhost:8000/graphql/",
+              url:weburl+"/graphql/",
               headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
               method:'post',
               data:{
@@ -213,14 +215,14 @@ class Addcourse extends React.Component{
                    }
                 }`
               },
-              timeout:1000,
+              timeout:timeout,
             })
             axios.all([getTeachersId(),getAssistantsId()])
             .then(axios.spread(function(teacher,assistant){
               value.授课教师=_.pluck(teacher.data.data.getUsersByUsernames,'id');
               value.助教=_.pluck(assistant.data.data.getUsersByUsernames,'id');
               var createcourse=axios.create({
-                url:"http://localhost:8000/graphql/",
+                url:weburl+"/graphql/",
                 headers:{"content-type":"application/json","token":localStorage.getItem('token'),"Accept":"application/json"},
                 method:'post',
                 data:{
@@ -238,10 +240,11 @@ class Addcourse extends React.Component{
                       }
                     ){
                        ok
+                       msg
                     }
                   }`
                 },
-                timeout:1000,
+                timeout:timeout,
               })
               createcourse().then(function(response){
                 if(response.data.data.createCourse.ok==true){
