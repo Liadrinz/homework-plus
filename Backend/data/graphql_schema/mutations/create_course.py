@@ -60,6 +60,18 @@ class CreateCourse(graphene.Mutation):
                         new_course.students.add(models.User.objects.get(pk=item))
                     for item in assistants:
                         new_course.teaching_assistants.add(models.User.objects.get(pk=item))
+                    
+                    class_list = []
+                    for student in new_course.students.all():
+                        class_list.append(student.class_number)
+                    class_list = list(set(class_list))
+                    class_info = ''
+                    for class_number in class_list:
+                        class_info += class_number + ','
+                    class_info = class_info[:-1]
+                    new_course.class_info = class_info
+                    new_course.save()
+
                     return CreateCourse(ok=True, course=new_course, msg=public_msg['success'])
             else:
                 return CreateCourse(ok=False, msg=public_msg['forbidden'])

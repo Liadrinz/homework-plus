@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from data.graphql_schema.mutations.set_weight import SetWeights
+from data.graphql_schema.mutations.import_students_from_excel import ImportStudentsFromExcel
 from data.graphql_schema.mutations.give_score import GiveScore
 from data.graphql_schema.mutations.edit_user import EditUser
 from data.graphql_schema.mutations.edit_submission import EditSubmission

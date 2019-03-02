@@ -37,8 +37,8 @@ class CourseCreationInput(graphene.InputObjectType):
     teaching_assistants = graphene.List(of_type=graphene.Int, required=False)
     students = graphene.List(of_type=graphene.Int, required=False)
     school = graphene.String(required=False)
-    start_time = graphene.DateTime(required=True)
-    end_time = graphene.DateTime(required=True)
+    start_time = graphene.DateTime(required=False)
+    end_time = graphene.DateTime(required=False)
 
 
 # arguments of editing a course
@@ -116,3 +116,8 @@ class TotalCalculationInput(graphene.InputObjectType):
 class WeightSettingInput(graphene.InputObjectType):
     assignments = graphene.List(of_type=graphene.Int, required=True)
     weights = graphene.List(of_type=graphene.Float, required=True)
+
+
+class StudentImportInput(graphene.InputObjectType):
+    excel_file = graphene.Int(required=True)
+    course_id = graphene.Int(required=True)

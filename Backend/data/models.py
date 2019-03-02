@@ -78,8 +78,9 @@ class HWFCourseClass(models.Model):
     school = models.TextField(null=True, blank=True)
     start_time = models.DateTimeField(null=True, blank=True)
     end_time = models.DateTimeField(null=True, blank=True)
-    semester_info = models.CharField(max_length=256, default="2019春季学期")  # e.g. 2019春季学期 2019暑假学期 2019秋季学期
-    class_info = models.CharField(max_length=1024, default="软件学院2017211501,2017211502,2017211503,2017211504")  # e.g. 软件学院2017211501,2017211502,2017211503,2017211504 马克思主义学院...,...,...
+    class_info = models.TextField(default='[]')  # JSON String
+    course_serial = models.CharField(max_length=2048, null=True)
+    cached_students_bupt_id = models.TextField(default='[]')  # JSON String
     
     def __str__(self):
         return self.name

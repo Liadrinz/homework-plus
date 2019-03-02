@@ -4,11 +4,12 @@ from bs4 import BeautifulSoup
 import json
 
 # get response cookie
-cookie = json.loads(JwxtCookieInfo.objects.get(url="http://jwxt.bupt.edu.cn/").cookie)
+def get_cookie():
+    return json.loads(JwxtCookieInfo.objects.get(url="http://jwxt.bupt.edu.cn/").cookie)
 
 # retrieve and save validation code
 def get_valid_code():
-    res_valid = requests.get("http://jwxt.bupt.edu.cn/validateCodeAction.do?random=", cookies=cookie)
+    res_valid = requests.get("http://jwxt.bupt.edu.cn/validateCodeAction.do?random=", cookies=get_cookie())
     return res_valid.content
 
 def login_jwxt(username, password, valid):
@@ -32,8 +33,10 @@ def login_jwxt(username, password, valid):
         url='http://jwxt.bupt.edu.cn/jwLoginAction.do',
         data=data,
         headers=headers,
-        cookies=cookie
+        cookies=get_cookie()
     )
+
+from data.views import jwxt_clear_cookie, jwxt_update_cookie
 
 def get_info():
     res = requests.get(
@@ -48,8 +51,9 @@ def get_info():
             'Upgrade-Insecure-Requests': '1',
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.140 Safari/537.36 Edge/17.17134'
         },
-        cookies=cookie
+        cookies=get_cookie()
     )
+    jwxt_update_cookie()
     html = res.text.replace('\t', '').replace('\n', '').replace('\r', '')
     soup = BeautifulSoup(html, 'lxml')
     result = {}

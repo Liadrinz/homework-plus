@@ -24,11 +24,11 @@ class CreateUserFromJwxt(graphene.Mutation):
 
     def mutate(self, info, jwxt_login_data):
         login_jwxt(**jwxt_login_data)
-        result = get_info()
-        if result == {}:
-            return CreateUserFromJwxt(ok=False, msg=public_msg['forbidden'])
-        target_user = models.User.objects.filter(bupt_id=result['学号']).first()
+        target_user = models.User.objects.filter(bupt_id=jwxt_login_data['username']).first()
         if not target_user:
+            result = get_info()
+            if not result:
+                return CreateUserFromJwxt(ok=False, msg=public_msg['forbidden'])
             if '入学日期' in result and '班级' in result:
                 new_user = models.User.objects.create(
                     username=jwxt_login_data['username'],
@@ -51,6 +51,6 @@ class CreateUserFromJwxt(graphene.Mutation):
                 )
             return CreateUserFromJwxt(ok=True, user=new_user, msg=public_msg['success'])
         else:
-            return CreateUserFromJwxt(ok=False, user=target_user, msg=create_msg(4231, '用户已存在'))
+            return CreateUserFromJwxt(ok=False, msg=create_msg(4231, '用户已存在'))
         
         

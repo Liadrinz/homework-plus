@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 import re
+import json
+import requests
 
 import qrcode
 from django.http import HttpResponse
@@ -81,9 +83,28 @@ def upload_file(request):
     return Response(data={"id": newfile.pk})
 
 
+def jwxt_update_cookie():
+    t_cookie = json.dumps(requests.get("http://jwxt.bupt.edu.cn/").cookies.get_dict())
+    res = models.JwxtCookieInfo.objects.filter(url="http://jwxt.bupt.edu.cn/").first()
+    if res:
+        res.cookie = t_cookie
+        res.save()
+    else:
+        models.JwxtCookieInfo.objects.create(
+            url="http://jwxt.bupt.edu.cn/",
+            cookie=t_cookie
+        )
+
+def jwxt_clear_cookie():
+    res = models.JwxtCookieInfo.objects.filter(url="http://jwxt.bupt.edu.cn/").first()
+    if res:
+        res.cookie = ''
+        res.save()
+
 # 获取教务验证码
 @api_view(['GET'])
 def get_valid(request):
+    jwxt_update_cookie()
     fname = getHash(getHash(request.META['REMOTE_ADDR'] * 233)) + '.png'
     with open('./data/backend_media/jwxt_valid/' + fname, 'wb') as f:
         f.write(get_valid_code())

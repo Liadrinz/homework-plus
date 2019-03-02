@@ -16,6 +16,7 @@ class Query(
 
 class Mutations(graphene.ObjectType):
     set_weight = data.schema.SetWeights.Field()
+    import_students_from_excel = data.schema.ImportStudentsFromExcel.Field()
     give_score = data.schema.GiveScore.Field()
     edit_user = data.schema.EditUser.Field()
     edit_submission = data.schema.EditSubmission.Field()

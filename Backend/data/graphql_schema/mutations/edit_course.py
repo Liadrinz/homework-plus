@@ -94,6 +94,17 @@ class EditCourse(graphene.Mutation):
                     editing_course.start_time = course_data['start_time']
                 if 'end_time' in course_data:
                     editing_course.end_time = course_data['end_time']
+                
+                class_list = []
+                for student in editing_course.students.all():
+                    class_list.append(student.class_number)
+                class_list = list(set(class_list))
+                class_info = ''
+                for class_number in class_list:
+                    class_info += class_number + ','
+                class_info = class_info[:-1]
+                editing_course.class_info = class_info
+                
                 editing_course.save()
                 return EditCourse(ok=True, course=editing_course, msg=public_msg['success'])
         
