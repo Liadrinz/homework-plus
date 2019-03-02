@@ -19,4 +19,5 @@ from data.graphql_schema.queries.query_total_marks import QueryTotalMarks
 from data.graphql_schema.queries.query_submission import QuerySubmission
 from data.graphql_schema.queries.query_message import QueryMessage
 from data.graphql_schema.queries.query_course import QueryCourse
+from data.graphql_schema.queries.query_cached_user import QueryCachedUser
 from data.graphql_schema.queries.query_assignment import QueryAssignment

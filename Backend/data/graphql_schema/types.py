@@ -20,6 +20,11 @@ class UserType(DjangoObjectType):
         exclude_fields = _user_exclude_fields
 
 
+class CachedUserType(DjangoObjectType):
+    class Meta:
+        model = models.CachedUser
+
+
 class TeacherType(DjangoObjectType):
     class Meta:
         model = models.User

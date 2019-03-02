@@ -80,10 +80,15 @@ class HWFCourseClass(models.Model):
     end_time = models.DateTimeField(null=True, blank=True)
     class_info = models.TextField(default='[]')  # JSON String
     course_serial = models.CharField(max_length=2048, null=True)
-    cached_students_bupt_id = models.TextField(default='[]')  # JSON String
     
     def __str__(self):
         return self.name
+
+
+class CachedUser(models.Model):
+    bupt_id = models.CharField(
+        max_length=10, unique=True, default=default_bupt_id)
+    courses = models.ManyToManyField(HWFCourseClass, related_name='cached_users', blank=True)
 
 
 # Any uploaded file is a HWFFile

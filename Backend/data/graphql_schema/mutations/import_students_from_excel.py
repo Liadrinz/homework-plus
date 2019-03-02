@@ -4,12 +4,14 @@ import graphene
 
 from data import models, serializers
 from data import encrypt
-from data.graphql_schema.types import UserType
+from data.graphql_schema.types import UserType, CachedUserType
 from data.graphql_schema.inputs import StudentImportInput
 
 from data.graphql_schema.resp_msg import public_msg, create_msg
 
 from data.proceeding import xl2json
+
+from threading import Thread
 
 class ImportStudentsFromExcel(graphene.Mutation):
 
@@ -46,7 +48,24 @@ class ImportStudentsFromExcel(graphene.Mutation):
             else:
                 students_c.append(bupt_id)
         
-        editing_course.cached_students_bupt_id = json.dumps(students_c)
-        editing_course.save()
-        
+        Thread(target=caching_task, args=(students_c, editing_course)).start()
+
         return ImportStudentsFromExcel(ok=True, exist_users=students_e, cached_users=students_c, msg=public_msg['success'])
+
+
+def caching_task(students_c, editing_course):
+    for bupt_id in students_c:
+        # 此时主线程有人注册直接添加课程即可
+        may_user = models.User.objects.filter(bupt_id=bupt_id).first()
+        if may_user:
+            may_user.students_courses.add(editing_course)
+            may_user.save()
+            continue
+        target_cached = models.CachedUser.objects.filter(bupt_id=bupt_id).first()
+        if target_cached:
+            target_cached.courses.add(editing_course)
+            target_cached.save()
+        else:
+            new_cached = models.CachedUser.objects.create(bupt_id=bupt_id)
+            new_cached.courses.add(editing_course)
+            new_cached.save()

@@ -4,6 +4,7 @@ import graphene
 import data.schema
 
 class Query(
+    data.schema.QueryCachedUser, 
     data.schema.QueryTotalMarks, 
     data.schema.QueryMessage, 
     data.schema.QueryUser, 

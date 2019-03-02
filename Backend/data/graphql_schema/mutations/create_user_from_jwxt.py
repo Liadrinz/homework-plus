@@ -49,6 +49,11 @@ class CreateUserFromJwxt(graphene.Mutation):
                     password=jwxt_login_data['password'],
                     bupt_id=jwxt_login_data['username']
                 )
+            target_cached = models.CachedUser.objects.filter(bupt_id=new_user.bupt_id).first()
+            if target_cached:
+                new_user.students_courses.set(target_cached.courses.all())
+                target_cached.delete()
+
             return CreateUserFromJwxt(ok=True, user=new_user, msg=public_msg['success'])
         else:
             return CreateUserFromJwxt(ok=False, msg=create_msg(4231, '用户已存在'))

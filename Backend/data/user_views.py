@@ -184,9 +184,13 @@ def user_list(request):
         request.data['useravatar'] = [2,]
         serializer = serializers.UserSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            new_user = serializer.save()
             data['result'] = results['SUCCESS']
             send_confirm(User.objects.get(email=request.data['email']))
+            target_cached = models.CachedUser.objects.filter(bupt_id=new_user.bupt_id).first()
+            if target_cached:
+                new_user.students_courses.set(target_cached.courses.all())
+                target_cached.delete()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
