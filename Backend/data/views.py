@@ -15,6 +15,7 @@ from data.models import User
 from project.settings import (API_AUTH_KEY, BACKEND_DOMIAN, FRONTEND_DOMAIN, SECRET_KEY)
 
 from data.encrypt import getHash
+from data.jwxt.bupt_login import get_valid_code
 
 
 # 获取课程的二维码
@@ -80,8 +81,16 @@ def upload_file(request):
     return Response(data={"id": newfile.pk})
 
 
+# 获取教务验证码
+@api_view(['GET'])
+def get_valid(request):
+    fname = getHash(getHash(request.META['REMOTE_ADDR'] * 233)) + '.png'
+    with open('./data/backend_media/jwxt_valid/' + fname, 'wb') as f:
+        f.write(get_valid_code())
+    return Response(data={'img_url': 'http://' + BACKEND_DOMIAN + '/media/jwxt_valid/' + fname})
+
+
 # 文件(数据库文件对象HWFFile)的REST接口
 class HWFFileViewSet(viewsets.ModelViewSet):
-    
     queryset = models.HWFFile.objects.all()
     serializer_class = serializers.HWFFileSerializer

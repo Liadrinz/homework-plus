@@ -14,11 +14,21 @@ def default_phone():
     return 'noPhone' + str(count)
 
 
+def default_email():
+    count = User.objects.all().count()
+    return 'noEmail' + str(count)
+
+
 class HostInfo(models.Model):
     host = models.CharField(max_length=32)
     count = models.IntegerField()
     start_time = models.DateTimeField(null=True)
     is_locked = models.BooleanField(default=False)
+
+
+class JwxtCookieInfo(models.Model):
+    cookie = models.TextField(null=True)
+    url = models.CharField(max_length=256)
 
 
 # User Profile
@@ -27,7 +37,7 @@ class User(AbstractUser):
     bupt_id = models.CharField(
         max_length=10, unique=True, default=default_bupt_id)
     name = models.TextField(default='')
-    email = models.EmailField(unique=True)
+    email = models.EmailField(unique=True, default=default_email)
     phone = models.CharField(max_length=11, unique=True, default=default_phone)
     gender = models.CharField(
         max_length=6,

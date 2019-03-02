@@ -7,6 +7,7 @@ from data.graphql_schema.mutations.edit_submission import EditSubmission
 from data.graphql_schema.mutations.edit_course import EditCourse
 from data.graphql_schema.mutations.edit_assignment import EditAssignment
 from data.graphql_schema.mutations.delete_assignment import DeleteAssignment
+from data.graphql_schema.mutations.create_user_from_jwxt import CreateUserFromJwxt
 from data.graphql_schema.mutations.create_user import CreateUser
 from data.graphql_schema.mutations.create_submission import CreateSubmission
 from data.graphql_schema.mutations.create_course import CreateCourse

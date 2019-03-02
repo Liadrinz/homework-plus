@@ -20,7 +20,8 @@ urlpatterns = [
     url(r'^account/forget_password/?$', user_views.forget_password), # 忘密
     url(r'^account/confirm_forgotten/?$', user_views.confirm_forgotten), # 确认忘记
     url(r'^account/change_directly/?$', user_views.directly_change),  # 直接修改密码(危险)
-    url(r'^account/confirm_bind_wechat/?$', views.confirm_bind_wechat)
+    url(r'^account/confirm_bind_wechat/?$', views.confirm_bind_wechat),
+    url(r'^get_jwxt_valid/?$', views.get_valid),
 ]
 
 

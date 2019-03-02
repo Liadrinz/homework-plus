@@ -14,6 +14,12 @@ class UserCreationInput(graphene.InputObjectType):
     phone = graphene.String(required=True)
 
 
+class JwxtLoginInput(graphene.InputObjectType):
+    username = graphene.String(required=True)
+    password = graphene.String(required=True)
+    valid = graphene.String(required=True)
+
+
 # arguments of editing a user
 class UserEditionInput(graphene.InputObjectType):
     id = graphene.Int(required=True)

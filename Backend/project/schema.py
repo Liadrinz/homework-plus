@@ -22,6 +22,7 @@ class Mutations(graphene.ObjectType):
     edit_course = data.schema.EditCourse.Field()
     edit_assignment = data.schema.EditAssignment.Field()
     delete_assignment = data.schema.DeleteAssignment.Field()
+    create_user_from_jwxt = data.schema.CreateUserFromJwxt.Field()
     create_user = data.schema.CreateUser.Field()
     create_submission = data.schema.CreateSubmission.Field()
     create_course = data.schema.CreateCourse.Field()
