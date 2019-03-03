@@ -31,7 +31,7 @@ class UserEditionInput(graphene.InputObjectType):
 # arguments of creating a course
 class CourseCreationInput(graphene.InputObjectType):
     name = graphene.String(required=True)
-    description = graphene.String(required=True)
+    description = graphene.String(required=False)
     marks = graphene.Float(required=True)
     teachers = graphene.List(of_type=graphene.Int, required=False)
     teaching_assistants = graphene.List(of_type=graphene.Int, required=False)

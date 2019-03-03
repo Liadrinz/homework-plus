@@ -8,15 +8,25 @@ def default_bupt_id():
     count = User.objects.all().count()
     return 'noBuptId' + str(count)
 
-
 def default_phone():
     count = User.objects.all().count()
     return 'noPhone' + str(count)
 
-
 def default_email():
     count = User.objects.all().count()
     return 'noEmail' + str(count)
+
+def default_semester_code():
+    start_year = 2018
+    codes = ['1', '2', '3']
+    count = Semester.objects.all().count()
+    return str(start_year + count // 3) + codes[count % 3]
+
+def default_semester_name():
+    start_year = 2018
+    seasons = ['春季', '暑假', '秋季']
+    count = Semester.objects.all().count()
+    return str(start_year + count // 3) + seasons[count % 3] + '学期'
 
 
 class HostInfo(models.Model):
@@ -25,10 +35,16 @@ class HostInfo(models.Model):
     start_time = models.DateTimeField(null=True)
     is_locked = models.BooleanField(default=False)
 
+    def __str__(self):
+        return self.host
+
 
 class JwxtCookieInfo(models.Model):
     cookie = models.TextField(null=True)
     url = models.CharField(max_length=256)
+
+    def __str__(self):
+        return self.cookie
 
 
 # User Profile
@@ -51,6 +67,9 @@ class User(AbstractUser):
     wechat = models.TextField(null=True)
     forgotten = models.BooleanField(default=False)
 
+    def __str__(self):
+        return self.username
+
 
 # 头像
 class UserAvatar(models.Model):
@@ -62,11 +81,22 @@ class UserAvatar(models.Model):
         height_field='url_height',
         width_field='url_width',
         null=True)
+    
+
+class Semester(models.Model):
+    semester_code = models.CharField(max_length=10, unique=True, default=default_semester_code)
+    semester_name = models.CharField(max_length=100, unique=True, default=default_semester_name)
+    start_time = models.DateTimeField(null=True)
+    end_time = models.DateTimeField(null=True)
+
+    def __str__(self):
+        return self.semester_name
 
 
 # 课程
 class HWFCourseClass(models.Model):
-    name = models.TextField()
+    name = models.TextField()  # 可从excel导入
+    semester = models.ForeignKey(Semester, on_delete=models.PROTECT, related_name='semester_classes')
     description = models.TextField(blank=True, null=True)
     marks = models.FloatField(default=0.0)
     teachers = models.ManyToManyField(
@@ -74,15 +104,16 @@ class HWFCourseClass(models.Model):
     teaching_assistants = models.ManyToManyField(
         User, related_name='teaching_assistants_courses', blank=True)
     students = models.ManyToManyField(
-        User, related_name='students_courses', blank=True)
+        User, related_name='students_courses', blank=True)  # 可从excel导入
     school = models.TextField(null=True, blank=True)
     start_time = models.DateTimeField(null=True, blank=True)
     end_time = models.DateTimeField(null=True, blank=True)
-    class_info = models.TextField(default='[]')  # JSON String
-    course_serial = models.CharField(max_length=2048, null=True)
+
+    class_info = models.TextField(default='[]')  # JSON String 自动计算
+    course_serial = models.CharField(max_length=2048, null=True)  # 从excel导入
     
     def __str__(self):
-        return self.name
+        return self.semester.semester_name + '-' + self.name
 
 
 class CachedUser(models.Model):
@@ -90,6 +121,8 @@ class CachedUser(models.Model):
         max_length=10, unique=True, default=default_bupt_id)
     courses = models.ManyToManyField(HWFCourseClass, related_name='cached_users', blank=True)
 
+    def __str__(self):
+        return self.bupt_id
 
 # Any uploaded file is a HWFFile
 # unique by hashcode
@@ -120,7 +153,7 @@ class HWFAssignment(models.Model):
     weight = models.FloatField(default=0.0)
 
     def __str__(self):
-        return self.name
+        return self.course_class.name + '-' + self.name
 
 
 # submission to an assignment
@@ -158,12 +191,18 @@ class HWFSubmission(models.Model):
     review_comment = models.TextField(blank=True, null=True)
     is_excellent = models.BooleanField(default=False)
 
+    def __str__(self):
+        return self.assignment.name + '-' + self.submitter.bupt_id
+
 
 class TotalMarks(models.Model):
     student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='student_total_marks')
     course_class = models.ForeignKey(HWFCourseClass, on_delete=models.CASCADE, related_name='course_total_marks')
     average = models.FloatField(default=0.0)
     total = models.FloatField(default=0.0)
+
+    def __str__(self):
+        return self.student.name + '-' + self.course_class.name
 
 
 class MessageFile(models.Model):

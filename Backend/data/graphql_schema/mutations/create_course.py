@@ -32,10 +32,11 @@ class CreateCourse(graphene.Mutation):
         try:
 
             # start end time validation
-            start_time = course_data['start_time']
-            end_time = course_data['end_time']
-            if start_time >= end_time or end_time.replace(tzinfo=None) <= datetime.now():
-                return CreateCourse(ok=False, msg=create_msg(4111, "the start time \"%s\" is later than the end time \"%s\""%(start_time, end_time)))
+            if 'start_time' and 'end_time' in course_data:
+                start_time = course_data['start_time']
+                end_time = course_data['end_time']
+                if start_time >= end_time or end_time.replace(tzinfo=None) <= datetime.now():
+                    return CreateCourse(ok=False, msg=create_msg(4111, "the start time \"%s\" is later than the end time \"%s\""%(start_time, end_time)))
             
             # isteacher validation
             if realuser.usertype.lower() == 'teacher':

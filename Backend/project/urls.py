@@ -30,5 +30,6 @@ urlpatterns = [
     path('graphql/', GraphQLView.as_view(graphiql=True, schema=schema)),
     url(r'^graphql/?', gql_view_func),
     url(r'^',include('data.urls')), # restful and plain API
-    url(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}) # File API
+    url(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}), # File API
+    url(r'^admin/', admin.site.urls),
 ]

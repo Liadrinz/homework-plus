@@ -21,6 +21,8 @@ class ImportStudentsFromExcel(graphene.Mutation):
     ok = graphene.Boolean()
     exist_users = graphene.List(of_type=UserType)
     cached_users = graphene.List(of_type=graphene.String)
+    course_serial = graphene.String()
+    course_name = graphene.String()
     msg = graphene.String()
 
     def mutate(self, info, import_data):
@@ -39,7 +41,7 @@ class ImportStudentsFromExcel(graphene.Mutation):
         students_c = []
 
         excel_file = models.HWFFile.objects.filter(pk=import_data['excel_file']).first()
-        students_bupt_id = xl2json.convert('./data/backend_media/' + str(excel_file.data))
+        students_bupt_id, serial, name = xl2json.convert('./data/backend_media/' + str(excel_file.data))
         
         for bupt_id in students_bupt_id:
             target_user = models.User.objects.filter(bupt_id=bupt_id).first()
@@ -50,7 +52,7 @@ class ImportStudentsFromExcel(graphene.Mutation):
         
         Thread(target=caching_task, args=(students_c, editing_course)).start()
 
-        return ImportStudentsFromExcel(ok=True, exist_users=students_e, cached_users=students_c, msg=public_msg['success'])
+        return ImportStudentsFromExcel(ok=True, exist_users=students_e, cached_users=students_c, course_serial=serial, course_name=name, msg=public_msg['success'])
 
 
 def caching_task(students_c, editing_course):

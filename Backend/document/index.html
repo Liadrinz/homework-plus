@@ -494,13 +494,17 @@ mutation {
   description: String
   school: String
   marks: Float
+  semester: SemesterType
   startTime: DateTime
   endTime: DateTime
   classInfo: String  // 班级信息 (create或edit时自动计算)
+  timeInfo: String  // 上课时间信息 (自动从excel导)
+  locationInfo: String  // 上课地点信心 (自动从excel导)
   courseSerial: String  // 课号课序号 (自动从excel导)
   teachers: List<UserType>
   teachingAssistants: List<UserType>
   students: List<UserType>
+  cachedUsers: List<CachedUserType>
   courseAssignments: List<AssignmentType>  // 该课程的作业
   courseTotalMarks: List<TotalMarksType>  // 该课程各学生的总分信息
 }
@@ -604,7 +608,7 @@ query {
 ```gql
 (courseData: {
   name: String!
-  description: String!
+  description: String
   marks: Float!
   teachers: List<Int>!,
   teachingAssistants: List<Int>!,
@@ -695,6 +699,8 @@ mutation {
   msg: String
   existUsers: List<UserType>  // excel中有的且已注册的用户
   cachedUsers: List<String> // excel中未注册的用户 注意: 不是List<CachedUserType>, 而是buptId串的列表
+  courseName: String  // 课程名称
+  courseSerial: String  // 课序号
 }
 ```
 ##### 用法
@@ -1310,6 +1316,18 @@ query {
 }
 ```
 </div>
+<div id="2-8">
+### 8. SemesterType (学期) (不能单独操作)
+##### 可以展开的字段
+```gql
+{
+  semesterCode: String  // 示例: 20191
+  semesterName: String  // 示例: 2019春季学期
+  startTime: DateTime
+  endTime: DateTime
+}
+```
+</div>
 </div>
 <div id="app" v-cloak>
   <div id="top" style="position: fixed; right: 50px; bottom: 50px; z-index: 9999;">
@@ -1473,12 +1491,14 @@ query {
                       <el-menu-item index="2-7-1">字段</el-menu-item>
                       <el-menu-item index="2-7-2">allCachedUsers</el-menu-item>
                     </el-submenu>
+                    <el-menu-item index="2-8">SemesterType (学期)</el-menu-item>
                 </el-submenu>
                 <el-submenu index="3" @open="handleMenuOpened" @close="handleMenuClose">
                   <template slot="title">
                     更新日志
                   </template>
                   <el-menu-item index="3-1">2019-03-02</el-menu-item>
+                  <el-menu-item index="3-2">2019-03-03</el-menu-item>
                 </el-submenu>
             </el-menu>
         </el-col>
@@ -1495,9 +1515,16 @@ query {
               提取excel文件中已注册和未注册的学生并缓存未注册的学生(<el-button type="text" @click="() => {handleMenuSelected('2-2-2-3');}">importStudentsFromExcel接口</el-button>) -> 
               将excel中已注册的学生添加到对应课程(<el-button type="text" @click="() => {handleMenuSelected('2-2-2-2');}">editCourse接口</el-button>)
             </h5>
-            <h4>3. <el-button type="text" @click="() => {handleMenuSelected('2-2-1-1');}">CourseType</el-button>增加classInfo和courseSerial字段</h4>
+            <h4>3. <el-button type="text" @click="() => {handleMenuSelected('2-2-1-1');}">CourseType</el-button>增加classInfo, courseSerial, cachedUsers字段</h4>
             <h4>4. <el-button type="text" @click="() => {handleMenuSelected('2-2-2-1');}">createCourse</el-button>的startTime和endTime字段由必选改为可选, 且<el-button type="text" @click="() => {handleMenuSelected('2-2-2-1');}">createCourse</el-button>和<el-button type="text" @click="() => {handleMenuSelected('2-2-2-2');}">editCourse</el-button>增加classInfo和courseSerial字段</h4>
             <h4>5. 缓存用户注册后, 会将相关课程添加到该用户, 并删除缓存信息</h4>
+          </div>
+          <div id="atc-3-2">
+            <h3>2019-03-03</h3>
+            <h4>1. 添加<el-button type="text" @click="() => {handleMenuSelected('2-8')}">SemesterType (学期)</el-button></h4>
+            <h4>2. <el-button type="text" @click="() => {handleMenuSelected('2-2-2-1');}">createCourse</el-button>的description字段由必选改为可选</h4>
+            <h4>3. <el-button type="text" @click="() => {handleMenuSelected('2-2-1-1');}">CourseType</el-button>增加timeInfo, locationInfo字段</h4>
+            <h4>4. <el-button type="text" @click="() => {handleMenuSelected('2-2-2-3');}">importStudentsFromExcel</el-button>的返回字段中增加了semester, courseName, courseSerial字段</h4>
           </div>
         </div>
         </el-col>
@@ -1525,7 +1552,6 @@ query {
         methods: {
           handleMenuSelected: function(index) {
             if (index[0] === '3') {
-              this.isLog = true;
               setTimeout(() => {
                 document.querySelector(`#atc-${index}`).scrollIntoView(true);
                 document.querySelector(this.prevIndex).style['color'] = "";
@@ -1533,9 +1559,9 @@ query {
                 this.prevIndex = `#atc-${index}`;
                 localStorage.setItem("prevIndex", this.prevIndex);
               }, 200);
+              this.isLog = true;
             }
             else {
-              this.isLog = false;
               setTimeout(() => {
                 document.querySelector(`#atc-${index}`).scrollIntoView(true);
                 document.querySelector(this.prevIndex).style['color'] = "";
@@ -1543,6 +1569,7 @@ query {
                 this.prevIndex = `#atc-${index}`;
                 localStorage.setItem("prevIndex", this.prevIndex);
               }, 200);
+              this.isLog = false;
             }
           },
           handleMenuOpened: function(index, indexPath) {
