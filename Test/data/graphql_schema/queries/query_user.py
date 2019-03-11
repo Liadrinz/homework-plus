@@ -2,6 +2,7 @@
 import graphene
 from data.graphql_schema.types import *
 from data import models
+from data.proceeding import xl2json
 
 class QueryUser(object):
 
@@ -47,4 +48,3 @@ class QueryUser(object):
     def resolve_get_users_by_course_id(self, info, **kwargs):
         target_course = models.HWFCourseClass.objects.get(pk=kwargs['course_id'])
         return target_course.students.all()
-

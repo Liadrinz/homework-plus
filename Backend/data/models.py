@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, Group
 from django.db import models
 from datetime import datetime
 
@@ -66,6 +66,7 @@ class User(AbstractUser):
     class_number = models.CharField(max_length=10, default='noClass')
     wechat = models.TextField(null=True)
     forgotten = models.BooleanField(default=False)
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='group_users')
 
     def __str__(self):
         return self.username
@@ -189,10 +190,14 @@ class HWFSubmission(models.Model):
     is_reviewed = models.BooleanField(default=False)
     score = models.FloatField(default=0.0)
     review_comment = models.TextField(blank=True, null=True)
+    review_result_picture = models.ForeignKey(HWFFile, on_delete=models.CASCADE, related_name='file_submission', null=True)
     is_excellent = models.BooleanField(default=False)
 
     def __str__(self):
         return self.assignment.name + '-' + self.submitter.bupt_id
+
+
+
 
 
 class TotalMarks(models.Model):

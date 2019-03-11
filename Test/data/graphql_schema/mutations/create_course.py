@@ -24,15 +24,19 @@ class CreateCourse(graphene.Mutation):
 
     def mutate(self, info, course_data):
         
-        realuser = models.User.objects.filter(pk=info.context.META.get('realuser', None)).first()
+        # id validation
+        realuser = models.User.objects.filter(pk=info.context.META['realuser']).first()
+        if realuser == None:
+            return CreateCourse(ok=False, msg=public_msg['not_login'])
 
         try:
 
             # start end time validation
-            start_time = course_data['start_time']
-            end_time = course_data['end_time']
-            if start_time >= end_time or end_time.replace(tzinfo=None) <= datetime.now():
-                return CreateCourse(ok=False, msg=create_msg(4111, "the start time \"%s\" is later than the end time \"%s\""%(start_time, end_time)))
+            if 'start_time' and 'end_time' in course_data:
+                start_time = course_data['start_time']
+                end_time = course_data['end_time']
+                if start_time >= end_time or end_time.replace(tzinfo=None) <= datetime.now():
+                    return CreateCourse(ok=False, msg=create_msg(4111, "the start time \"%s\" is later than the end time \"%s\""%(start_time, end_time)))
             
             # isteacher validation
             if realuser.usertype.lower() == 'teacher':
@@ -57,6 +61,18 @@ class CreateCourse(graphene.Mutation):
                         new_course.students.add(models.User.objects.get(pk=item))
                     for item in assistants:
                         new_course.teaching_assistants.add(models.User.objects.get(pk=item))
+                    
+                    class_list = []
+                    for student in new_course.students.all():
+                        class_list.append(student.class_number)
+                    class_list = list(set(class_list))
+                    class_info = ''
+                    for class_number in class_list:
+                        class_info += class_number + ','
+                    class_info = class_info[:-1]
+                    new_course.class_info = class_info
+                    new_course.save()
+
                     return CreateCourse(ok=True, course=new_course, msg=public_msg['success'])
             else:
                 return CreateCourse(ok=False, msg=public_msg['forbidden'])

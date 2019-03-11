@@ -24,7 +24,10 @@ class DeleteAssignment(graphene.Mutation):
 
     def mutate(self, info, assignment_data):
         
-        realuser = models.User.objects.filter(pk=info.context.META.get('realuser', None)).first()
+        # id validation
+        realuser = models.User.objects.filter(pk=info.context.META['realuser']).first()
+        if realuser == None:
+            return DeleteAssignment(ok=False, msg=public_msg['not_login'])
         
         try:
 

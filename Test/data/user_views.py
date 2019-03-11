@@ -12,6 +12,8 @@ from data.safe.confirm import send_confirm, send_forget
 from data.models import User
 from project.settings import API_AUTH_KEY, SECRET_KEY
 
+from rest_framework.test import APIClient
+
 
 # 登录时返回的状态
 results = {
@@ -64,7 +66,6 @@ def login(request):
         except:
             openid = request.META['HTTP_TOKEN']
             hs = encrypt.getHash(openid)
-            print(hs)
             realuser = User.objects.get(wechat=hs)
             if realuser.is_active == False:
                 data['result'] = results['INACTIVE']
@@ -110,6 +111,18 @@ def login(request):
         return Response(data=data, headers=headers)
 
     return Response(data=data, headers=headers, status=status.HTTP_400_BAD_REQUEST)
+
+def _repeated(**kwargs):
+    usernames = User.objects.values_list('username').all()
+    bupt_ids = User.objects.values_list('bupt_id').all()
+    emails = User.objects.values_list('email').all()
+    phones = User.objects.values_list('phone').all()
+    all_vals = [item[0] for item in usernames] + [item[0] for item in bupt_ids] + [item[0] for item in emails] + [item[0] for item in phones]
+    keys_to_check = ['username', 'bupt_id', 'email', 'phone']
+    for key in keys_to_check:
+        if kwargs[key] in all_vals:
+            return True
+    return False
 
 
 # TODO: 确认前端未使用后删除
@@ -181,12 +194,18 @@ def user_list(request):
     }
     # 注册接口
     if request.method == 'POST':
+        if _repeated(**request.data):
+            return Response(data={'error': 'repeated'})    
         request.data['useravatar'] = [2,]
         serializer = serializers.UserSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            new_user = serializer.save()
             data['result'] = results['SUCCESS']
             send_confirm(User.objects.get(email=request.data['email']))
+            target_cached = models.CachedUser.objects.filter(bupt_id=new_user.bupt_id).first()
+            if target_cached:
+                new_user.students_courses.set(target_cached.courses.all())
+                target_cached.delete()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -289,9 +308,14 @@ def user_detail(request, pk):
 def is_repeated(request):
     init()
     to_judge = request.data['content']
-    all_data = User.objects.values_list(request.data['type']).all()
-    all_data = [item[0] for item in all_data]
-    data['data'] = {"repeat": (to_judge in all_data)}
+    all_data = []
+    this_data = [item[0] for item in User.objects.values_list(request.data['type']).all()]
+    add_username_data = [item[0] for item in User.objects.values_list('username').all()]
+    add_bupt_id_data = [item[0] for item in User.objects.values_list('bupt_id').all()]
+    add_phone_data = [item[0] for item in User.objects.values_list('phone').all()]
+    add_email_data = [item[0] for item in User.objects.values_list('email').all()]
+    data['data'] = {
+        "repeat": (to_judge in this_data or to_judge in add_username_data or to_judge in add_bupt_id_data or to_judge in add_phone_data or to_judge in add_email_data)}
     return Response(data=data, headers=headers)
 
 # 激活账户

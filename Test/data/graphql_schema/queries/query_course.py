@@ -12,6 +12,7 @@ class QueryCourse(object):
     all_teachers = graphene.List(TeacherType)
     all_students = graphene.List(StudentType)
     all_teaching_assistants = graphene.List(TeachingAssistantType)
+    
 
     # specific query of courses
     def resolve_all_courses(self, info, **kwargs):

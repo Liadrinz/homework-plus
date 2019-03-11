@@ -983,6 +983,7 @@ mutation {
   aware: Boolean
   description: String
   reviewComment: String
+  reviewResultPicture: FileType
   isReviewed: Boolean
   score: Float
   isExcellent: Boolean
@@ -1158,6 +1159,8 @@ mutation {
 (scoreGivingData: {
   submission: Int!
   score: Float!
+  reviewComment: String
+  reviewResultPicture: Int
   isExcellent: Boolean
 }!)
 ```

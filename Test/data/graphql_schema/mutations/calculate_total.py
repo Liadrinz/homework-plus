@@ -25,7 +25,10 @@ class CalculateTotal(graphene.Mutation):
     msg = graphene.String()
 
     def mutate(self, info, calc_target):
-        realuser = models.User.objects.filter(pk=info.context.META.get('realuser', None)).first()
+        # id validation
+        realuser = models.User.objects.filter(pk=info.context.META['realuser']).first()
+        if realuser == None:
+            return CalculateTotal(ok=False, msg=public_msg['not_login'])
         
         editing_course = models.HWFCourseClass.objects.get(pk=calc_target['course'])
         return_list = []

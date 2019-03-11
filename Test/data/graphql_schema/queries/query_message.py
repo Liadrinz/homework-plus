@@ -13,7 +13,9 @@ class QueryMessage(object):
 
     
     def resolve_get_messages_by_sender_and_receiver(self, info, **kwargs):
-        realuser = models.User.objects.filter(pk=info.context.META.get('realuser', None)).first()
+        realuser = models.User.objects.filter(pk=info.context.META['realuser']).first()
+        if realuser == None:
+            return
         sender = kwargs['sender']
         receiver = kwargs['receiver']
         # 不能获取与自己无关的消息
@@ -24,7 +26,14 @@ class QueryMessage(object):
         return models.Message.objects.filter(result).order_by("send_time")
 
     def resolve_get_messages_by_receiver(self, info, **kwargs):
-        realuser = models.User.objects.filter(pk=info.context.META.get('realuser', None)).first()
+        try:
+            realuser = token.confirm_validate_token(info.context.META['HTTP_TOKEN'])
+            realuser = models.User.objects.get(pk=realuser)
+        except:
+            try:
+                realuser = models.User.objects.get(wechat=encrypt.getHash(info.context.META['HTTP_TOKEN']))
+            except:
+                return
         receiver = kwargs['receiver']
         # 不能获取与自己无关的消息
         if realuser.pk != receiver:

@@ -7,9 +7,12 @@ import datetime
 import threading
 import os
 
-from data.user_views import login, user_list
-from data.views import upload_file
+from django.views.static import serve
+from data.user_views import login, user_list, is_repeated
+from data.views import upload_file, confirm_bind_wechat
 from project.urls import gql_view_func
+
+from project.settings import DEBUG
 
 class Verification(MiddlewareMixin):
     def process_request(self, request):
@@ -28,7 +31,9 @@ class Verification(MiddlewareMixin):
         return None
     
     def process_view(self, request, view_func, view_args, view_kwargs):
-        if view_func == login or view_func == user_list:
+        if DEBUG:
+            return None
+        if view_func == login or view_func == user_list or view_func == serve or view_func == is_repeated or view_func == confirm_bind_wechat:
             return None
         elif request.META.get('realuser', None):
             return None
@@ -84,7 +89,7 @@ class FrequencyLimit(MiddlewareMixin):
             tn = datetime.datetime.now()
             if [tf.year, tf.month, tf.day] == [tn.year, tn.month, tn.day]:
                 try:
-                    size += os.path.getsize('./data/backend_media/' + owners_file.data)
+                    size += os.path.getsize('./data/backend_media/' + str(owners_file.data))
                 except FileNotFoundError:
                     pass
         if size <= 2 ** 30:

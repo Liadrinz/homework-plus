@@ -27,7 +27,10 @@ class SetWeights(graphene.Mutation):
 
     def mutate(self, info, weight_data):
 
-        realuser = models.User.objects.filter(pk=info.context.META.get('realuser', None)).first()
+        # id validation
+        realuser = models.User.objects.filter(pk=info.context.META['realuser']).first()
+        if realuser == None:
+            return SetWeights(ok=False, msg=public_msg['not_login'])
         
         try:
             for assignment_pk in weight_data['assignments']:

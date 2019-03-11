@@ -4,6 +4,7 @@ import graphene
 import data.schema
 
 class Query(
+    data.schema.QueryCachedUser, 
     data.schema.QueryTotalMarks, 
     data.schema.QueryMessage, 
     data.schema.QueryUser, 
@@ -16,12 +17,14 @@ class Query(
 
 class Mutations(graphene.ObjectType):
     set_weight = data.schema.SetWeights.Field()
+    import_students_from_excel = data.schema.ImportStudentsFromExcel.Field()
     give_score = data.schema.GiveScore.Field()
     edit_user = data.schema.EditUser.Field()
     edit_submission = data.schema.EditSubmission.Field()
     edit_course = data.schema.EditCourse.Field()
     edit_assignment = data.schema.EditAssignment.Field()
     delete_assignment = data.schema.DeleteAssignment.Field()
+    create_user_from_jwxt = data.schema.CreateUserFromJwxt.Field()
     create_user = data.schema.CreateUser.Field()
     create_submission = data.schema.CreateSubmission.Field()
     create_course = data.schema.CreateCourse.Field()

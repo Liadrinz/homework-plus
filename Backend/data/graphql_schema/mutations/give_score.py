@@ -47,6 +47,8 @@ class GiveScore(graphene.Mutation):
                     editing_submission.is_excellent = score_giving_data['is_excellent']
                 if 'review_comment' in score_giving_data:
                     editing_submission.review_comment = score_giving_data['review_comment']
+                if 'review_result_picture' in score_giving_data:
+                    editing_submission.review_result_picture_id = score_giving_data['review_result_picture']
                 editing_submission.is_reviewed = True
                 editing_submission.save()
                 return GiveScore(ok=True, submission=editing_submission, msg=public_msg['success'])

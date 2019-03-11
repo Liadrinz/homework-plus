@@ -22,7 +22,12 @@ class EditUser(graphene.Mutation):
 
     def mutate(self, info, user_data):
 
-        realuser = models.User.objects.filter(pk=info.context.META.get('realuser', None)).first()
+        # id validation
+        realuser = models.User.objects.filter(pk=info.context.META['realuser']).first()
+        if realuser == None:
+            return EditUser(ok=False, msg=public_msg['not_login'])
+        
+        editing_user = models.User.objects.get(pk=user_data['id'])
         
         try:
 

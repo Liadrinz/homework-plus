@@ -103,6 +103,7 @@ class ScoreGivingInput(graphene.InputObjectType):
     submission = graphene.Int(required=True)
     score = graphene.Float(required=True)
     review_comment = graphene.String(required=False)
+    review_result_picture = graphene.Int(required=False)
     is_excellent = graphene.Boolean(required=False)
 
 

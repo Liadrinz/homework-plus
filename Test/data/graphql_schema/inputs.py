@@ -14,6 +14,12 @@ class UserCreationInput(graphene.InputObjectType):
     phone = graphene.String(required=True)
 
 
+class JwxtLoginInput(graphene.InputObjectType):
+    username = graphene.String(required=True)
+    password = graphene.String(required=True)
+    valid = graphene.String(required=True)
+
+
 # arguments of editing a user
 class UserEditionInput(graphene.InputObjectType):
     id = graphene.Int(required=True)
@@ -25,14 +31,14 @@ class UserEditionInput(graphene.InputObjectType):
 # arguments of creating a course
 class CourseCreationInput(graphene.InputObjectType):
     name = graphene.String(required=True)
-    description = graphene.String(required=True)
+    description = graphene.String(required=False)
     marks = graphene.Float(required=True)
     teachers = graphene.List(of_type=graphene.Int, required=False)
     teaching_assistants = graphene.List(of_type=graphene.Int, required=False)
     students = graphene.List(of_type=graphene.Int, required=False)
     school = graphene.String(required=False)
-    start_time = graphene.DateTime(required=True)
-    end_time = graphene.DateTime(required=True)
+    start_time = graphene.DateTime(required=False)
+    end_time = graphene.DateTime(required=False)
 
 
 # arguments of editing a course
@@ -110,3 +116,8 @@ class TotalCalculationInput(graphene.InputObjectType):
 class WeightSettingInput(graphene.InputObjectType):
     assignments = graphene.List(of_type=graphene.Int, required=True)
     weights = graphene.List(of_type=graphene.Float, required=True)
+
+
+class StudentImportInput(graphene.InputObjectType):
+    excel_file = graphene.Int(required=True)
+    course_id = graphene.Int(required=True)

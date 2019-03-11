@@ -24,10 +24,14 @@ class EditCourse(graphene.Mutation):
 
     def mutate(self, info, course_data):
 
-        is_from_wechat = info.context.META.get('is_wechat', False)
-        realuser = models.User.objects.filter(pk=info.context.META.get('realuser', None)).first()
-            
+        is_from_wechat = info.context.META['is_wechat']
+        # id validation
+        realuser = models.User.objects.filter(pk=info.context.META['realuser']).first()
+        if realuser == None:
+            return EditCourse(ok=False, msg=public_msg['not_login'])
+        
         editing_course = models.HWFCourseClass.objects.get(pk=course_data['id'])
+
         try:
 
             # usertype validation
@@ -90,6 +94,17 @@ class EditCourse(graphene.Mutation):
                     editing_course.start_time = course_data['start_time']
                 if 'end_time' in course_data:
                     editing_course.end_time = course_data['end_time']
+                
+                class_list = []
+                for student in editing_course.students.all():
+                    class_list.append(student.class_number)
+                class_list = list(set(class_list))
+                class_info = ''
+                for class_number in class_list:
+                    class_info += class_number + ','
+                class_info = class_info[:-1]
+                editing_course.class_info = class_info
+                
                 editing_course.save()
                 return EditCourse(ok=True, course=editing_course, msg=public_msg['success'])
         

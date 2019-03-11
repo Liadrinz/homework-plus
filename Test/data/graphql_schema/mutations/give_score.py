@@ -24,7 +24,10 @@ class GiveScore(graphene.Mutation):
 
     def mutate(self, info, score_giving_data):
 
-        realuser = models.User.objects.filter(pk=info.context.META.get('realuser', None)).first()
+        # id validation
+        realuser = models.User.objects.filter(pk=info.context.META['realuser']).first()
+        if realuser == None:
+            return GiveScore(ok=False, msg=public_msg['not_login'])
 
         editing_submission = models.HWFSubmission.objects.get(pk=score_giving_data['submission'])
         editing_course = editing_submission.assignment.course_class
